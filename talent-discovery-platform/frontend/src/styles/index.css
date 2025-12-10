@@ -1,0 +1,202 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+:root {
+  --color-primary: #667eea;
+  --color-primary-dark: #5a67d8;
+  --color-secondary: #764ba2;
+  --color-accent: #f093fb;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  body {
+    @apply bg-gray-900 text-gray-100;
+  }
+}
+
+.dark body {
+  @apply bg-gray-900 text-gray-100;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-200;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}
+
+/* Video player styles */
+.video-container {
+  @apply relative w-full;
+  padding-top: 56.25%; /* 16:9 aspect ratio */
+}
+
+.video-container video,
+.video-container .video-player {
+  @apply absolute inset-0 w-full h-full;
+}
+
+/* Gradient backgrounds */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+}
+
+.bg-gradient-accent {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-accent) 100%);
+}
+
+/* Button styles */
+.btn {
+  @apply inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.btn-primary {
+  @apply btn bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500;
+}
+
+.btn-secondary {
+  @apply btn bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500;
+}
+
+.btn-danger {
+  @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+}
+
+.btn-outline {
+  @apply btn border-gray-300 bg-transparent text-gray-700 hover:bg-gray-50 focus:ring-indigo-500;
+}
+
+/* Card styles */
+.card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden;
+}
+
+.dark .card {
+  @apply bg-gray-800 border-gray-700;
+}
+
+/* Input styles */
+.input {
+  @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500;
+}
+
+.input-error {
+  @apply border-red-300 focus:border-red-500 focus:ring-red-500;
+}
+
+/* Badge styles */
+.badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-primary {
+  @apply badge bg-indigo-100 text-indigo-800;
+}
+
+.badge-success {
+  @apply badge bg-green-100 text-green-800;
+}
+
+.badge-warning {
+  @apply badge bg-yellow-100 text-yellow-800;
+}
+
+.badge-danger {
+  @apply badge bg-red-100 text-red-800;
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s infinite;
+}
+
+/* Score indicators */
+.score-excellent {
+  @apply text-green-600;
+}
+
+.score-good {
+  @apply text-blue-600;
+}
+
+.score-average {
+  @apply text-yellow-600;
+}
+
+.score-poor {
+  @apply text-red-600;
+}
+
+/* Trending badge */
+.trending-badge {
+  @apply absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full;
+}
+
+/* Video thumbnail hover effect */
+.video-thumbnail {
+  @apply relative overflow-hidden rounded-lg;
+}
+
+.video-thumbnail:hover .thumbnail-overlay {
+  @apply opacity-100;
+}
+
+.thumbnail-overlay {
+  @apply absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 transition-opacity;
+}
+
+/* Agent verified badge */
+.agent-verified {
+  @apply inline-flex items-center text-blue-600;
+}
+
+.agent-verified::after {
+  content: '';
+  @apply ml-1 w-4 h-4 bg-blue-500 rounded-full;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/%3E%3C/svg%3E");
+  background-size: 12px;
+  background-position: center;
+  background-repeat: no-repeat;
+}

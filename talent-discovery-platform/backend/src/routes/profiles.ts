@@ -1,0 +1,224 @@
+import { Router } from 'express';
+import { body } from 'express-validator';
+import { validate } from '../middleware/validate';
+import { authenticate, AuthRequest } from '../middleware/auth';
+import { Response, NextFunction } from 'express';
+import { User } from '../models';
+import { cacheDelete } from '../config/redis';
+
+const router = Router();
+
+// Get current user's profile
+router.get('/me', authenticate, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    res.json({ profile: req.user!.toAuthJSON() });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update profile
+router.put(
+  '/me',
+  authenticate,
+  validate([
+    body('firstName').optional().trim().isLength({ min: 1, max: 100 }).withMessage('First name must be 1-100 chars'),
+    body('lastName').optional().trim().isLength({ min: 1, max: 100 }).withMessage('Last name must be 1-100 chars'),
+    body('bio').optional().trim().isLength({ max: 500 }).withMessage('Bio must be max 500 chars'),
+    body('location').optional().trim().isLength({ max: 255 }).withMessage('Location must be max 255 chars'),
+    body('website').optional().trim().isURL().withMessage('Invalid website URL'),
+    body('dateOfBirth').optional().isISO8601().withMessage('Invalid date format'),
+    body('talentCategories').optional().isArray().withMessage('Talent categories must be an array')
+  ]),
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = req.user!;
+      const { firstName, lastName, bio, location, website, dateOfBirth, talentCategories } = req.body;
+
+      await user.update({
+        ...(firstName && { firstName }),
+        ...(lastName && { lastName }),
+        ...(bio !== undefined && { bio }),
+        ...(location !== undefined && { location }),
+        ...(website !== undefined && { website }),
+        ...(dateOfBirth && { dateOfBirth }),
+        ...(talentCategories && { talentCategories })
+      });
+
+      // Clear cache
+      await cacheDelete(`user:${user.id}`);
+
+      res.json({ profile: user.toAuthJSON() });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Update profile image
+router.put(
+  '/me/image',
+  authenticate,
+  validate([
+    body('profileImageUrl').notEmpty().isURL().withMessage('Valid image URL required')
+  ]),
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = req.user!;
+      const { profileImageUrl } = req.body;
+
+      await user.update({ profileImageUrl });
+
+      // Clear cache
+      await cacheDelete(`user:${user.id}`);
+
+      res.json({
+        message: 'Profile image updated',
+        profileImageUrl
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Update username
+router.put(
+  '/me/username',
+  authenticate,
+  validate([
+    body('username')
+      .trim()
+      .isLength({ min: 3, max: 50 })
+      .matches(/^[a-zA-Z0-9_]+$/)
+      .withMessage('Username must be 3-50 chars, alphanumeric and underscores only')
+  ]),
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = req.user!;
+      const { username } = req.body;
+
+      // Check if username is taken
+      const existing = await User.findOne({
+        where: { username }
+      });
+
+      if (existing && existing.id !== user.id) {
+        res.status(409).json({ error: 'Username already taken' });
+        return;
+      }
+
+      await user.update({ username });
+
+      // Clear cache
+      await cacheDelete(`user:${user.id}`);
+
+      res.json({ username: user.username });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Upgrade to creator role
+router.post('/me/upgrade-creator', authenticate, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const user = req.user!;
+
+    if (user.role !== 'user') {
+      res.status(400).json({ error: 'Already a creator or agent' });
+      return;
+    }
+
+    await user.update({ role: 'creator' });
+
+    res.json({
+      message: 'Upgraded to creator',
+      role: user.role
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Request agent verification
+router.post(
+  '/me/request-agent',
+  authenticate,
+  validate([
+    body('agencyName').trim().isLength({ min: 1, max: 255 }).withMessage('Agency name required'),
+    body('verificationDocuments').optional().isArray().withMessage('Documents must be an array')
+  ]),
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = req.user!;
+      const { agencyName } = req.body;
+
+      await user.update({
+        role: 'agent',
+        agencyName,
+        agencyVerified: false
+      });
+
+      // TODO: Create verification request for admin review
+
+      res.json({
+        message: 'Agent request submitted for review',
+        agencyName
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Get notification settings
+router.get('/me/settings/notifications', authenticate, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    // TODO: Implement notification settings model
+    res.json({
+      settings: {
+        emailNewFollower: true,
+        emailNewComment: true,
+        emailVideoPublished: true,
+        emailAgentMessage: true,
+        pushEnabled: true
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update notification settings
+router.put(
+  '/me/settings/notifications',
+  authenticate,
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { settings } = req.body;
+      // TODO: Save notification settings
+      res.json({ settings });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Delete account
+router.delete('/me', authenticate, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const user = req.user!;
+
+    // Soft delete - mark as banned with special status
+    await user.update({ status: 'banned' });
+
+    // TODO: Queue cleanup job to anonymize data
+
+    res.json({ message: 'Account deletion initiated' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+export default router;

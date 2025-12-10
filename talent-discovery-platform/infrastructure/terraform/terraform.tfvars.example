@@ -1,0 +1,55 @@
+# TalentVault Terraform Variables Example
+# Copy this file to terraform.tfvars and fill in your values
+
+environment = "production"
+aws_region  = "us-east-1"
+
+# VPC
+vpc_cidr           = "10.0.0.0/16"
+availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
+
+# S3
+video_bucket_name = "talentvault-videos"
+
+# CloudFront
+cdn_domain_name = "cdn.yourdomain.com"
+certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/xxxxx"
+
+# WAF
+waf_rate_limit = 2000
+
+# RDS
+db_instance_class = "db.t3.medium"
+database_name     = "talentvault"
+database_username = "admin"
+database_password = "your-secure-password-here"
+
+# ElastiCache
+redis_node_type = "cache.t3.medium"
+
+# ECS
+api_image      = "123456789012.dkr.ecr.us-east-1.amazonaws.com/talentvault-api:latest"
+worker_image   = "123456789012.dkr.ecr.us-east-1.amazonaws.com/talentvault-worker:latest"
+ai_image       = "123456789012.dkr.ecr.us-east-1.amazonaws.com/talentvault-ai:latest"
+frontend_image = "123456789012.dkr.ecr.us-east-1.amazonaws.com/talentvault-frontend:latest"
+
+api_cpu     = 512
+api_memory  = 1024
+worker_cpu  = 1024
+worker_memory = 2048
+
+# Secrets
+jwt_secret         = "your-jwt-secret-here"
+jwt_refresh_secret = "your-jwt-refresh-secret-here"
+encryption_key     = "your-32-char-encryption-key-here"
+smtp_password      = "your-smtp-password-here"
+
+cloudfront_key_pair_id = "KXXXXXXXX"
+cloudfront_private_key = <<EOF
+-----BEGIN RSA PRIVATE KEY-----
+Your CloudFront private key here
+-----END RSA PRIVATE KEY-----
+EOF
+
+# CloudWatch
+alarm_email = "alerts@yourdomain.com"

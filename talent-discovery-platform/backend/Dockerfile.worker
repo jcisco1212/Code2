@@ -1,0 +1,22 @@
+FROM node:18-alpine
+
+# Install FFmpeg and other dependencies
+RUN apk add --no-cache ffmpeg python3 make g++
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Build TypeScript
+RUN npm run build
+
+# Create temp directory for video processing
+RUN mkdir -p /tmp/videos
+
+# Start the worker
+CMD ["npm", "run", "worker:prod"]
