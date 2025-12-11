@@ -3,11 +3,8 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
-    libsndfile1 \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -15,8 +12,8 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Download NLTK data
-RUN python -c "import nltk; nltk.download('punkt'); nltk.download('averaged_perceptron_tagger')"
+# Download NLTK data (skip if fails)
+RUN python -c "import nltk; nltk.download('punkt'); nltk.download('averaged_perceptron_tagger')" || true
 
 # Copy source code
 COPY . .
