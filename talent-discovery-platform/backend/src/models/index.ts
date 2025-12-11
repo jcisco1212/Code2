@@ -54,7 +54,7 @@ User.hasMany(Message, { foreignKey: 'receiverId', as: 'receivedMessages' });
 Video.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 Video.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
 Video.hasMany(Comment, { foreignKey: 'videoId', as: 'comments' });
-Video.hasMany(VideoView, { foreignKey: 'videoId', as: 'views' });
+Video.hasMany(VideoView, { foreignKey: 'videoId', as: 'videoViews' });
 
 // Category associations
 Category.hasMany(Video, { foreignKey: 'categoryId', as: 'videos' });
