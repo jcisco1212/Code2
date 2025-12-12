@@ -1,4 +1,4 @@
-import User, { UserRole, UserStatus } from './User';
+import User, { UserRole } from './User';
 import Video, { VideoStatus, VideoVisibility } from './Video';
 import Category from './Category';
 import Comment, { CommentStatus } from './Comment';
@@ -86,7 +86,6 @@ AgentBookmark.belongsTo(User, { foreignKey: 'talentId', as: 'talent' });
 export {
   User,
   UserRole,
-  UserStatus,
   Video,
   VideoStatus,
   VideoVisibility,

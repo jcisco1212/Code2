@@ -6,110 +6,75 @@ export enum UserRole {
   USER = 'user',
   CREATOR = 'creator',
   AGENT = 'agent',
-  MODERATOR = 'moderator',
   ADMIN = 'admin'
-}
-
-export enum UserStatus {
-  PENDING = 'pending',
-  ACTIVE = 'active',
-  SUSPENDED = 'suspended',
-  BANNED = 'banned'
 }
 
 interface UserAttributes {
   id: string;
   email: string;
+  passwordHash: string;
   username: string;
-  password: string;
-  firstName: string;
-  lastName: string;
+  displayName: string | null;
+  bio: string | null;
+  avatarUrl: string | null;
+  bannerUrl: string | null;
   role: UserRole;
-  status: UserStatus;
-  emailVerified: boolean;
-  emailVerificationToken: string | null;
-  emailVerificationExpires: Date | null;
-  passwordResetToken: string | null;
-  passwordResetExpires: Date | null;
+  isVerified: boolean;
+  isActive: boolean;
   twoFactorEnabled: boolean;
   twoFactorSecret: string | null;
-  profileImageUrl: string | null;
-  bio: string | null;
-  location: string | null;
-  website: string | null;
-  dateOfBirth: Date | null;
-  talentCategories: string[];
-  agencyName: string | null;
-  agencyVerified: boolean;
-  lastLoginAt: Date | null;
-  loginAttempts: number;
-  lockoutUntil: Date | null;
+  emailVerified: boolean;
+  emailVerificationToken: string | null;
+  passwordResetToken: string | null;
+  passwordResetExpires: Date | null;
+  lastLogin: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
 interface UserCreationAttributes extends Optional<UserAttributes,
-  'id' | 'role' | 'status' | 'emailVerified' | 'emailVerificationToken' |
-  'emailVerificationExpires' | 'passwordResetToken' | 'passwordResetExpires' |
-  'twoFactorEnabled' | 'twoFactorSecret' | 'profileImageUrl' | 'bio' |
-  'location' | 'website' | 'dateOfBirth' | 'talentCategories' | 'agencyName' |
-  'agencyVerified' | 'lastLoginAt' | 'loginAttempts' | 'lockoutUntil' |
-  'createdAt' | 'updatedAt'
+  'id' | 'displayName' | 'bio' | 'avatarUrl' | 'bannerUrl' | 'role' |
+  'isVerified' | 'isActive' | 'twoFactorEnabled' | 'twoFactorSecret' |
+  'emailVerified' | 'emailVerificationToken' | 'passwordResetToken' |
+  'passwordResetExpires' | 'lastLogin' | 'createdAt' | 'updatedAt'
 > {}
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   public id!: string;
   public email!: string;
+  public passwordHash!: string;
   public username!: string;
-  public password!: string;
-  public firstName!: string;
-  public lastName!: string;
+  public displayName!: string | null;
+  public bio!: string | null;
+  public avatarUrl!: string | null;
+  public bannerUrl!: string | null;
   public role!: UserRole;
-  public status!: UserStatus;
-  public emailVerified!: boolean;
-  public emailVerificationToken!: string | null;
-  public emailVerificationExpires!: Date | null;
-  public passwordResetToken!: string | null;
-  public passwordResetExpires!: Date | null;
+  public isVerified!: boolean;
+  public isActive!: boolean;
   public twoFactorEnabled!: boolean;
   public twoFactorSecret!: string | null;
-  public profileImageUrl!: string | null;
-  public bio!: string | null;
-  public location!: string | null;
-  public website!: string | null;
-  public dateOfBirth!: Date | null;
-  public talentCategories!: string[];
-  public agencyName!: string | null;
-  public agencyVerified!: boolean;
-  public lastLoginAt!: Date | null;
-  public loginAttempts!: number;
-  public lockoutUntil!: Date | null;
+  public emailVerified!: boolean;
+  public emailVerificationToken!: string | null;
+  public passwordResetToken!: string | null;
+  public passwordResetExpires!: Date | null;
+  public lastLogin!: Date | null;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
   // Instance methods
   public async comparePassword(candidatePassword: string): Promise<boolean> {
-    return bcrypt.compare(candidatePassword, this.password);
-  }
-
-  public isLocked(): boolean {
-    return this.lockoutUntil !== null && this.lockoutUntil > new Date();
+    return bcrypt.compare(candidatePassword, this.passwordHash);
   }
 
   public toPublicJSON(): Partial<UserAttributes> {
     return {
       id: this.id,
       username: this.username,
-      firstName: this.firstName,
-      lastName: this.lastName,
+      displayName: this.displayName,
       role: this.role,
-      profileImageUrl: this.profileImageUrl,
+      avatarUrl: this.avatarUrl,
       bio: this.bio,
-      location: this.location,
-      website: this.website,
-      talentCategories: this.talentCategories,
-      agencyName: this.agencyName,
-      agencyVerified: this.agencyVerified,
+      isVerified: this.isVerified,
       createdAt: this.createdAt
     };
   }
@@ -119,19 +84,14 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       id: this.id,
       email: this.email,
       username: this.username,
-      firstName: this.firstName,
-      lastName: this.lastName,
+      displayName: this.displayName,
       role: this.role,
-      status: this.status,
+      isActive: this.isActive,
       emailVerified: this.emailVerified,
       twoFactorEnabled: this.twoFactorEnabled,
-      profileImageUrl: this.profileImageUrl,
+      avatarUrl: this.avatarUrl,
       bio: this.bio,
-      location: this.location,
-      website: this.website,
-      talentCategories: this.talentCategories,
-      agencyName: this.agencyName,
-      agencyVerified: this.agencyVerified,
+      isVerified: this.isVerified,
       createdAt: this.createdAt
     };
   }
@@ -152,61 +112,51 @@ User.init(
         isEmail: true
       }
     },
+    passwordHash: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      field: 'password_hash'
+    },
     username: {
       type: DataTypes.STRING(50),
       allowNull: false,
       unique: true,
       validate: {
-        len: [3, 50],
-        is: /^[a-zA-Z0-9_]+$/
+        len: [3, 50]
       }
     },
-    password: {
-      type: DataTypes.STRING(255),
-      allowNull: false
-    },
-    firstName: {
+    displayName: {
       type: DataTypes.STRING(100),
-      allowNull: false,
-      field: 'first_name'
+      allowNull: true,
+      field: 'display_name'
     },
-    lastName: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-      field: 'last_name'
+    bio: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    avatarUrl: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      field: 'avatar_url'
+    },
+    bannerUrl: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      field: 'banner_url'
     },
     role: {
-      type: DataTypes.ENUM(...Object.values(UserRole)),
-      defaultValue: UserRole.USER
+      type: DataTypes.ENUM('user', 'creator', 'agent', 'admin'),
+      defaultValue: 'user'
     },
-    status: {
-      type: DataTypes.ENUM(...Object.values(UserStatus)),
-      defaultValue: UserStatus.PENDING
-    },
-    emailVerified: {
+    isVerified: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
-      field: 'email_verified'
+      field: 'is_verified'
     },
-    emailVerificationToken: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-      field: 'email_verification_token'
-    },
-    emailVerificationExpires: {
-      type: DataTypes.DATE,
-      allowNull: true,
-      field: 'email_verification_expires'
-    },
-    passwordResetToken: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-      field: 'password_reset_token'
-    },
-    passwordResetExpires: {
-      type: DataTypes.DATE,
-      allowNull: true,
-      field: 'password_reset_expires'
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+      field: 'is_active'
     },
     twoFactorEnabled: {
       type: DataTypes.BOOLEAN,
@@ -218,60 +168,30 @@ User.init(
       allowNull: true,
       field: 'two_factor_secret'
     },
-    profileImageUrl: {
-      type: DataTypes.STRING(500),
-      allowNull: true,
-      field: 'profile_image_url'
-    },
-    bio: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-    location: {
-      type: DataTypes.STRING(255),
-      allowNull: true
-    },
-    website: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-      validate: {
-        isUrl: true
-      }
-    },
-    dateOfBirth: {
-      type: DataTypes.DATEONLY,
-      allowNull: true,
-      field: 'date_of_birth'
-    },
-    talentCategories: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      defaultValue: [],
-      field: 'talent_categories'
-    },
-    agencyName: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-      field: 'agency_name'
-    },
-    agencyVerified: {
+    emailVerified: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
-      field: 'agency_verified'
+      field: 'email_verified'
     },
-    lastLoginAt: {
+    emailVerificationToken: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      field: 'email_verification_token'
+    },
+    passwordResetToken: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      field: 'password_reset_token'
+    },
+    passwordResetExpires: {
       type: DataTypes.DATE,
       allowNull: true,
-      field: 'last_login_at'
+      field: 'password_reset_expires'
     },
-    loginAttempts: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-      field: 'login_attempts'
-    },
-    lockoutUntil: {
+    lastLogin: {
       type: DataTypes.DATE,
       allowNull: true,
-      field: 'lockout_until'
+      field: 'last_login'
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -289,21 +209,19 @@ User.init(
     indexes: [
       { fields: ['email'], unique: true },
       { fields: ['username'], unique: true },
-      { fields: ['role'] },
-      { fields: ['status'] },
-      { fields: ['talent_categories'], using: 'GIN' }
+      { fields: ['role'] }
     ],
     hooks: {
       beforeCreate: async (user: User) => {
-        if (user.password) {
+        if (user.passwordHash && !user.passwordHash.startsWith('$2')) {
           const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS || '12'));
-          user.password = await bcrypt.hash(user.password, salt);
+          user.passwordHash = await bcrypt.hash(user.passwordHash, salt);
         }
       },
       beforeUpdate: async (user: User) => {
-        if (user.changed('password')) {
+        if (user.changed('passwordHash') && !user.passwordHash.startsWith('$2')) {
           const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS || '12'));
-          user.password = await bcrypt.hash(user.password, salt);
+          user.passwordHash = await bcrypt.hash(user.passwordHash, salt);
         }
       }
     }

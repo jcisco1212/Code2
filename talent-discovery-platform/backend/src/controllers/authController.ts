@@ -3,10 +3,10 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
-import { User, UserRole, UserStatus } from '../models';
+import { User, UserRole } from '../models';
 import { AuthRequest, JWTPayload } from '../middleware/auth';
-import { AppError, BadRequestError, UnauthorizedError, NotFoundError, ConflictError } from '../middleware/errorHandler';
-import { redis, cacheDelete } from '../config/redis';
+import { BadRequestError, UnauthorizedError, ConflictError } from '../middleware/errorHandler';
+import { redis } from '../config/redis';
 import { sendEmail } from '../services/emailService';
 import { logger, logAudit } from '../utils/logger';
 
@@ -48,32 +48,30 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
 
     // Generate email verification token
     const emailVerificationToken = crypto.randomBytes(32).toString('hex');
-    const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Create user
+    // Create user - combine firstName and lastName into displayName
+    const displayName = firstName && lastName ? `${firstName} ${lastName}` : username;
+
     const user = await User.create({
       email,
       username,
-      password,
-      firstName,
-      lastName,
+      passwordHash: password, // Will be hashed by beforeCreate hook
+      displayName,
       role: role || UserRole.USER,
-      status: UserStatus.PENDING,
-      emailVerificationToken,
-      emailVerificationExpires
+      emailVerificationToken
     });
 
-    // Send verification email
-    const verificationUrl = `${process.env.APP_URL}/verify-email?token=${emailVerificationToken}`;
-    await sendEmail({
+    // Send verification email (don't await to not block response)
+    const verificationUrl = `${process.env.APP_URL || 'http://localhost:3001'}/verify-email?token=${emailVerificationToken}`;
+    sendEmail({
       to: email,
       subject: 'Verify your TalentVault account',
       template: 'email-verification',
       data: {
-        firstName,
+        name: displayName,
         verificationUrl
       }
-    });
+    }).catch(err => logger.error('Failed to send verification email', { error: err.message }));
 
     logAudit('USER_REGISTERED', user.id, { email, username });
 
@@ -97,40 +95,19 @@ export const login = async (req: AuthRequest, res: Response, next: NextFunction)
       throw new UnauthorizedError('Invalid email or password');
     }
 
-    // Check if account is locked
-    if (user.isLocked()) {
-      throw new UnauthorizedError('Account is temporarily locked. Please try again later.');
+    // Check if account is active
+    if (!user.isActive) {
+      throw new UnauthorizedError('Account is disabled');
     }
 
     // Verify password
     const isValidPassword = await user.comparePassword(password);
     if (!isValidPassword) {
-      // Increment login attempts
-      user.loginAttempts += 1;
-
-      // Lock account after 5 failed attempts
-      if (user.loginAttempts >= 5) {
-        user.lockoutUntil = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
-        await user.save();
-        throw new UnauthorizedError('Account locked due to too many failed attempts');
-      }
-
-      await user.save();
       throw new UnauthorizedError('Invalid email or password');
     }
 
-    // Check if account is banned or suspended
-    if (user.status === UserStatus.BANNED) {
-      throw new UnauthorizedError('Account has been banned');
-    }
-    if (user.status === UserStatus.SUSPENDED) {
-      throw new UnauthorizedError('Account is suspended');
-    }
-
-    // Reset login attempts on successful login
-    user.loginAttempts = 0;
-    user.lockoutUntil = null;
-    user.lastLoginAt = new Date();
+    // Update last login
+    user.lastLogin = new Date();
     await user.save();
 
     // Check if 2FA is enabled
@@ -216,7 +193,7 @@ export const refreshToken = async (req: AuthRequest, res: Response, next: NextFu
 
     // Get user
     const user = await User.findByPk(decoded.userId);
-    if (!user || user.status === UserStatus.BANNED) {
+    if (!user || !user.isActive) {
       throw new UnauthorizedError('Invalid user');
     }
 
@@ -246,39 +223,6 @@ export const logout = async (req: AuthRequest, res: Response, next: NextFunction
   }
 };
 
-// Resend verification email
-export const resendVerification = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const user = req.user!;
-
-    if (user.emailVerified) {
-      throw new BadRequestError('Email already verified');
-    }
-
-    // Generate new token
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
-    user.emailVerificationToken = emailVerificationToken;
-    user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    await user.save();
-
-    // Send email
-    const verificationUrl = `${process.env.APP_URL}/verify-email?token=${emailVerificationToken}`;
-    await sendEmail({
-      to: user.email,
-      subject: 'Verify your TalentVault account',
-      template: 'email-verification',
-      data: {
-        firstName: user.firstName,
-        verificationUrl
-      }
-    });
-
-    res.json({ message: 'Verification email sent' });
-  } catch (error) {
-    next(error);
-  }
-};
-
 // Verify email
 export const verifyEmail = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -294,14 +238,8 @@ export const verifyEmail = async (req: AuthRequest, res: Response, next: NextFun
       throw new BadRequestError('Invalid or expired verification token');
     }
 
-    if (user.emailVerificationExpires && user.emailVerificationExpires < new Date()) {
-      throw new BadRequestError('Verification token has expired');
-    }
-
     user.emailVerified = true;
     user.emailVerificationToken = null;
-    user.emailVerificationExpires = null;
-    user.status = UserStatus.ACTIVE;
     await user.save();
 
     logAudit('EMAIL_VERIFIED', user.id, {});
@@ -332,16 +270,16 @@ export const forgotPassword = async (req: AuthRequest, res: Response, next: Next
     await user.save();
 
     // Send email
-    const resetUrl = `${process.env.APP_URL}/reset-password?token=${passwordResetToken}`;
-    await sendEmail({
+    const resetUrl = `${process.env.APP_URL || 'http://localhost:3001'}/reset-password?token=${passwordResetToken}`;
+    sendEmail({
       to: user.email,
       subject: 'Reset your TalentVault password',
       template: 'password-reset',
       data: {
-        firstName: user.firstName,
+        name: user.displayName || user.username,
         resetUrl
       }
-    });
+    }).catch(err => logger.error('Failed to send reset email', { error: err.message }));
 
     logAudit('PASSWORD_RESET_REQUESTED', user.id, {});
 
@@ -370,11 +308,9 @@ export const resetPassword = async (req: AuthRequest, res: Response, next: NextF
       throw new BadRequestError('Reset token has expired');
     }
 
-    user.password = password;
+    user.passwordHash = password; // Will be hashed by beforeUpdate hook
     user.passwordResetToken = null;
     user.passwordResetExpires = null;
-    user.loginAttempts = 0;
-    user.lockoutUntil = null;
     await user.save();
 
     // Invalidate refresh tokens
@@ -503,7 +439,7 @@ export const changePassword = async (req: AuthRequest, res: Response, next: Next
       throw new UnauthorizedError('Current password is incorrect');
     }
 
-    user.password = newPassword;
+    user.passwordHash = newPassword; // Will be hashed by beforeUpdate hook
     await user.save();
 
     // Invalidate refresh tokens
@@ -521,6 +457,38 @@ export const changePassword = async (req: AuthRequest, res: Response, next: Next
 export const getCurrentUser = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     res.json({ user: req.user!.toAuthJSON() });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Resend verification email
+export const resendVerification = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const user = req.user!;
+
+    if (user.emailVerified) {
+      throw new BadRequestError('Email already verified');
+    }
+
+    // Generate new token
+    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+    user.emailVerificationToken = emailVerificationToken;
+    await user.save();
+
+    // Send email
+    const verificationUrl = `${process.env.APP_URL || 'http://localhost:3001'}/verify-email?token=${emailVerificationToken}`;
+    await sendEmail({
+      to: user.email,
+      subject: 'Verify your TalentVault account',
+      template: 'email-verification',
+      data: {
+        name: user.displayName || user.username,
+        verificationUrl
+      }
+    });
+
+    res.json({ message: 'Verification email sent' });
   } catch (error) {
     next(error);
   }
