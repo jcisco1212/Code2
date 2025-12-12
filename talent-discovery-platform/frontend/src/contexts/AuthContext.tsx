@@ -1,13 +1,21 @@
 import React, { createContext, useContext, useEffect, ReactNode } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
-import { getCurrentUser, logout as logoutAction, clearError } from '../store/slices/authSlice';
+import {
+  getCurrentUser,
+  logout as logoutAction,
+  login as loginAction,
+  register as registerAction,
+  clearError
+} from '../store/slices/authSlice';
 
 interface AuthContextType {
   user: any;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  login: (email: string, password: string) => Promise<any>;
+  register: (data: { email: string; username: string; password: string; firstName: string; lastName: string }) => Promise<any>;
   logout: () => Promise<void>;
   clearAuthError: () => void;
 }
@@ -26,6 +34,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [accessToken, user, dispatch]);
 
+  const login = async (email: string, password: string) => {
+    const result = await dispatch(loginAction({ email, password }));
+    if (loginAction.rejected.match(result)) {
+      throw new Error(result.payload as string);
+    }
+    return result.payload;
+  };
+
+  const register = async (data: { email: string; username: string; password: string; firstName: string; lastName: string }) => {
+    const result = await dispatch(registerAction(data));
+    if (registerAction.rejected.match(result)) {
+      throw new Error(result.payload as string);
+    }
+    return result.payload;
+  };
+
   const logout = async () => {
     await dispatch(logoutAction());
   };
@@ -41,6 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated,
         isLoading,
         error,
+        login,
+        register,
         logout,
         clearAuthError
       }}

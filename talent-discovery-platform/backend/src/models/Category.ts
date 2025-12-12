@@ -7,19 +7,15 @@ interface CategoryAttributes {
   slug: string;
   description: string | null;
   parentId: string | null;
-  iconUrl: string | null;
-  color: string | null;
+  icon: string | null;
   sortOrder: number;
   isActive: boolean;
-  isTalentType: boolean;
-  videoCount: number;
   createdAt: Date;
-  updatedAt: Date;
 }
 
 interface CategoryCreationAttributes extends Optional<CategoryAttributes,
-  'id' | 'description' | 'parentId' | 'iconUrl' | 'color' | 'sortOrder' |
-  'isActive' | 'isTalentType' | 'videoCount' | 'createdAt' | 'updatedAt'
+  'id' | 'description' | 'parentId' | 'icon' | 'sortOrder' |
+  'isActive' | 'createdAt'
 > {}
 
 class Category extends Model<CategoryAttributes, CategoryCreationAttributes> implements CategoryAttributes {
@@ -28,14 +24,10 @@ class Category extends Model<CategoryAttributes, CategoryCreationAttributes> imp
   public slug!: string;
   public description!: string | null;
   public parentId!: string | null;
-  public iconUrl!: string | null;
-  public color!: string | null;
+  public icon!: string | null;
   public sortOrder!: number;
   public isActive!: boolean;
-  public isTalentType!: boolean;
-  public videoCount!: number;
   public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
 }
 
 Category.init(
@@ -67,13 +59,8 @@ Category.init(
         key: 'id'
       }
     },
-    iconUrl: {
-      type: DataTypes.STRING(500),
-      allowNull: true,
-      field: 'icon_url'
-    },
-    color: {
-      type: DataTypes.STRING(20),
+    icon: {
+      type: DataTypes.STRING(50),
       allowNull: true
     },
     sortOrder: {
@@ -86,34 +73,20 @@ Category.init(
       defaultValue: true,
       field: 'is_active'
     },
-    isTalentType: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
-      field: 'is_talent_type'
-    },
-    videoCount: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-      field: 'video_count'
-    },
     createdAt: {
       type: DataTypes.DATE,
       field: 'created_at'
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      field: 'updated_at'
     }
   },
   {
     sequelize,
     tableName: 'categories',
     modelName: 'Category',
+    timestamps: false,
     indexes: [
       { fields: ['slug'], unique: true },
       { fields: ['parent_id'] },
       { fields: ['is_active'] },
-      { fields: ['is_talent_type'] },
       { fields: ['sort_order'] }
     ]
   }
