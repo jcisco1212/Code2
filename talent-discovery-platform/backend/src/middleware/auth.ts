@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { User, UserRole, UserStatus } from '../models';
+import { User, UserRole } from '../models';
 import { logger } from '../utils/logger';
 
 export interface AuthRequest extends Request {
@@ -42,13 +42,8 @@ export const authenticate = async (
       return;
     }
 
-    if (user.status === UserStatus.BANNED) {
-      res.status(403).json({ error: 'Account has been banned' });
-      return;
-    }
-
-    if (user.status === UserStatus.SUSPENDED) {
-      res.status(403).json({ error: 'Account is suspended' });
+    if (!user.isActive) {
+      res.status(403).json({ error: 'Account is disabled' });
       return;
     }
 
@@ -89,7 +84,7 @@ export const optionalAuth = async (
     const decoded = jwt.verify(token, jwtSecret) as JWTPayload;
     const user = await User.findByPk(decoded.userId);
 
-    if (user && user.status === UserStatus.ACTIVE) {
+    if (user && user.isActive) {
       req.user = user;
       req.userId = user.id;
     }
@@ -167,8 +162,8 @@ export const requireModeratorOrAdmin = (
     return;
   }
 
-  if (req.user.role !== UserRole.ADMIN && req.user.role !== UserRole.MODERATOR) {
-    res.status(403).json({ error: 'Moderator or admin access required' });
+  if (req.user.role !== UserRole.ADMIN) {
+    res.status(403).json({ error: 'Admin access required' });
     return;
   }
 

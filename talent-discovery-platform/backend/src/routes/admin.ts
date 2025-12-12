@@ -3,7 +3,7 @@ import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validate';
 import { authenticate, requireRole, requireModeratorOrAdmin, AuthRequest } from '../middleware/auth';
 import { Response, NextFunction } from 'express';
-import { User, UserRole, UserStatus, Video, VideoStatus, Comment, CommentStatus, Report, ReportStatus, Category } from '../models';
+import { User, UserRole, Video, VideoStatus, Comment, CommentStatus, Report, ReportStatus, Category } from '../models';
 import { NotFoundError, ForbiddenError } from '../middleware/errorHandler';
 import { Op, fn, col } from 'sequelize';
 import { cacheDelete } from '../config/redis';
@@ -26,7 +26,8 @@ router.get(
       const where: any = {};
 
       if (role) where.role = role;
-      if (status) where.status = status;
+      if (status === 'active') where.isActive = true;
+      else if (status === 'inactive') where.isActive = false;
       if (search) {
         where[Op.or] = [
           { email: { [Op.iLike]: `%${search}%` } },
@@ -36,7 +37,7 @@ router.get(
 
       const { count, rows } = await User.findAndCountAll({
         where,
-        attributes: { exclude: ['password', 'twoFactorSecret'] },
+        attributes: { exclude: ['passwordHash', 'twoFactorSecret'] },
         order: [['createdAt', 'DESC']],
         limit: Number(limit),
         offset
@@ -57,30 +58,30 @@ router.get(
   }
 );
 
-// Update user status
+// Update user active status
 router.put(
   '/users/:id/status',
   authenticate,
   requireRole(UserRole.ADMIN),
   validate([
     param('id').isUUID().withMessage('Valid user ID required'),
-    body('status').isIn(Object.values(UserStatus)).withMessage('Invalid status')
+    body('isActive').isBoolean().withMessage('isActive must be a boolean')
   ]),
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
-      const { status, reason } = req.body;
+      const { isActive, reason } = req.body;
 
       const user = await User.findByPk(id);
       if (!user) {
         throw new NotFoundError('User not found');
       }
 
-      await user.update({ status });
+      await user.update({ isActive });
 
       logAudit('USER_STATUS_CHANGED', req.userId!, {
         targetUserId: id,
-        newStatus: status,
+        isActive,
         reason
       });
 
@@ -146,7 +147,7 @@ router.post(
         return;
       }
 
-      await user.update({ agencyVerified: true });
+      await user.update({ isVerified: true });
 
       logAudit('AGENT_VERIFIED', req.userId!, { agentId: id });
 
