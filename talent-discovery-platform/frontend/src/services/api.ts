@@ -39,7 +39,7 @@ const processQueue = (error: AxiosError | null, token: string | null = null) => 
       prom.reject(error);
     } else if (token && prom.config.headers) {
       prom.config.headers.Authorization = `Bearer ${token}`;
-      prom.resolve(api(prom.config));
+      api(prom.config).then(prom.resolve).catch(prom.reject);
     }
   });
   failedQueue = [];
