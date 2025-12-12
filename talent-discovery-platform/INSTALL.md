@@ -5,15 +5,16 @@ Complete installation instructions for the TalentVault AI-powered video sharing 
 ## Table of Contents
 
 1. [Prerequisites](#prerequisites)
-2. [Local Development Setup](#local-development-setup)
-3. [AWS Cloud Deployment](#aws-cloud-deployment)
-4. [Environment Configuration](#environment-configuration)
-5. [Database Setup](#database-setup)
-6. [AI Services Setup](#ai-services-setup)
-7. [Video Processing Setup](#video-processing-setup)
-8. [Security Configuration](#security-configuration)
-9. [Monitoring & Logging](#monitoring--logging)
-10. [Troubleshooting](#troubleshooting)
+2. [Windows/WSL Quick Start](#windowswsl-quick-start)
+3. [Local Development Setup](#local-development-setup)
+4. [AWS Cloud Deployment](#aws-cloud-deployment)
+5. [Environment Configuration](#environment-configuration)
+6. [Database Setup](#database-setup)
+7. [AI Services Setup](#ai-services-setup)
+8. [Video Processing Setup](#video-processing-setup)
+9. [Security Configuration](#security-configuration)
+10. [Monitoring & Logging](#monitoring--logging)
+11. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -41,6 +42,75 @@ Complete installation instructions for the TalentVault AI-powered video sharing 
 
 **Production (AWS):**
 - See AWS resource sizing in the Terraform configuration
+
+---
+
+## Windows/WSL Quick Start
+
+If you're on Windows, we recommend using WSL2 (Windows Subsystem for Linux) for the best experience.
+
+### Step 1: Install WSL2
+
+```powershell
+# Run in PowerShell as Administrator
+wsl --install
+# Restart your computer after installation
+```
+
+### Step 2: Set Up Ubuntu in WSL
+
+```bash
+# After restart, Ubuntu will auto-launch
+# Create your username and password when prompted
+
+# Update packages
+sudo apt update && sudo apt upgrade -y
+
+# Install Node.js
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Install Docker (for WSL)
+sudo apt install -y docker.io docker-compose
+sudo usermod -aG docker $USER
+```
+
+### Step 3: Simple Infrastructure Setup (Recommended for Windows)
+
+Instead of running all Docker containers, use the simplified setup:
+
+```bash
+# Clone to your home directory
+cd ~
+git clone https://github.com/your-org/talent-discovery-platform.git
+cd talent-discovery-platform
+
+# Copy environment file
+cp .env.example .env
+
+# Start only infrastructure services (PostgreSQL, Redis, MinIO)
+docker-compose -f docker-compose.simple.yml up -d
+
+# Install and run backend locally
+cd backend
+npm install --legacy-peer-deps
+npm run dev
+
+# In a new terminal, run frontend
+cd ~/talent-discovery-platform/frontend
+npm install --legacy-peer-deps
+npm start
+```
+
+### Windows Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Port already in use | `pkill -f node` or find process with `lsof -i :PORT` |
+| Permission denied | Use `sudo rm -rf` for cleanup or work in a new directory |
+| Docker not starting | Ensure Docker Desktop is running with WSL2 backend |
+| npm ci fails | Use `npm install --legacy-peer-deps` instead |
+| TypeScript errors | Frontend requires TypeScript 4.x (not 5.x) |
 
 ---
 
