@@ -8,6 +8,7 @@ import { NotFoundError, ForbiddenError } from '../middleware/errorHandler';
 import { Op, fn, col } from 'sequelize';
 import { cacheDelete } from '../config/redis';
 import { logAudit } from '../utils/logger';
+import bcrypt from 'bcryptjs';
 
 const router = Router();
 
@@ -152,6 +153,205 @@ router.post(
       logAudit('AGENT_VERIFIED', req.userId!, { agentId: id });
 
       res.json({ message: 'Agent verified', user: user.toPublicJSON() });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Admin reset user password
+router.put(
+  '/users/:id/reset-password',
+  authenticate,
+  requireRole(UserRole.ADMIN),
+  validate([
+    param('id').isUUID().withMessage('Valid user ID required'),
+    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
+  ]),
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { password } = req.body;
+
+      const user = await User.findByPk(id);
+      if (!user) {
+        throw new NotFoundError('User not found');
+      }
+
+      // Hash the new password
+      const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS || '12'));
+      const passwordHash = await bcrypt.hash(password, salt);
+
+      await user.update({ passwordHash });
+
+      logAudit('ADMIN_PASSWORD_RESET', req.userId!, { targetUserId: id });
+
+      res.json({ message: 'Password reset successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Delete user
+router.delete(
+  '/users/:id',
+  authenticate,
+  requireRole(UserRole.ADMIN),
+  validate([
+    param('id').isUUID().withMessage('Valid user ID required')
+  ]),
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      if (id === req.userId) {
+        res.status(400).json({ error: 'Cannot delete your own account' });
+        return;
+      }
+
+      const user = await User.findByPk(id);
+      if (!user) {
+        throw new NotFoundError('User not found');
+      }
+
+      await user.destroy();
+
+      logAudit('USER_DELETED', req.userId!, { deletedUserId: id, deletedEmail: user.email });
+
+      res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// === Category Management ===
+
+// Create category
+router.post(
+  '/categories',
+  authenticate,
+  requireRole(UserRole.ADMIN),
+  validate([
+    body('name').trim().notEmpty().withMessage('Name is required'),
+    body('slug').trim().notEmpty().withMessage('Slug is required'),
+    body('description').optional().trim(),
+    body('icon').optional().trim(),
+    body('sortOrder').optional().isInt().withMessage('Sort order must be an integer'),
+    body('isActive').optional().isBoolean()
+  ]),
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { name, slug, description, icon, sortOrder, isActive } = req.body;
+
+      // Check if slug already exists
+      const existing = await Category.findOne({ where: { slug } });
+      if (existing) {
+        res.status(400).json({ error: { message: 'Category with this slug already exists' } });
+        return;
+      }
+
+      const category = await Category.create({
+        name,
+        slug,
+        description,
+        icon,
+        sortOrder: sortOrder || 0,
+        isActive: isActive !== false
+      });
+
+      logAudit('CATEGORY_CREATED', req.userId!, { categoryId: category.id, name });
+
+      res.status(201).json({ category });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Update category
+router.put(
+  '/categories/:id',
+  authenticate,
+  requireRole(UserRole.ADMIN),
+  validate([
+    param('id').isUUID().withMessage('Valid category ID required'),
+    body('name').optional().trim().notEmpty().withMessage('Name cannot be empty'),
+    body('slug').optional().trim().notEmpty().withMessage('Slug cannot be empty'),
+    body('description').optional().trim(),
+    body('icon').optional().trim(),
+    body('sortOrder').optional().isInt().withMessage('Sort order must be an integer'),
+    body('isActive').optional().isBoolean()
+  ]),
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { name, slug, description, icon, sortOrder, isActive } = req.body;
+
+      const category = await Category.findByPk(id);
+      if (!category) {
+        throw new NotFoundError('Category not found');
+      }
+
+      // If changing slug, check it doesn't already exist
+      if (slug && slug !== category.slug) {
+        const existing = await Category.findOne({ where: { slug } });
+        if (existing) {
+          res.status(400).json({ error: { message: 'Category with this slug already exists' } });
+          return;
+        }
+      }
+
+      await category.update({
+        ...(name !== undefined && { name }),
+        ...(slug !== undefined && { slug }),
+        ...(description !== undefined && { description }),
+        ...(icon !== undefined && { icon }),
+        ...(sortOrder !== undefined && { sortOrder }),
+        ...(isActive !== undefined && { isActive })
+      });
+
+      logAudit('CATEGORY_UPDATED', req.userId!, { categoryId: id });
+
+      res.json({ category });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Delete category
+router.delete(
+  '/categories/:id',
+  authenticate,
+  requireRole(UserRole.ADMIN),
+  validate([
+    param('id').isUUID().withMessage('Valid category ID required')
+  ]),
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      const category = await Category.findByPk(id);
+      if (!category) {
+        throw new NotFoundError('Category not found');
+      }
+
+      // Check if category has videos
+      const videoCount = await Video.count({ where: { categoryId: id } });
+      if (videoCount > 0) {
+        res.status(400).json({
+          error: { message: `Cannot delete category with ${videoCount} videos. Reassign videos first.` }
+        });
+        return;
+      }
+
+      await category.destroy();
+
+      logAudit('CATEGORY_DELETED', req.userId!, { categoryId: id, categoryName: category.name });
+
+      res.json({ message: 'Category deleted successfully' });
     } catch (error) {
       next(error);
     }
