@@ -95,10 +95,6 @@ export const login = async (req: AuthRequest, res: Response, next: NextFunction)
       throw new UnauthorizedError('Invalid email or password');
     }
 
-    // DEBUG: Log user isActive value
-    console.log('DEBUG LOGIN - user.isActive:', user.isActive, 'type:', typeof user.isActive);
-    console.log('DEBUG LOGIN - user data:', JSON.stringify(user.toJSON(), null, 2));
-
     // Check if account is active
     if (!user.isActive) {
       throw new UnauthorizedError('Account is disabled');
