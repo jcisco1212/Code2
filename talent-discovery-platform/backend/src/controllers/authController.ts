@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
+import { Op } from 'sequelize';
 import { User, UserRole } from '../models';
 import { AuthRequest, JWTPayload } from '../middleware/auth';
 import { BadRequestError, UnauthorizedError, ConflictError } from '../middleware/errorHandler';
@@ -87,12 +88,19 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
 // Login
 export const login = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { email, password } = req.body;
+    const { identifier, password } = req.body;
 
-    // Find user
-    const user = await User.findOne({ where: { email } });
+    // Find user by email or username
+    const user = await User.findOne({
+      where: {
+        [Op.or]: [
+          { email: identifier.toLowerCase() },
+          { username: identifier }
+        ]
+      }
+    });
     if (!user) {
-      throw new UnauthorizedError('Invalid email or password');
+      throw new UnauthorizedError('Invalid email/username or password');
     }
 
     // Check if account is active
@@ -103,7 +111,7 @@ export const login = async (req: AuthRequest, res: Response, next: NextFunction)
     // Verify password
     const isValidPassword = await user.comparePassword(password);
     if (!isValidPassword) {
-      throw new UnauthorizedError('Invalid email or password');
+      throw new UnauthorizedError('Invalid email/username or password');
     }
 
     // Update last login

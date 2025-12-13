@@ -14,7 +14,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<any>;
+  login: (identifier: string, password: string) => Promise<any>;
   register: (data: { email: string; username: string; password: string; firstName: string; lastName: string }) => Promise<any>;
   logout: () => Promise<void>;
   clearAuthError: () => void;
@@ -34,8 +34,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [accessToken, user, dispatch]);
 
-  const login = async (email: string, password: string) => {
-    const result = await dispatch(loginAction({ email, password }));
+  const login = async (identifier: string, password: string) => {
+    const result = await dispatch(loginAction({ identifier, password }));
     if (loginAction.rejected.match(result)) {
       throw new Error(result.payload as string);
     }

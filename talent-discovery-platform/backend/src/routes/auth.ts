@@ -30,7 +30,7 @@ router.post(
 router.post(
   '/login',
   validate([
-    body('email').isEmail().normalizeEmail().withMessage('Valid email required'),
+    body('identifier').notEmpty().withMessage('Email or username required'),
     body('password').notEmpty().withMessage('Password required')
   ]),
   authController.login

@@ -367,12 +367,11 @@ router.get(
   requireModeratorOrAdmin,
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { page = 1, limit = 50, status, moderationStatus } = req.query;
+      const { page = 1, limit = 50, status } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
 
       const where: any = {};
       if (status) where.status = status;
-      if (moderationStatus) where.moderationStatus = moderationStatus;
 
       const { count, rows } = await Video.findAndCountAll({
         where,
@@ -406,36 +405,28 @@ router.put(
   requireModeratorOrAdmin,
   validate([
     param('id').isUUID().withMessage('Valid video ID required'),
-    body('action').isIn(['approve', 'reject', 'remove', 'age-restrict']).withMessage('Invalid action'),
+    body('action').isIn(['approve', 'reject', 'remove']).withMessage('Invalid action'),
     body('reason').optional().trim().isLength({ max: 1000 }).withMessage('Reason max 1000 chars')
   ]),
   async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
-      const { action, reason } = req.body;
+      const { action } = req.body;
 
       const video = await Video.findByPk(id);
       if (!video) {
         throw new NotFoundError('Video not found');
       }
 
-      const updates: any = { moderationNotes: reason };
+      const updates: any = {};
 
       switch (action) {
         case 'approve':
-          updates.moderationStatus = 'approved';
+          updates.status = VideoStatus.READY;
           break;
         case 'reject':
-          updates.moderationStatus = 'rejected';
-          updates.status = VideoStatus.REMOVED;
-          break;
         case 'remove':
-          updates.status = VideoStatus.REMOVED;
-          updates.moderationStatus = 'removed';
-          break;
-        case 'age-restrict':
-          updates.ageRestricted = true;
-          updates.moderationStatus = 'approved';
+          updates.status = VideoStatus.DELETED;
           break;
       }
 
@@ -443,8 +434,7 @@ router.put(
 
       logAudit('VIDEO_MODERATED', req.userId!, {
         videoId: id,
-        action,
-        reason
+        action
       });
 
       res.json({ video });
@@ -587,7 +577,7 @@ router.get(
         User.count(),
         Video.count({ where: { status: VideoStatus.READY } }),
         Report.count({ where: { status: ReportStatus.PENDING } }),
-        Video.count({ where: { moderationStatus: 'pending' } }),
+        Video.count({ where: { status: VideoStatus.PENDING } }),
         User.count({
           where: {
             createdAt: { [Op.gte]: new Date(new Date().setHours(0, 0, 0, 0)) }
