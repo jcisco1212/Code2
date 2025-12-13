@@ -40,26 +40,26 @@ interface UserCreationAttributes extends Optional<UserAttributes,
 > {}
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
-  public id!: string;
-  public email!: string;
-  public passwordHash!: string;
-  public username!: string;
-  public displayName!: string | null;
-  public bio!: string | null;
-  public avatarUrl!: string | null;
-  public bannerUrl!: string | null;
-  public role!: UserRole;
-  public isVerified!: boolean;
-  public isActive!: boolean;
-  public twoFactorEnabled!: boolean;
-  public twoFactorSecret!: string | null;
-  public emailVerified!: boolean;
-  public emailVerificationToken!: string | null;
-  public passwordResetToken!: string | null;
-  public passwordResetExpires!: Date | null;
-  public lastLogin!: Date | null;
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  declare id: string;
+  declare email: string;
+  declare passwordHash: string;
+  declare username: string;
+  declare displayName: string | null;
+  declare bio: string | null;
+  declare avatarUrl: string | null;
+  declare bannerUrl: string | null;
+  declare role: UserRole;
+  declare isVerified: boolean;
+  declare isActive: boolean;
+  declare twoFactorEnabled: boolean;
+  declare twoFactorSecret: string | null;
+  declare emailVerified: boolean;
+  declare emailVerificationToken: string | null;
+  declare passwordResetToken: string | null;
+  declare passwordResetExpires: Date | null;
+  declare lastLogin: Date | null;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 
   // Instance methods
   public async comparePassword(candidatePassword: string): Promise<boolean> {
