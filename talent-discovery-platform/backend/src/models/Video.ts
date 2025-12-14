@@ -112,6 +112,37 @@ class Video extends Model<VideoAttributes, VideoCreationAttributes> implements V
 
     return Math.round(score * 100) / 100;
   }
+
+  // Convert to public-safe JSON (excludes internal fields)
+  public toPublicJSON() {
+    return {
+      id: this.id,
+      userId: this.userId,
+      categoryId: this.categoryId,
+      title: this.title,
+      description: this.description,
+      thumbnailUrl: this.thumbnailUrl,
+      hlsUrl: this.hlsUrl,
+      duration: this.duration,
+      status: this.status,
+      visibility: this.visibility,
+      viewsCount: this.viewsCount,
+      likesCount: this.likesCount,
+      commentsCount: this.commentsCount,
+      sharesCount: this.sharesCount,
+      aiOverallScore: this.aiOverallScore,
+      aiVocalScore: this.aiVocalScore,
+      aiMovementScore: this.aiMovementScore,
+      aiExpressionScore: this.aiExpressionScore,
+      aiTimingScore: this.aiTimingScore,
+      aiPresenceScore: this.aiPresenceScore,
+      tags: this.tags,
+      isFeatured: this.isFeatured,
+      publishedAt: this.publishedAt,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt
+    };
+  }
 }
 
 Video.init(
