@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 import { store } from './store';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // Layout
 import Layout from './components/layout/Layout';
@@ -52,16 +53,17 @@ import AdminCategories from './pages/admin/Categories';
 function App() {
   return (
     <Provider store={store}>
-      <AuthProvider>
-        <BrowserRouter>
-          <Toaster position="top-right" />
-          <Routes>
+      <ThemeProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <Toaster position="top-right" />
+            <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
               <Route path="watch/:videoId" element={<Watch />} />
               <Route path="search" element={<Search />} />
-              <Route path="profile/:userId" element={<Profile />} />
+              <Route path="profile/:username" element={<Profile />} />
               <Route path="category/:categorySlug" element={<Category />} />
               <Route path="trending" element={<Trending />} />
               <Route path="about" element={<About />} />
@@ -98,9 +100,10 @@ function App() {
               {/* 404 */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </ThemeProvider>
     </Provider>
   );
 }

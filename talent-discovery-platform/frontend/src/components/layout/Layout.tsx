@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import {
   HomeIcon,
   MagnifyingGlassIcon,
@@ -14,13 +15,17 @@ import {
   ChartBarIcon,
   Bars3Icon,
   XMarkIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  SunIcon,
+  MoonIcon,
+  ComputerDesktopIcon
 } from '@heroicons/react/24/outline';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 
 const Layout: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
+  const { theme, setTheme, isDark } = useTheme();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -126,15 +131,15 @@ const Layout: React.FC = () => {
                   >
                     <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right rounded-xl bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none divide-y divide-gray-100 dark:divide-gray-700">
                       <div className="px-4 py-3">
-                        <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
-                        <p className="text-sm text-gray-500">@{user?.username}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.firstName} {user?.lastName}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">@{user?.username}</p>
                       </div>
                       <div className="py-1">
                         <Menu.Item>
                           {({ active }) => (
                             <Link
-                              to={`/profile/${user?.id}`}
-                              className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm`}
+                              to={`/profile/${user?.username}`}
+                              className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200`}
                             >
                               <UserCircleIcon className="w-5 h-5" />
                               Your Profile
@@ -145,7 +150,7 @@ const Layout: React.FC = () => {
                           {({ active }) => (
                             <Link
                               to="/studio"
-                              className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm`}
+                              className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200`}
                             >
                               <ChartBarIcon className="w-5 h-5" />
                               Creator Studio
@@ -156,7 +161,7 @@ const Layout: React.FC = () => {
                           {({ active }) => (
                             <Link
                               to="/settings"
-                              className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm`}
+                              className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200`}
                             >
                               <Cog6ToothIcon className="w-5 h-5" />
                               Settings
@@ -168,7 +173,7 @@ const Layout: React.FC = () => {
                             {({ active }) => (
                               <Link
                                 to="/agent"
-                                className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm`}
+                                className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200`}
                               >
                                 <ChartBarIcon className="w-5 h-5" />
                                 Agent Dashboard
@@ -181,7 +186,7 @@ const Layout: React.FC = () => {
                             {({ active }) => (
                               <Link
                                 to="/admin"
-                                className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm`}
+                                className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200`}
                               >
                                 <Cog6ToothIcon className="w-5 h-5" />
                                 Admin Panel
@@ -190,12 +195,53 @@ const Layout: React.FC = () => {
                           </Menu.Item>
                         )}
                       </div>
+                      {/* Dark Mode Toggle */}
+                      <div className="py-1">
+                        <div className="px-4 py-2">
+                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Appearance</p>
+                          <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                            <button
+                              onClick={() => setTheme('light')}
+                              className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                                theme === 'light'
+                                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                              }`}
+                            >
+                              <SunIcon className="w-4 h-4" />
+                              Light
+                            </button>
+                            <button
+                              onClick={() => setTheme('dark')}
+                              className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                                theme === 'dark'
+                                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                              }`}
+                            >
+                              <MoonIcon className="w-4 h-4" />
+                              Dark
+                            </button>
+                            <button
+                              onClick={() => setTheme('system')}
+                              className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                                theme === 'system'
+                                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                              }`}
+                            >
+                              <ComputerDesktopIcon className="w-4 h-4" />
+                              Auto
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                       <div className="py-1">
                         <Menu.Item>
                           {({ active }) => (
                             <button
                               onClick={handleLogout}
-                              className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm w-full text-red-600`}
+                              className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm w-full text-red-600 dark:text-red-400`}
                             >
                               <ArrowRightOnRectangleIcon className="w-5 h-5" />
                               Sign out
