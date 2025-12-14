@@ -134,7 +134,7 @@ export const login = async (req: AuthRequest, res: Response, next: NextFunction)
     // Store refresh token in Redis
     await redis.setex(`refresh:${user.id}`, 30 * 24 * 60 * 60, tokens.refreshToken);
 
-    logAudit('USER_LOGIN', user.id, { email });
+    logAudit('USER_LOGIN', user.id, { identifier });
 
     res.json({
       message: 'Login successful',
