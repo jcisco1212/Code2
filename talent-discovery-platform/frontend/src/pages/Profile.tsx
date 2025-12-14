@@ -216,7 +216,7 @@ const Profile: React.FC = () => {
                     <div className="flex gap-3">
                       {isOwnProfile ? (
                         <Link
-                          to="/settings/profile"
+                          to="/settings"
                           className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors"
                         >
                           Edit Profile
