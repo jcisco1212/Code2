@@ -5,6 +5,7 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
 import { Server as SocketServer } from 'socket.io';
+import path from 'path';
 import dotenv from 'dotenv';
 
 import { sequelize } from './config/database';
@@ -53,9 +54,9 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
-      imgSrc: ["'self'", 'data:', 'blob:', '*.amazonaws.com'],
-      mediaSrc: ["'self'", 'blob:', '*.amazonaws.com', '*.cloudfront.net'],
-      connectSrc: ["'self'", 'ws:', 'wss:']
+      imgSrc: ["'self'", 'data:', 'blob:', '*.amazonaws.com', 'localhost:*'],
+      mediaSrc: ["'self'", 'blob:', '*.amazonaws.com', '*.cloudfront.net', 'localhost:*'],
+      connectSrc: ["'self'", 'ws:', 'wss:', 'localhost:*']
     }
   },
   hsts: {
@@ -96,6 +97,9 @@ const globalLimiter = rateLimit({
   legacyHeaders: false
 });
 app.use(globalLimiter);
+
+// Serve uploaded files (for development without S3)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {

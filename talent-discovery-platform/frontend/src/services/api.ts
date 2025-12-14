@@ -161,7 +161,22 @@ export const uploadAPI = {
   getProfileImagePresignedUrl: (contentType: string, fileSize: number) =>
     api.post('/upload/profile-image/presign', { contentType, fileSize }),
   getThumbnailPresignedUrl: (videoId: string, contentType: string, fileSize: number) =>
-    api.post('/upload/thumbnail/presign', { videoId, contentType, fileSize })
+    api.post('/upload/thumbnail/presign', { videoId, contentType, fileSize }),
+  // Direct upload for development without S3
+  directVideoUpload: (videoId: string, file: File, onProgress?: (progress: number) => void) => {
+    const formData = new FormData();
+    formData.append('videoId', videoId);
+    formData.append('video', file);
+    return api.post('/upload/video/direct', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+          onProgress(progress);
+        }
+      }
+    });
+  }
 };
 
 export const usersAPI = {

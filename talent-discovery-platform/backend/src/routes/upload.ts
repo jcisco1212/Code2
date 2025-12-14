@@ -4,6 +4,9 @@ import { validate } from '../middleware/validate';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { Response, NextFunction } from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import path from 'path';
+import fs from 'fs';
+import multer from 'multer';
 import { Video, VideoStatus } from '../models';
 import { generatePresignedPost, generateUploadUrl, buckets } from '../config/s3';
 import { videoQueue } from '../jobs/videoQueue';
@@ -12,6 +15,41 @@ import { logger } from '../utils/logger';
 import rateLimit from 'express-rate-limit';
 
 const router = Router();
+
+// Local uploads directory for development
+const UPLOADS_DIR = path.join(__dirname, '../../uploads');
+const VIDEOS_DIR = path.join(UPLOADS_DIR, 'videos');
+
+// Ensure upload directories exist
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+if (!fs.existsSync(VIDEOS_DIR)) fs.mkdirSync(VIDEOS_DIR, { recursive: true });
+
+// Multer configuration for local uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const authReq = req as AuthRequest;
+    const userDir = path.join(VIDEOS_DIR, authReq.userId || 'anonymous');
+    if (!fs.existsSync(userDir)) fs.mkdirSync(userDir, { recursive: true });
+    cb(null, userDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${uuidv4()}${ext}`);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Allowed: MP4, MOV, AVI, WebM'));
+    }
+  }
+});
 
 // Upload rate limiting
 const uploadLimiter = rateLimit({
@@ -66,8 +104,7 @@ router.post(
 
       // Update video with key
       await video.update({
-        originalKey: key,
-        mimeType: contentType,
+        s3Key: key,
         fileSize,
         status: VideoStatus.PENDING
       });
@@ -102,7 +139,7 @@ router.post(
         throw new ForbiddenError('Not authorized');
       }
 
-      if (!video.originalKey) {
+      if (!video.s3Key) {
         throw new BadRequestError('No upload key found');
       }
 
@@ -113,7 +150,7 @@ router.post(
       await videoQueue.add('process', {
         videoId: video.id,
         userId: req.userId,
-        key: video.originalKey
+        key: video.s3Key
       }, {
         priority: 1,
         attempts: 3,
@@ -226,6 +263,79 @@ router.post(
       res.json({
         message: 'Thumbnail updated',
         thumbnailUrl
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// ===========================================
+// Direct Upload (for development without S3)
+// ===========================================
+
+// Direct video upload - stores files locally
+router.post(
+  '/video/direct',
+  authenticate,
+  uploadLimiter,
+  upload.single('video'),
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { videoId } = req.body;
+
+      if (!req.file) {
+        throw new BadRequestError('No video file uploaded');
+      }
+
+      if (!videoId) {
+        // Clean up uploaded file
+        fs.unlinkSync(req.file.path);
+        throw new BadRequestError('Video ID required');
+      }
+
+      // Verify video exists and belongs to user
+      const video = await Video.findByPk(videoId);
+      if (!video) {
+        fs.unlinkSync(req.file.path);
+        throw new NotFoundError('Video not found');
+      }
+      if (video.userId !== req.userId) {
+        fs.unlinkSync(req.file.path);
+        throw new ForbiddenError('Not authorized');
+      }
+
+      // Move file to video-specific directory
+      const videoDir = path.join(VIDEOS_DIR, req.userId!, videoId);
+      if (!fs.existsSync(videoDir)) fs.mkdirSync(videoDir, { recursive: true });
+
+      const ext = path.extname(req.file.originalname);
+      const newPath = path.join(videoDir, `original${ext}`);
+      fs.renameSync(req.file.path, newPath);
+
+      // Generate a local URL for the video
+      const localKey = `videos/${req.userId}/${videoId}/original${ext}`;
+      const videoUrl = `/uploads/${localKey}`;
+
+      // Update video record
+      await video.update({
+        s3Key: localKey,
+        originalFilename: req.file.originalname,
+        fileSize: req.file.size,
+        status: VideoStatus.READY, // Mark as ready since we're not processing
+        hlsUrl: videoUrl // Use the direct video URL for now
+      });
+
+      logger.info(`Video ${videoId} uploaded directly to local storage`);
+
+      res.json({
+        message: 'Video uploaded successfully',
+        video: {
+          id: video.id,
+          title: video.title,
+          status: video.status,
+          videoUrl
+        }
       });
     } catch (error) {
       next(error);
