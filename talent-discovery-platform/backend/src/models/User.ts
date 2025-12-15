@@ -9,15 +9,32 @@ export enum UserRole {
   ADMIN = 'admin'
 }
 
+export interface SocialLinks {
+  website?: string;
+  imdb?: string;
+  instagram?: string;
+  twitter?: string;
+  tiktok?: string;
+  youtube?: string;
+  linkedin?: string;
+  spotify?: string;
+  soundcloud?: string;
+  agency?: string;
+}
+
 interface UserAttributes {
   id: string;
   email: string;
   passwordHash: string;
   username: string;
   displayName: string | null;
+  firstName: string | null;
+  lastName: string | null;
   bio: string | null;
   avatarUrl: string | null;
   bannerUrl: string | null;
+  location: string | null;
+  socialLinks: SocialLinks | null;
   role: UserRole;
   isVerified: boolean;
   isActive: boolean;
@@ -33,9 +50,9 @@ interface UserAttributes {
 }
 
 interface UserCreationAttributes extends Optional<UserAttributes,
-  'id' | 'displayName' | 'bio' | 'avatarUrl' | 'bannerUrl' | 'role' |
-  'isVerified' | 'isActive' | 'twoFactorEnabled' | 'twoFactorSecret' |
-  'emailVerified' | 'emailVerificationToken' | 'passwordResetToken' |
+  'id' | 'displayName' | 'firstName' | 'lastName' | 'bio' | 'avatarUrl' | 'bannerUrl' |
+  'location' | 'socialLinks' | 'role' | 'isVerified' | 'isActive' | 'twoFactorEnabled' |
+  'twoFactorSecret' | 'emailVerified' | 'emailVerificationToken' | 'passwordResetToken' |
   'passwordResetExpires' | 'lastLogin' | 'createdAt' | 'updatedAt'
 > {}
 
@@ -45,9 +62,13 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   declare passwordHash: string;
   declare username: string;
   declare displayName: string | null;
+  declare firstName: string | null;
+  declare lastName: string | null;
   declare bio: string | null;
   declare avatarUrl: string | null;
   declare bannerUrl: string | null;
+  declare location: string | null;
+  declare socialLinks: SocialLinks | null;
   declare role: UserRole;
   declare isVerified: boolean;
   declare isActive: boolean;
@@ -71,9 +92,14 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       id: this.id,
       username: this.username,
       displayName: this.displayName,
+      firstName: this.firstName,
+      lastName: this.lastName,
       role: this.role,
       avatarUrl: this.avatarUrl,
+      bannerUrl: this.bannerUrl,
       bio: this.bio,
+      location: this.location,
+      socialLinks: this.socialLinks,
       isVerified: this.isVerified,
       createdAt: this.createdAt
     };
@@ -85,12 +111,17 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       email: this.email,
       username: this.username,
       displayName: this.displayName,
+      firstName: this.firstName,
+      lastName: this.lastName,
       role: this.role,
       isActive: this.isActive,
       emailVerified: this.emailVerified,
       twoFactorEnabled: this.twoFactorEnabled,
       avatarUrl: this.avatarUrl,
+      bannerUrl: this.bannerUrl,
       bio: this.bio,
+      location: this.location,
+      socialLinks: this.socialLinks,
       isVerified: this.isVerified,
       createdAt: this.createdAt
     };
@@ -130,6 +161,16 @@ User.init(
       allowNull: true,
       field: 'display_name'
     },
+    firstName: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      field: 'first_name'
+    },
+    lastName: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      field: 'last_name'
+    },
     bio: {
       type: DataTypes.TEXT,
       allowNull: true
@@ -143,6 +184,16 @@ User.init(
       type: DataTypes.STRING(500),
       allowNull: true,
       field: 'banner_url'
+    },
+    location: {
+      type: DataTypes.STRING(100),
+      allowNull: true
+    },
+    socialLinks: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: null,
+      field: 'social_links'
     },
     role: {
       type: DataTypes.ENUM('user', 'creator', 'agent', 'admin'),

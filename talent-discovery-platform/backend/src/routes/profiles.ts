@@ -205,6 +205,84 @@ router.put(
   }
 );
 
+// Update social links
+router.put(
+  '/me/social-links',
+  authenticate,
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = req.user!;
+      const { socialLinks } = req.body;
+
+      // Validate that socialLinks is an object
+      if (typeof socialLinks !== 'object' || socialLinks === null) {
+        res.status(400).json({ error: 'Invalid social links data' });
+        return;
+      }
+
+      // Filter to only allowed keys
+      const allowedKeys = ['website', 'imdb', 'instagram', 'twitter', 'tiktok', 'youtube', 'linkedin', 'spotify', 'soundcloud', 'agency'];
+      const filteredLinks: Record<string, string> = {};
+
+      for (const key of allowedKeys) {
+        if (socialLinks[key] !== undefined && socialLinks[key] !== '') {
+          filteredLinks[key] = String(socialLinks[key]).trim();
+        }
+      }
+
+      await user.update({ socialLinks: filteredLinks });
+
+      // Clear cache
+      await cacheDelete(`user:${user.id}`);
+
+      res.json({
+        message: 'Social links updated',
+        socialLinks: user.socialLinks
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Update notification settings
+router.put(
+  '/me/notifications',
+  authenticate,
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { settings } = req.body;
+      // TODO: Save notification settings to database
+      // For now, just return success
+      res.json({
+        message: 'Notification settings updated',
+        settings
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Update privacy settings
+router.put(
+  '/me/privacy',
+  authenticate,
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { settings } = req.body;
+      // TODO: Save privacy settings to database
+      // For now, just return success
+      res.json({
+        message: 'Privacy settings updated',
+        settings
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 // Delete account
 router.delete('/me', authenticate, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {

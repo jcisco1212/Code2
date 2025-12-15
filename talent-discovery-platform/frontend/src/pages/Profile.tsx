@@ -4,6 +4,19 @@ import { usersAPI, socialAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
+interface SocialLinks {
+  website?: string;
+  imdb?: string;
+  instagram?: string;
+  twitter?: string;
+  tiktok?: string;
+  youtube?: string;
+  linkedin?: string;
+  spotify?: string;
+  soundcloud?: string;
+  agency?: string;
+}
+
 interface UserProfile {
   id: string;
   username: string;
@@ -18,6 +31,8 @@ interface UserProfile {
   videoCount: number;
   isFollowing: boolean;
   createdAt: string;
+  location?: string;
+  socialLinks?: SocialLinks;
 }
 
 interface Video {
@@ -423,6 +438,125 @@ const Profile: React.FC = () => {
                     </ul>
                   </div>
                 </div>
+
+                {/* Social Links Section */}
+                {profile.socialLinks && Object.values(profile.socialLinks).some(v => v) && (
+                  <div className="mt-8">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">Links & Profiles</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {profile.socialLinks.website && (
+                        <a
+                          href={profile.socialLinks.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                        >
+                          <span className="text-xl">🌐</span>
+                          <span className="text-gray-700 dark:text-gray-200 font-medium">Website</span>
+                        </a>
+                      )}
+                      {profile.socialLinks.imdb && (
+                        <a
+                          href={profile.socialLinks.imdb}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/50 transition-colors"
+                        >
+                          <span className="text-xl">🎬</span>
+                          <span className="text-gray-700 dark:text-gray-200 font-medium">IMDB</span>
+                        </a>
+                      )}
+                      {profile.socialLinks.instagram && (
+                        <a
+                          href={profile.socialLinks.instagram}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3 bg-pink-50 dark:bg-pink-900/30 rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/50 transition-colors"
+                        >
+                          <span className="text-xl">📷</span>
+                          <span className="text-gray-700 dark:text-gray-200 font-medium">Instagram</span>
+                        </a>
+                      )}
+                      {profile.socialLinks.twitter && (
+                        <a
+                          href={profile.socialLinks.twitter}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                        >
+                          <span className="text-xl">𝕏</span>
+                          <span className="text-gray-700 dark:text-gray-200 font-medium">Twitter / X</span>
+                        </a>
+                      )}
+                      {profile.socialLinks.tiktok && (
+                        <a
+                          href={profile.socialLinks.tiktok}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                        >
+                          <span className="text-xl">🎵</span>
+                          <span className="text-gray-700 dark:text-gray-200 font-medium">TikTok</span>
+                        </a>
+                      )}
+                      {profile.socialLinks.youtube && (
+                        <a
+                          href={profile.socialLinks.youtube}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3 bg-red-50 dark:bg-red-900/30 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
+                        >
+                          <span className="text-xl">▶️</span>
+                          <span className="text-gray-700 dark:text-gray-200 font-medium">YouTube</span>
+                        </a>
+                      )}
+                      {profile.socialLinks.linkedin && (
+                        <a
+                          href={profile.socialLinks.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                        >
+                          <span className="text-xl">💼</span>
+                          <span className="text-gray-700 dark:text-gray-200 font-medium">LinkedIn</span>
+                        </a>
+                      )}
+                      {profile.socialLinks.spotify && (
+                        <a
+                          href={profile.socialLinks.spotify}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/30 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors"
+                        >
+                          <span className="text-xl">🎧</span>
+                          <span className="text-gray-700 dark:text-gray-200 font-medium">Spotify</span>
+                        </a>
+                      )}
+                      {profile.socialLinks.soundcloud && (
+                        <a
+                          href={profile.socialLinks.soundcloud}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-900/30 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors"
+                        >
+                          <span className="text-xl">☁️</span>
+                          <span className="text-gray-700 dark:text-gray-200 font-medium">SoundCloud</span>
+                        </a>
+                      )}
+                      {profile.socialLinks.agency && (
+                        <a
+                          href={profile.socialLinks.agency}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-900/30 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
+                        >
+                          <span className="text-xl">🏢</span>
+                          <span className="text-gray-700 dark:text-gray-200 font-medium">Agency / Management</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Contact Section for Creators */}
                 {profile.role === 'creator' && !isOwnProfile && (

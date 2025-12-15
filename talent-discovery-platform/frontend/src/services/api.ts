@@ -200,7 +200,15 @@ export const profileAPI = {
   updateUsername: (username: string) =>
     api.put('/profiles/me/username', { username }),
   upgradeToCreator: () =>
-    api.post('/profiles/me/upgrade-creator')
+    api.post('/profiles/me/upgrade-creator'),
+  changePassword: (data: { currentPassword: string; newPassword: string }) =>
+    api.put('/auth/change-password', data),
+  updateNotificationSettings: (settings: any) =>
+    api.put('/profiles/me/notifications', settings),
+  updatePrivacySettings: (settings: any) =>
+    api.put('/profiles/me/privacy', settings),
+  updateSocialLinks: (socialLinks: any) =>
+    api.put('/profiles/me/social-links', { socialLinks })
 };
 
 export const socialAPI = {

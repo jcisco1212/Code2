@@ -66,7 +66,7 @@ const AgentBookmarks: React.FC = () => {
     return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  const categories = ['all', ...new Set(bookmarks.map(b => b.category))];
+  const categories = ['all', ...Array.from(new Set(bookmarks.map(b => b.category)))];
 
   const filteredBookmarks = bookmarks
     .filter(b => filterCategory === 'all' || b.category === filterCategory)
