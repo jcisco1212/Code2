@@ -55,11 +55,11 @@ const Register: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto px-4 py-12">
-      <h1 className="text-2xl font-bold text-center mb-6">Create Account</h1>
+      <h1 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">Create Account</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               First Name
             </label>
             <input
@@ -74,7 +74,7 @@ const Register: React.FC = () => {
             />
           </div>
           <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Last Name
             </label>
             <input
@@ -90,7 +90,7 @@ const Register: React.FC = () => {
           </div>
         </div>
         <div>
-          <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Username
           </label>
           <input
@@ -105,7 +105,7 @@ const Register: React.FC = () => {
           />
         </div>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Email Address
           </label>
           <input
@@ -120,7 +120,7 @@ const Register: React.FC = () => {
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Password
           </label>
           <input
@@ -135,7 +135,7 @@ const Register: React.FC = () => {
           />
         </div>
         <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Confirm Password
           </label>
           <input
@@ -157,7 +157,7 @@ const Register: React.FC = () => {
           {loading ? 'Creating Account...' : 'Create Account'}
         </button>
       </form>
-      <p className="text-center mt-4 text-gray-600">
+      <p className="text-center mt-4 text-gray-600 dark:text-gray-300">
         Already have an account? <Link to="/login" className="text-indigo-600 hover:text-indigo-500">Sign in</Link>
       </p>
     </div>
