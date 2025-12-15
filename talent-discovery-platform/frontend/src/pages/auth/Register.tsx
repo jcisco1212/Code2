@@ -69,7 +69,7 @@ const Register: React.FC = () => {
               value={formData.firstName}
               onChange={handleChange}
               placeholder="John"
-              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 placeholder-gray-400"
               required
             />
           </div>
@@ -84,7 +84,7 @@ const Register: React.FC = () => {
               value={formData.lastName}
               onChange={handleChange}
               placeholder="Doe"
-              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 placeholder-gray-400"
               required
             />
           </div>
@@ -100,7 +100,7 @@ const Register: React.FC = () => {
             value={formData.username}
             onChange={handleChange}
             placeholder="johndoe"
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 placeholder-gray-400"
             required
           />
         </div>
@@ -115,7 +115,7 @@ const Register: React.FC = () => {
             value={formData.email}
             onChange={handleChange}
             placeholder="you@example.com"
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 placeholder-gray-400"
             required
           />
         </div>
@@ -130,7 +130,7 @@ const Register: React.FC = () => {
             value={formData.password}
             onChange={handleChange}
             placeholder="At least 8 characters"
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 placeholder-gray-400"
             required
           />
         </div>
@@ -145,7 +145,7 @@ const Register: React.FC = () => {
             value={formData.confirmPassword}
             onChange={handleChange}
             placeholder="Confirm your password"
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900 placeholder-gray-400"
             required
           />
         </div>
