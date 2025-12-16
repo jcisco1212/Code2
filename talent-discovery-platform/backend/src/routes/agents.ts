@@ -1,8 +1,7 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { authenticate, requireAgent, AuthRequest } from '../middleware/auth';
-import { Response, NextFunction } from 'express';
+import { authenticate, requireAgent } from '../middleware/auth';
 import { User, UserRole, Video, VideoStatus, VideoVisibility, AgentBookmark, Message, Notification, NotificationType, Follow } from '../models';
 import { NotFoundError, ForbiddenError, BadRequestError } from '../middleware/errorHandler';
 import { Op, fn, col, literal } from 'sequelize';
@@ -13,9 +12,9 @@ const router = Router();
 // Agent Dashboard - Get talent discovery feed
 router.get(
   '/discover',
-  authenticate,
-  requireAgent,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  requireAgent as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const {
         page = 1,
@@ -94,9 +93,9 @@ router.get(
 // Get AI-recommended talent for agent
 router.get(
   '/recommended',
-  authenticate,
-  requireAgent,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  requireAgent as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { limit = 10 } = req.query;
 
@@ -160,9 +159,9 @@ router.get(
 // Get rising talent
 router.get(
   '/rising',
-  authenticate,
-  requireAgent,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  requireAgent as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { limit = 20, category, period = '7d' } = req.query;
 
@@ -213,15 +212,15 @@ router.get(
 // Bookmark a talent
 router.post(
   '/bookmarks',
-  authenticate,
-  requireAgent,
+  authenticate as RequestHandler,
+  requireAgent as RequestHandler,
   validate([
     body('talentId').isUUID().withMessage('Valid talent ID required'),
     body('listName').optional().trim().isLength({ max: 100 }).withMessage('List name max 100 chars'),
     body('notes').optional().trim().isLength({ max: 1000 }).withMessage('Notes max 1000 chars'),
     body('rating').optional().isInt({ min: 1, max: 5 }).withMessage('Rating must be 1-5')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { talentId, listName, notes, rating } = req.body;
 
@@ -271,9 +270,9 @@ router.post(
 // Get agent's bookmarks
 router.get(
   '/bookmarks',
-  authenticate,
-  requireAgent,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  requireAgent as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { listName, page = 1, limit = 20 } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
@@ -315,9 +314,9 @@ router.get(
 // Get bookmark lists
 router.get(
   '/bookmarks/lists',
-  authenticate,
-  requireAgent,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  requireAgent as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const lists = await AgentBookmark.findAll({
         where: { agentId: req.userId },
@@ -338,12 +337,12 @@ router.get(
 // Remove bookmark
 router.delete(
   '/bookmarks/:talentId',
-  authenticate,
-  requireAgent,
+  authenticate as RequestHandler,
+  requireAgent as RequestHandler,
   validate([
     param('talentId').isUUID().withMessage('Valid talent ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { talentId } = req.params;
 
@@ -364,13 +363,13 @@ router.delete(
 // Send message to talent
 router.post(
   '/message',
-  authenticate,
-  requireAgent,
+  authenticate as RequestHandler,
+  requireAgent as RequestHandler,
   validate([
     body('talentId').isUUID().withMessage('Valid talent ID required'),
     body('content').trim().isLength({ min: 1, max: 5000 }).withMessage('Message required (1-5000 chars)')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { talentId, content } = req.body;
 
@@ -418,9 +417,9 @@ router.post(
 // Get talent lists (curated)
 router.get(
   '/talent-lists',
-  authenticate,
-  requireAgent,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  requireAgent as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Get top performers by category
       const categories = ['singer', 'actor', 'dancer', 'comedian', 'voice-over'];
@@ -466,9 +465,9 @@ router.get(
 // Get trend reports
 router.get(
   '/trends',
-  authenticate,
-  requireAgent,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  requireAgent as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { period = '7d' } = req.query;
 

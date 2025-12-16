@@ -1,8 +1,7 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { body, param } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { authenticate, AuthRequest } from '../middleware/auth';
-import { Response, NextFunction } from 'express';
+import { authenticate } from '../middleware/auth';
 import { Report, ReportType, ReportTarget, Video, Comment, User } from '../models';
 import { NotFoundError, BadRequestError } from '../middleware/errorHandler';
 
@@ -11,14 +10,14 @@ const router = Router();
 // Create report
 router.post(
   '/',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     body('targetId').isUUID().withMessage('Valid target ID required'),
     body('targetType').isIn(Object.values(ReportTarget)).withMessage('Invalid target type'),
     body('type').isIn(Object.values(ReportType)).withMessage('Invalid report type'),
     body('description').optional().trim().isLength({ max: 1000 }).withMessage('Description max 1000 chars')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { targetId, targetType, type, description } = req.body;
 
@@ -73,7 +72,7 @@ router.post(
 );
 
 // Get user's reports
-router.get('/my-reports', authenticate, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+router.get('/my-reports', authenticate as RequestHandler, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { page = 1, limit = 20 } = req.query;
     const offset = (Number(page) - 1) * Number(limit);

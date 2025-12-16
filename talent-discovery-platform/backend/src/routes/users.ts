@@ -1,8 +1,7 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { param, query } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { authenticate, optionalAuth, AuthRequest } from '../middleware/auth';
-import { Response, NextFunction } from 'express';
+import { authenticate, optionalAuth } from '../middleware/auth';
 import { User, Video, VideoStatus, VideoVisibility, Follow } from '../models';
 import { NotFoundError } from '../middleware/errorHandler';
 import { Op } from 'sequelize';
@@ -12,8 +11,8 @@ const router = Router();
 // Get user by ID or username
 router.get(
   '/:identifier',
-  optionalAuth,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  optionalAuth as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { identifier } = req.params;
 
@@ -71,11 +70,11 @@ router.get(
 // Get user's videos
 router.get(
   '/:userId/videos',
-  optionalAuth,
+  optionalAuth as RequestHandler,
   validate([
     param('userId').isUUID().withMessage('Valid user ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { userId } = req.params;
       const { page = 1, limit = 20, sortBy = 'createdAt', order = 'DESC' } = req.query;
@@ -122,7 +121,7 @@ router.get(
   validate([
     param('userId').isUUID().withMessage('Valid user ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { userId } = req.params;
       const { page = 1, limit = 20 } = req.query;
@@ -164,7 +163,7 @@ router.get(
   validate([
     param('userId').isUUID().withMessage('Valid user ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { userId } = req.params;
       const { page = 1, limit = 20 } = req.query;
@@ -206,7 +205,7 @@ router.get(
   validate([
     query('q').optional().isLength({ min: 1 }).withMessage('Search query required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { q, page = 1, limit = 20, role } = req.query;
       const offset = (Number(page) - 1) * Number(limit);

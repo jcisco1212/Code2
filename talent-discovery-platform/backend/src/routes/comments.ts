@@ -1,8 +1,7 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { authenticate, optionalAuth, AuthRequest } from '../middleware/auth';
-import { Response, NextFunction } from 'express';
+import { authenticate, optionalAuth } from '../middleware/auth';
 import { Comment, CommentStatus, Video, User, Like, LikeTarget } from '../models';
 import { NotFoundError, ForbiddenError, BadRequestError } from '../middleware/errorHandler';
 import { aiQueue } from '../jobs/videoQueue';
@@ -12,11 +11,11 @@ const router = Router();
 // Get comments for a video
 router.get(
   '/video/:videoId',
-  optionalAuth,
+  optionalAuth as RequestHandler,
   validate([
     param('videoId').isUUID().withMessage('Valid video ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { videoId } = req.params;
       const { page = 1, limit = 20, sortBy = 'createdAt', order = 'DESC' } = req.query;
@@ -71,11 +70,11 @@ router.get(
 // Get replies to a comment
 router.get(
   '/:commentId/replies',
-  optionalAuth,
+  optionalAuth as RequestHandler,
   validate([
     param('commentId').isUUID().withMessage('Valid comment ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { commentId } = req.params;
       const { page = 1, limit = 10 } = req.query;
@@ -117,13 +116,13 @@ router.get(
 // Create comment
 router.post(
   '/',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     body('videoId').isUUID().withMessage('Valid video ID required'),
     body('content').trim().isLength({ min: 1, max: 10000 }).withMessage('Comment must be 1-10000 chars'),
     body('parentId').optional().isUUID().withMessage('Valid parent comment ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { videoId, content, parentId } = req.body;
 
@@ -184,12 +183,12 @@ router.post(
 // Update comment
 router.put(
   '/:id',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid comment ID required'),
     body('content').trim().isLength({ min: 1, max: 10000 }).withMessage('Comment must be 1-10000 chars')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
       const { content } = req.body;
@@ -221,11 +220,11 @@ router.put(
 // Delete comment
 router.delete(
   '/:id',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid comment ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -262,11 +261,11 @@ router.delete(
 // Pin/unpin comment (video owner only)
 router.post(
   '/:id/pin',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid comment ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -302,11 +301,11 @@ router.post(
 // Highlight comment (video owner only)
 router.post(
   '/:id/highlight',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid comment ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
 

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
-    "start": "ts-node src/index.ts",
+    "start": "ts-node --transpile-only src/index.ts",
     "start:prod": "node dist/index.js",
     "worker": "ts-node src/workers/index.ts",
     "worker:dev": "ts-node-dev --respawn --transpile-only src/workers/index.ts",

@@ -1,8 +1,7 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { body, param } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { authenticate, AuthRequest } from '../middleware/auth';
-import { Response, NextFunction } from 'express';
+import { authenticate } from '../middleware/auth';
 import { Like, LikeType, LikeTarget, Video, Comment } from '../models';
 import { NotFoundError, BadRequestError } from '../middleware/errorHandler';
 
@@ -11,12 +10,12 @@ const router = Router();
 // Like/unlike a video
 router.post(
   '/video/:videoId',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     param('videoId').isUUID().withMessage('Valid video ID required'),
     body('type').optional().isIn(['like', 'dislike']).withMessage('Type must be like or dislike')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { videoId } = req.params;
       const { type = 'like' } = req.body;
@@ -86,11 +85,11 @@ router.post(
 // Like/unlike a comment
 router.post(
   '/comment/:commentId',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     param('commentId').isUUID().withMessage('Valid comment ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { commentId } = req.params;
 
@@ -131,11 +130,11 @@ router.post(
 // Get like status for multiple videos
 router.post(
   '/status/videos',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     body('videoIds').isArray({ min: 1, max: 100 }).withMessage('Video IDs array required (1-100 items)')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { videoIds } = req.body;
 
@@ -166,7 +165,7 @@ router.get(
   validate([
     param('userId').isUUID().withMessage('Valid user ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { userId } = req.params;
       const { page = 1, limit = 20 } = req.query;

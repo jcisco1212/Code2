@@ -1,8 +1,7 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { authenticate, requireRole, requireModeratorOrAdmin, AuthRequest } from '../middleware/auth';
-import { Response, NextFunction } from 'express';
+import { authenticate, requireRole, requireModeratorOrAdmin } from '../middleware/auth';
 import { User, UserRole, Video, VideoStatus, Comment, CommentStatus, Report, ReportStatus, Category } from '../models';
 import { NotFoundError, ForbiddenError } from '../middleware/errorHandler';
 import { Op, fn, col } from 'sequelize';
@@ -17,9 +16,9 @@ const router = Router();
 // Get all users
 router.get(
   '/users',
-  authenticate,
-  requireModeratorOrAdmin,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { page = 1, limit = 50, role, status, search } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
@@ -62,13 +61,13 @@ router.get(
 // Update user active status
 router.put(
   '/users/:id/status',
-  authenticate,
-  requireRole(UserRole.ADMIN),
+  authenticate as RequestHandler,
+  requireRole(UserRole.ADMIN) as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid user ID required'),
     body('isActive').isBoolean().withMessage('isActive must be a boolean')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
       const { isActive, reason } = req.body;
@@ -96,13 +95,13 @@ router.put(
 // Update user role
 router.put(
   '/users/:id/role',
-  authenticate,
-  requireRole(UserRole.ADMIN),
+  authenticate as RequestHandler,
+  requireRole(UserRole.ADMIN) as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid user ID required'),
     body('role').isIn(Object.values(UserRole)).withMessage('Invalid role')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
       const { role } = req.body;
@@ -129,12 +128,12 @@ router.put(
 // Verify agent
 router.post(
   '/users/:id/verify-agent',
-  authenticate,
-  requireRole(UserRole.ADMIN),
+  authenticate as RequestHandler,
+  requireRole(UserRole.ADMIN) as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid user ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -162,13 +161,13 @@ router.post(
 // Admin reset user password
 router.put(
   '/users/:id/reset-password',
-  authenticate,
-  requireRole(UserRole.ADMIN),
+  authenticate as RequestHandler,
+  requireRole(UserRole.ADMIN) as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid user ID required'),
     body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
       const { password } = req.body;
@@ -196,12 +195,12 @@ router.put(
 // Delete user
 router.delete(
   '/users/:id',
-  authenticate,
-  requireRole(UserRole.ADMIN),
+  authenticate as RequestHandler,
+  requireRole(UserRole.ADMIN) as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid user ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -231,8 +230,8 @@ router.delete(
 // Create category
 router.post(
   '/categories',
-  authenticate,
-  requireRole(UserRole.ADMIN),
+  authenticate as RequestHandler,
+  requireRole(UserRole.ADMIN) as RequestHandler,
   validate([
     body('name').trim().notEmpty().withMessage('Name is required'),
     body('slug').trim().notEmpty().withMessage('Slug is required'),
@@ -241,7 +240,7 @@ router.post(
     body('sortOrder').optional().isInt().withMessage('Sort order must be an integer'),
     body('isActive').optional().isBoolean()
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { name, slug, description, icon, sortOrder, isActive } = req.body;
 
@@ -273,8 +272,8 @@ router.post(
 // Update category
 router.put(
   '/categories/:id',
-  authenticate,
-  requireRole(UserRole.ADMIN),
+  authenticate as RequestHandler,
+  requireRole(UserRole.ADMIN) as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid category ID required'),
     body('name').optional().trim().notEmpty().withMessage('Name cannot be empty'),
@@ -284,7 +283,7 @@ router.put(
     body('sortOrder').optional().isInt().withMessage('Sort order must be an integer'),
     body('isActive').optional().isBoolean()
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
       const { name, slug, description, icon, sortOrder, isActive } = req.body;
@@ -324,12 +323,12 @@ router.put(
 // Delete category
 router.delete(
   '/categories/:id',
-  authenticate,
-  requireRole(UserRole.ADMIN),
+  authenticate as RequestHandler,
+  requireRole(UserRole.ADMIN) as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid category ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -363,9 +362,9 @@ router.delete(
 // Get all videos (including pending)
 router.get(
   '/videos',
-  authenticate,
-  requireModeratorOrAdmin,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { page = 1, limit = 50, status } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
@@ -401,14 +400,14 @@ router.get(
 // Moderate video
 router.put(
   '/videos/:id/moderate',
-  authenticate,
-  requireModeratorOrAdmin,
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid video ID required'),
     body('action').isIn(['approve', 'reject', 'remove']).withMessage('Invalid action'),
     body('reason').optional().trim().isLength({ max: 1000 }).withMessage('Reason max 1000 chars')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
       const { action } = req.body;
@@ -447,12 +446,12 @@ router.put(
 // Feature video
 router.post(
   '/videos/:id/feature',
-  authenticate,
-  requireModeratorOrAdmin,
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid video ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -482,9 +481,9 @@ router.post(
 // Get reports
 router.get(
   '/reports',
-  authenticate,
-  requireModeratorOrAdmin,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { page = 1, limit = 50, status = 'pending', type } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
@@ -521,14 +520,14 @@ router.get(
 // Review report
 router.put(
   '/reports/:id/review',
-  authenticate,
-  requireModeratorOrAdmin,
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid report ID required'),
     body('status').isIn(Object.values(ReportStatus)).withMessage('Invalid status'),
     body('resolution').optional().trim().isLength({ max: 1000 }).withMessage('Resolution max 1000 chars')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
       const { status, resolution } = req.body;
@@ -562,9 +561,9 @@ router.put(
 
 router.get(
   '/stats',
-  authenticate,
-  requireModeratorOrAdmin,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const [
         totalUsers,

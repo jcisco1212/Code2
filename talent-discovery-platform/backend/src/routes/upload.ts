@@ -1,8 +1,7 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { authenticate, AuthRequest } from '../middleware/auth';
-import { Response, NextFunction } from 'express';
+import { authenticate } from '../middleware/auth';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
@@ -27,7 +26,7 @@ if (!fs.existsSync(VIDEOS_DIR)) fs.mkdirSync(VIDEOS_DIR, { recursive: true });
 // Multer configuration for local uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const authReq = req as AuthRequest;
+    const authReq = req;
     const userDir = path.join(VIDEOS_DIR, authReq.userId || 'anonymous');
     if (!fs.existsSync(userDir)) fs.mkdirSync(userDir, { recursive: true });
     cb(null, userDir);
@@ -63,14 +62,14 @@ const uploadLimiter = rateLimit({
 // Get presigned URL for video upload
 router.post(
   '/video/presign',
-  authenticate,
+  authenticate as RequestHandler,
   uploadLimiter,
   validate([
     body('videoId').isUUID().withMessage('Valid video ID required'),
     body('contentType').notEmpty().withMessage('Content type required'),
     body('fileSize').isInt({ min: 1, max: 524288000 }).withMessage('File size must be 1 byte to 500MB')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { videoId, contentType, fileSize } = req.body;
 
@@ -123,11 +122,11 @@ router.post(
 // Confirm upload completion and start processing
 router.post(
   '/video/complete',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     body('videoId').isUUID().withMessage('Valid video ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { videoId } = req.body;
 
@@ -175,12 +174,12 @@ router.post(
 // Get presigned URL for profile image upload
 router.post(
   '/profile-image/presign',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     body('contentType').isIn(['image/jpeg', 'image/png', 'image/webp']).withMessage('Invalid image type'),
     body('fileSize').isInt({ min: 1, max: 5242880 }).withMessage('File size must be 1 byte to 5MB')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { contentType, fileSize } = req.body;
 
@@ -203,13 +202,13 @@ router.post(
 // Get presigned URL for thumbnail upload (for custom thumbnails)
 router.post(
   '/thumbnail/presign',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     body('videoId').isUUID().withMessage('Valid video ID required'),
     body('contentType').isIn(['image/jpeg', 'image/png', 'image/webp']).withMessage('Invalid image type'),
     body('fileSize').isInt({ min: 1, max: 2097152 }).withMessage('File size must be 1 byte to 2MB')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { videoId, contentType, fileSize } = req.body;
 
@@ -240,12 +239,12 @@ router.post(
 // Confirm thumbnail upload
 router.post(
   '/thumbnail/complete',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     body('videoId').isUUID().withMessage('Valid video ID required'),
     body('key').notEmpty().withMessage('Key required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { videoId, key } = req.body;
 
@@ -277,10 +276,10 @@ router.post(
 // Direct video upload - stores files locally
 router.post(
   '/video/direct',
-  authenticate,
+  authenticate as RequestHandler,
   uploadLimiter,
   upload.single('video'),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { videoId } = req.body;
 

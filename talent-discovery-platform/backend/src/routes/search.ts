@@ -1,8 +1,7 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { query } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { optionalAuth, AuthRequest } from '../middleware/auth';
-import { Response, NextFunction } from 'express';
+import { optionalAuth } from '../middleware/auth';
 import { User, Video, VideoStatus, VideoVisibility, Category } from '../models';
 import { Op } from 'sequelize';
 
@@ -11,11 +10,11 @@ const router = Router();
 // Universal search
 router.get(
   '/',
-  optionalAuth,
+  optionalAuth as RequestHandler,
   validate([
     query('q').notEmpty().withMessage('Search query required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { q, type = 'all', limit = 10 } = req.query;
       const searchTerm = (q as string).toLowerCase();
@@ -84,7 +83,7 @@ router.get(
   validate([
     query('q').isLength({ min: 2 }).withMessage('Search query must be at least 2 characters')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { q } = req.query;
       const searchTerm = (q as string).toLowerCase();
@@ -133,7 +132,7 @@ router.get(
 );
 
 // Trending searches
-router.get('/trending', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+router.get('/trending', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // This would typically come from a search analytics service
     // For now, return popular categories and trending video titles

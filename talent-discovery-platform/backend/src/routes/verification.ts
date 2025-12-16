@@ -1,6 +1,11 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, RequestHandler } from 'express';
 import { body, validationResult } from 'express-validator';
 import { authenticate, requireAgent, requireAdmin } from '../middleware/auth';
+
+// Cast middleware to RequestHandler to fix TypeScript conflicts
+const auth = authenticate as RequestHandler;
+const agentRequired = requireAgent as RequestHandler;
+const adminRequired = requireAdmin as RequestHandler;
 import AgentVerification, { VerificationStatus, DocumentType } from '../models/AgentVerification';
 import User from '../models/User';
 import scamDetectionService from '../services/scamDetectionService';
@@ -13,8 +18,8 @@ const router = Router();
  */
 router.post(
   '/apply',
-  authenticate,
-  requireAgent,
+  auth,
+  agentRequired,
   [
     body('agencyName').notEmpty().trim(),
     body('agencyEmail').isEmail(),
@@ -76,7 +81,7 @@ router.post(
  * Get verification status
  * GET /api/verification/status
  */
-router.get('/status', authenticate, requireAgent, async (req: Request, res: Response) => {
+router.get('/status', auth, agentRequired, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;
     const verification = await AgentVerification.findOne({ where: { userId } });
@@ -110,8 +115,8 @@ router.get('/status', authenticate, requireAgent, async (req: Request, res: Resp
  */
 router.post(
   '/document',
-  authenticate,
-  requireAgent,
+  auth,
+  agentRequired,
   [
     body('documentType').isIn(Object.values(DocumentType)),
     body('documentUrl').isURL(),
@@ -155,8 +160,8 @@ router.post(
  */
 router.post(
   '/:id/review',
-  authenticate,
-  requireAdmin,
+  auth,
+  adminRequired,
   [
     body('status').isIn([VerificationStatus.BASIC, VerificationStatus.VERIFIED,
                          VerificationStatus.PREMIUM, VerificationStatus.REJECTED]),
@@ -214,7 +219,7 @@ router.post(
  * Admin: Get pending verifications
  * GET /api/verification/pending
  */
-router.get('/pending', authenticate, requireAdmin, async (req: Request, res: Response) => {
+router.get('/pending', auth, adminRequired, async (req: Request, res: Response) => {
   try {
     const verifications = await AgentVerification.findAll({
       where: { status: VerificationStatus.PENDING },
@@ -239,7 +244,7 @@ router.get('/pending', authenticate, requireAdmin, async (req: Request, res: Res
  */
 router.post(
   '/report',
-  authenticate,
+  auth,
   [
     body('agentId').isUUID(),
     body('reason').notEmpty(),
@@ -298,7 +303,7 @@ router.post(
  */
 router.post(
   '/analyze-message',
-  authenticate,
+  auth,
   [body('message').notEmpty(), body('senderId').isUUID()],
   async (req: Request, res: Response) => {
     try {
@@ -335,7 +340,7 @@ router.post(
  * Get agent public verification info (for talent to view)
  * GET /api/verification/agent/:id
  */
-router.get('/agent/:id', authenticate, async (req: Request, res: Response) => {
+router.get('/agent/:id', auth, async (req: Request, res: Response) => {
   try {
     const verification = await AgentVerification.findOne({
       where: { userId: req.params.id },

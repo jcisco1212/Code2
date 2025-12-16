@@ -1,21 +1,25 @@
-import { Router } from 'express';
+import { Router, RequestHandler } from 'express';
 import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { authenticate, optionalAuth, AuthRequest } from '../middleware/auth';
+import { authenticate, optionalAuth } from '../middleware/auth';
 import * as videoController from '../controllers/videoController';
 
 const router = Router();
 
+// Cast middleware to RequestHandler
+const auth = authenticate as RequestHandler;
+const optAuth = optionalAuth as RequestHandler;
+
 // Get trending videos
-router.get('/trending', optionalAuth, videoController.getTrendingVideos);
+router.get('/trending', optAuth, videoController.getTrendingVideos);
 
 // Get featured videos
-router.get('/featured', optionalAuth, videoController.getFeaturedVideos);
+router.get('/featured', optAuth, videoController.getFeaturedVideos);
 
 // Get videos by category
 router.get(
   '/category/:categoryId',
-  optionalAuth,
+  optAuth,
   validate([
     param('categoryId').isUUID().withMessage('Valid category ID required')
   ]),
@@ -25,7 +29,7 @@ router.get(
 // Search videos
 router.get(
   '/search',
-  optionalAuth,
+  optAuth,
   validate([
     query('q').notEmpty().withMessage('Search query required')
   ]),
@@ -33,12 +37,12 @@ router.get(
 );
 
 // Get all videos (with filters)
-router.get('/', optionalAuth, videoController.getVideos);
+router.get('/', optAuth, videoController.getVideos);
 
 // Get single video
 router.get(
   '/:id',
-  optionalAuth,
+  optAuth,
   validate([
     param('id').isUUID().withMessage('Valid video ID required')
   ]),
@@ -48,7 +52,7 @@ router.get(
 // Get video streaming URL
 router.get(
   '/:id/stream',
-  optionalAuth,
+  optAuth,
   validate([
     param('id').isUUID().withMessage('Valid video ID required')
   ]),
@@ -58,7 +62,7 @@ router.get(
 // Create video (metadata only - actual upload via presigned URL)
 router.post(
   '/',
-  authenticate,
+  auth,
   validate([
     body('title').trim().isLength({ min: 1, max: 255 }).withMessage('Title required (1-255 chars)'),
     body('description').optional().trim().isLength({ max: 5000 }).withMessage('Description too long'),
@@ -73,7 +77,7 @@ router.post(
 // Update video
 router.put(
   '/:id',
-  authenticate,
+  auth,
   validate([
     param('id').isUUID().withMessage('Valid video ID required'),
     body('title').optional().trim().isLength({ min: 1, max: 255 }).withMessage('Title must be 1-255 chars'),
@@ -89,7 +93,7 @@ router.put(
 // Delete video
 router.delete(
   '/:id',
-  authenticate,
+  auth,
   validate([
     param('id').isUUID().withMessage('Valid video ID required')
   ]),
@@ -99,7 +103,7 @@ router.delete(
 // Record view
 router.post(
   '/:id/view',
-  optionalAuth,
+  optAuth,
   validate([
     param('id').isUUID().withMessage('Valid video ID required'),
     body('watchTime').optional().isInt({ min: 0 }).withMessage('Watch time must be positive integer'),
@@ -111,7 +115,7 @@ router.post(
 // Get video analytics (owner only)
 router.get(
   '/:id/analytics',
-  authenticate,
+  auth,
   validate([
     param('id').isUUID().withMessage('Valid video ID required')
   ]),
@@ -121,7 +125,7 @@ router.get(
 // Get AI analysis results
 router.get(
   '/:id/ai-analysis',
-  authenticate,
+  auth,
   validate([
     param('id').isUUID().withMessage('Valid video ID required')
   ]),
@@ -131,7 +135,7 @@ router.get(
 // Request AI re-analysis
 router.post(
   '/:id/reanalyze',
-  authenticate,
+  auth,
   validate([
     param('id').isUUID().withMessage('Valid video ID required')
   ]),

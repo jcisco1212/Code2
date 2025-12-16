@@ -1,8 +1,7 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { param, body } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { authenticate, AuthRequest } from '../middleware/auth';
-import { Response, NextFunction } from 'express';
+import { authenticate } from '../middleware/auth';
 import { Notification } from '../models';
 import { NotFoundError } from '../middleware/errorHandler';
 import { Op } from 'sequelize';
@@ -10,7 +9,7 @@ import { Op } from 'sequelize';
 const router = Router();
 
 // Get user's notifications
-router.get('/', authenticate, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+router.get('/', authenticate as RequestHandler, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { page = 1, limit = 20, unreadOnly = false } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
@@ -49,9 +48,9 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response, next: Next
 // Mark notification as read
 router.put(
   '/:id/read',
-  authenticate,
+  authenticate as RequestHandler,
   validate([param('id').isUUID().withMessage('Valid notification ID required')]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -73,7 +72,7 @@ router.put(
 );
 
 // Mark all as read
-router.put('/read-all', authenticate, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+router.put('/read-all', authenticate as RequestHandler, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     await Notification.update(
       { isRead: true, readAt: new Date() },
@@ -89,9 +88,9 @@ router.put('/read-all', authenticate, async (req: AuthRequest, res: Response, ne
 // Delete notification
 router.delete(
   '/:id',
-  authenticate,
+  authenticate as RequestHandler,
   validate([param('id').isUUID().withMessage('Valid notification ID required')]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -111,7 +110,7 @@ router.delete(
 );
 
 // Get unread count
-router.get('/unread-count', authenticate, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+router.get('/unread-count', authenticate as RequestHandler, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const count = await Notification.count({
       where: { userId: req.userId, isRead: false }

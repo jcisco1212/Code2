@@ -1,15 +1,14 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { body } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { authenticate, AuthRequest } from '../middleware/auth';
-import { Response, NextFunction } from 'express';
+import { authenticate } from '../middleware/auth';
 import { User } from '../models';
 import { cacheDelete } from '../config/redis';
 
 const router = Router();
 
 // Get current user's profile
-router.get('/me', authenticate, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+router.get('/me', authenticate as RequestHandler, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     res.json({ profile: req.user!.toAuthJSON() });
   } catch (error) {
@@ -20,7 +19,7 @@ router.get('/me', authenticate, async (req: AuthRequest, res: Response, next: Ne
 // Update profile
 router.put(
   '/me',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     body('firstName').optional().trim().isLength({ min: 1, max: 100 }).withMessage('First name must be 1-100 chars'),
     body('lastName').optional().trim().isLength({ min: 1, max: 100 }).withMessage('Last name must be 1-100 chars'),
@@ -30,7 +29,7 @@ router.put(
     body('dateOfBirth').optional().isISO8601().withMessage('Invalid date format'),
     body('talentCategories').optional().isArray().withMessage('Talent categories must be an array')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = req.user!;
       const { firstName, lastName, bio, location, website, dateOfBirth, talentCategories } = req.body;
@@ -58,11 +57,11 @@ router.put(
 // Update profile image
 router.put(
   '/me/image',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     body('profileImageUrl').notEmpty().isURL().withMessage('Valid image URL required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = req.user!;
       const { profileImageUrl } = req.body;
@@ -85,7 +84,7 @@ router.put(
 // Update username
 router.put(
   '/me/username',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     body('username')
       .trim()
@@ -93,7 +92,7 @@ router.put(
       .matches(/^[a-zA-Z0-9_]+$/)
       .withMessage('Username must be 3-50 chars, alphanumeric and underscores only')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = req.user!;
       const { username } = req.body;
@@ -121,7 +120,7 @@ router.put(
 );
 
 // Upgrade to creator role
-router.post('/me/upgrade-creator', authenticate, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+router.post('/me/upgrade-creator', authenticate as RequestHandler, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const user = req.user!;
 
@@ -144,12 +143,12 @@ router.post('/me/upgrade-creator', authenticate, async (req: AuthRequest, res: R
 // Request agent verification
 router.post(
   '/me/request-agent',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     body('agencyName').trim().isLength({ min: 1, max: 255 }).withMessage('Agency name required'),
     body('verificationDocuments').optional().isArray().withMessage('Documents must be an array')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = req.user!;
       const { agencyName } = req.body;
@@ -173,7 +172,7 @@ router.post(
 );
 
 // Get notification settings
-router.get('/me/settings/notifications', authenticate, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+router.get('/me/settings/notifications', authenticate as RequestHandler, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // TODO: Implement notification settings model
     res.json({
@@ -193,8 +192,8 @@ router.get('/me/settings/notifications', authenticate, async (req: AuthRequest, 
 // Update notification settings
 router.put(
   '/me/settings/notifications',
-  authenticate,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { settings } = req.body;
       // TODO: Save notification settings
@@ -208,8 +207,8 @@ router.put(
 // Update social links
 router.put(
   '/me/social-links',
-  authenticate,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = req.user!;
       const { socialLinks } = req.body;
@@ -248,8 +247,8 @@ router.put(
 // Update notification settings
 router.put(
   '/me/notifications',
-  authenticate,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { settings } = req.body;
       // TODO: Save notification settings to database
@@ -267,8 +266,8 @@ router.put(
 // Update privacy settings
 router.put(
   '/me/privacy',
-  authenticate,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { settings } = req.body;
       // TODO: Save privacy settings to database
@@ -284,7 +283,7 @@ router.put(
 );
 
 // Delete account
-router.delete('/me', authenticate, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+router.delete('/me', authenticate as RequestHandler, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const user = req.user!;
 

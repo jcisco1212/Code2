@@ -1,8 +1,7 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { param, body } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { authenticate, AuthRequest } from '../middleware/auth';
-import { Response, NextFunction } from 'express';
+import { authenticate } from '../middleware/auth';
 import { Follow, User, Notification, NotificationType } from '../models';
 import { NotFoundError, BadRequestError } from '../middleware/errorHandler';
 
@@ -11,11 +10,11 @@ const router = Router();
 // Follow a user
 router.post(
   '/:userId',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     param('userId').isUUID().withMessage('Valid user ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { userId } = req.params;
 
@@ -65,11 +64,11 @@ router.post(
 // Unfollow a user
 router.delete(
   '/:userId',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     param('userId').isUUID().withMessage('Valid user ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { userId } = req.params;
 
@@ -97,11 +96,11 @@ router.delete(
 // Check if following
 router.get(
   '/check/:userId',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     param('userId').isUUID().withMessage('Valid user ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { userId } = req.params;
 
@@ -122,11 +121,11 @@ router.get(
 // Check follow status for multiple users
 router.post(
   '/check-multiple',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     body('userIds').isArray({ min: 1, max: 100 }).withMessage('User IDs array required (1-100 items)')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { userIds } = req.body;
 
@@ -152,11 +151,11 @@ router.post(
 // Get mutual followers
 router.get(
   '/mutual/:userId',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     param('userId').isUUID().withMessage('Valid user ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { userId } = req.params;
       const { page = 1, limit = 20 } = req.query;

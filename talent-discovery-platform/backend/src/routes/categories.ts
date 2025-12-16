@@ -1,8 +1,7 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { body, param } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { authenticate, requireModeratorOrAdmin, AuthRequest } from '../middleware/auth';
-import { Response, NextFunction } from 'express';
+import { authenticate, requireModeratorOrAdmin } from '../middleware/auth';
 import { Category } from '../models';
 import { NotFoundError, ConflictError } from '../middleware/errorHandler';
 import { cacheGet, cacheSet, cacheDelete } from '../config/redis';
@@ -10,7 +9,7 @@ import { cacheGet, cacheSet, cacheDelete } from '../config/redis';
 const router = Router();
 
 // Get all categories
-router.get('/', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+router.get('/', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { includeInactive = false, talentOnly = false } = req.query;
 
@@ -64,7 +63,7 @@ router.get(
   validate([
     param('id').isUUID().withMessage('Valid category ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -89,8 +88,8 @@ router.get(
 // Create category (admin/moderator only)
 router.post(
   '/',
-  authenticate,
-  requireModeratorOrAdmin,
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
   validate([
     body('name').trim().isLength({ min: 1, max: 100 }).withMessage('Name required (1-100 chars)'),
     body('slug').trim().isLength({ min: 1, max: 100 }).matches(/^[a-z0-9-]+$/).withMessage('Invalid slug format'),
@@ -101,7 +100,7 @@ router.post(
     body('sortOrder').optional().isInt({ min: 0 }).withMessage('Sort order must be positive integer'),
     body('isTalentType').optional().isBoolean().withMessage('isTalentType must be boolean')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { name, slug, description, parentId, iconUrl, color, sortOrder, isTalentType } = req.body;
 
@@ -135,8 +134,8 @@ router.post(
 // Update category (admin/moderator only)
 router.put(
   '/:id',
-  authenticate,
-  requireModeratorOrAdmin,
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid category ID required'),
     body('name').optional().trim().isLength({ min: 1, max: 100 }).withMessage('Name must be 1-100 chars'),
@@ -149,7 +148,7 @@ router.put(
     body('isActive').optional().isBoolean().withMessage('isActive must be boolean'),
     body('isTalentType').optional().isBoolean().withMessage('isTalentType must be boolean')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -193,12 +192,12 @@ router.put(
 // Delete category (admin only)
 router.delete(
   '/:id',
-  authenticate,
-  requireModeratorOrAdmin,
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid category ID required')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
 

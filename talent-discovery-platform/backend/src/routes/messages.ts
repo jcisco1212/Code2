@@ -1,8 +1,7 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { authenticate, AuthRequest } from '../middleware/auth';
-import { Response, NextFunction } from 'express';
+import { authenticate } from '../middleware/auth';
 import { Message, MessageStatus, User } from '../models';
 import { NotFoundError, ForbiddenError } from '../middleware/errorHandler';
 import { Op, fn, col, literal } from 'sequelize';
@@ -11,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 const router = Router();
 
 // Get conversations
-router.get('/conversations', authenticate, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+router.get('/conversations', authenticate as RequestHandler, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { page = 1, limit = 20 } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
@@ -84,9 +83,9 @@ router.get('/conversations', authenticate, async (req: AuthRequest, res: Respons
 // Get messages in conversation
 router.get(
   '/conversation/:conversationId',
-  authenticate,
+  authenticate as RequestHandler,
   validate([param('conversationId').isUUID().withMessage('Valid conversation ID required')]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { conversationId } = req.params;
       const { page = 1, limit = 50 } = req.query;
@@ -147,12 +146,12 @@ router.get(
 // Send message
 router.post(
   '/',
-  authenticate,
+  authenticate as RequestHandler,
   validate([
     body('receiverId').isUUID().withMessage('Valid receiver ID required'),
     body('content').trim().isLength({ min: 1, max: 5000 }).withMessage('Message required (1-5000 chars)')
   ]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { receiverId, content } = req.body;
 
@@ -197,9 +196,9 @@ router.post(
 // Delete message
 router.delete(
   '/:id',
-  authenticate,
+  authenticate as RequestHandler,
   validate([param('id').isUUID().withMessage('Valid message ID required')]),
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
 
@@ -221,7 +220,7 @@ router.delete(
 );
 
 // Get unread count
-router.get('/unread-count', authenticate, async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+router.get('/unread-count', authenticate as RequestHandler, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const count = await Message.count({
       where: {

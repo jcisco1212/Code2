@@ -1,8 +1,7 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { query } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { authenticate, AuthRequest } from '../middleware/auth';
-import { Response, NextFunction } from 'express';
+import { authenticate } from '../middleware/auth';
 import { Video, VideoStatus, VideoView, Like, LikeTarget, Follow, Comment } from '../models';
 import { Op, fn, col } from 'sequelize';
 
@@ -11,8 +10,8 @@ const router = Router();
 // Get creator dashboard analytics
 router.get(
   '/dashboard',
-  authenticate,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { period = '30d' } = req.query;
 
@@ -97,8 +96,8 @@ router.get(
 // Get engagement metrics
 router.get(
   '/engagement',
-  authenticate,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { period = '30d' } = req.query;
 
@@ -156,8 +155,8 @@ router.get(
 // Get audience insights
 router.get(
   '/audience',
-  authenticate,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const videos = await Video.findAll({
         where: { userId: req.userId, status: VideoStatus.READY },
@@ -200,8 +199,8 @@ router.get(
 // Get AI performance insights
 router.get(
   '/ai-insights',
-  authenticate,
-  async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  authenticate as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const videos = await Video.findAll({
         where: {
