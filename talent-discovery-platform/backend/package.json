@@ -17,6 +17,7 @@
     "seed": "sequelize-cli db:seed:all",
     "seed:undo": "sequelize-cli db:seed:undo:all",
     "seed:categories": "ts-node src/scripts/seedCategories.ts",
+    "db:add-user-columns": "ts-node src/scripts/addUserColumns.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint src/**/*.ts",
