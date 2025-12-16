@@ -4,8 +4,40 @@ import { validate } from '../middleware/validate';
 import { authenticate } from '../middleware/auth';
 import { User } from '../models';
 import { cacheDelete } from '../config/redis';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
 const router = Router();
+
+// Configure multer for profile image uploads
+const uploadDir = path.join(process.cwd(), 'uploads', 'profiles');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const profileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `profile-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+const profileUpload = multer({
+  storage: profileStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.'));
+    }
+  }
+});
 
 // Get current user's profile
 router.get('/me', authenticate as RequestHandler, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -54,27 +86,48 @@ router.put(
   }
 );
 
-// Update profile image
+// Update profile image (file upload)
 router.put(
   '/me/image',
   authenticate as RequestHandler,
-  validate([
-    body('profileImageUrl').notEmpty().isURL().withMessage('Valid image URL required')
-  ]),
+  profileUpload.single('image'),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = req.user!;
-      const { profileImageUrl } = req.body;
 
-      await user.update({ profileImageUrl });
+      // Handle file upload
+      if (req.file) {
+        const imageUrl = `/uploads/profiles/${req.file.filename}`;
+        await user.update({ avatarUrl: imageUrl });
 
-      // Clear cache
-      await cacheDelete(`user:${user.id}`);
+        // Clear cache
+        await cacheDelete(`user:${user.id}`);
 
-      res.json({
-        message: 'Profile image updated',
-        profileImageUrl
-      });
+        res.json({
+          message: 'Profile image updated',
+          avatarUrl: imageUrl
+        });
+        return;
+      }
+
+      // Handle URL in body (legacy support)
+      const { profileImageUrl, avatarUrl } = req.body;
+      const newUrl = profileImageUrl || avatarUrl;
+
+      if (newUrl) {
+        await user.update({ avatarUrl: newUrl });
+
+        // Clear cache
+        await cacheDelete(`user:${user.id}`);
+
+        res.json({
+          message: 'Profile image updated',
+          avatarUrl: newUrl
+        });
+        return;
+      }
+
+      res.status(400).json({ error: 'No image file or URL provided' });
     } catch (error) {
       next(error);
     }
