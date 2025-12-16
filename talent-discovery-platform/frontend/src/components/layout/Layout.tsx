@@ -168,7 +168,7 @@ const Layout: React.FC = () => {
                             </Link>
                           )}
                         </Menu.Item>
-                        {user?.role === 'agent' && (
+                        {(user?.role === 'agent' || user?.role === 'admin' || user?.role === 'moderator') && (
                           <Menu.Item>
                             {({ active }) => (
                               <Link

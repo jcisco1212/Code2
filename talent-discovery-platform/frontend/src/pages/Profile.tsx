@@ -144,7 +144,7 @@ const Profile: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center dark:bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
       </div>
     );
@@ -152,9 +152,9 @@ const Profile: React.FC = () => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center dark:bg-gray-900">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Profile not found</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Profile not found</h1>
           <Link to="/" className="text-indigo-600 hover:underline mt-4 block">Go home</Link>
         </div>
       </div>
@@ -162,7 +162,7 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Hero Banner Section */}
       <div className="relative">
         {/* Banner Image */}
@@ -186,11 +186,11 @@ const Profile: React.FC = () => {
         {/* Profile Info Overlay */}
         <div className="max-w-6xl mx-auto px-4">
           <div className="relative -mt-24 md:-mt-32 pb-6">
-            <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8">
               <div className="flex flex-col md:flex-row md:items-end gap-6">
                 {/* Avatar */}
                 <div className="flex-shrink-0 -mt-20 md:-mt-24">
-                  <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gradient-to-br from-indigo-400 to-purple-500">
+                  <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white dark:border-gray-800 shadow-lg overflow-hidden bg-gradient-to-br from-indigo-400 to-purple-500">
                     {profile.avatarUrl ? (
                       <img
                         src={profile.avatarUrl}
@@ -210,7 +210,7 @@ const Profile: React.FC = () => {
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-3">
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
                           {profile.displayName || profile.username}
                         </h1>
                         {profile.isVerified && (
@@ -219,12 +219,12 @@ const Profile: React.FC = () => {
                           </span>
                         )}
                         {profile.role === 'creator' && (
-                          <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+                          <span className="bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full text-xs font-semibold">
                             Creator
                           </span>
                         )}
                       </div>
-                      <p className="text-gray-500 mt-1">@{profile.username}</p>
+                      <p className="text-gray-500 dark:text-gray-400 mt-1">@{profile.username}</p>
                     </div>
 
                     {/* Action Buttons */}
@@ -232,7 +232,7 @@ const Profile: React.FC = () => {
                       {isOwnProfile ? (
                         <Link
                           to="/settings"
-                          className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors"
+                          className="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                         >
                           Edit Profile
                         </Link>
@@ -242,13 +242,13 @@ const Profile: React.FC = () => {
                             onClick={handleFollow}
                             className={`px-6 py-2.5 rounded-full font-medium transition-colors ${
                               following
-                                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
                                 : 'bg-indigo-600 text-white hover:bg-indigo-700'
                             }`}
                           >
                             {following ? 'Following' : 'Follow'}
                           </button>
-                          <button className="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors">
+                          <button className="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                             Message
                           </button>
                         </>
@@ -259,16 +259,16 @@ const Profile: React.FC = () => {
                   {/* Stats */}
                   <div className="flex gap-6 mt-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-gray-900">{formatNumber(profile.videoCount)}</div>
-                      <div className="text-sm text-gray-500">Videos</div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">{formatNumber(profile.videoCount)}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">Videos</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-gray-900">{formatNumber(profile.followersCount)}</div>
-                      <div className="text-sm text-gray-500">Followers</div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">{formatNumber(profile.followersCount)}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">Followers</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-gray-900">{formatNumber(profile.followingCount)}</div>
-                      <div className="text-sm text-gray-500">Following</div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">{formatNumber(profile.followingCount)}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">Following</div>
                     </div>
                   </div>
                 </div>
@@ -276,13 +276,13 @@ const Profile: React.FC = () => {
 
               {/* Bio */}
               {profile.bio && (
-                <div className="mt-6 pt-6 border-t border-gray-100">
-                  <p className="text-gray-700 whitespace-pre-wrap">{profile.bio}</p>
+                <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{profile.bio}</p>
                 </div>
               )}
 
               {/* Member Since */}
-              <div className="mt-4 text-sm text-gray-400">
+              <div className="mt-4 text-sm text-gray-400 dark:text-gray-500">
                 Member since {formatDate(profile.createdAt)}
               </div>
             </div>
@@ -292,16 +292,16 @@ const Profile: React.FC = () => {
 
       {/* Content Tabs */}
       <div className="max-w-6xl mx-auto px-4 mt-6">
-        <div className="bg-white rounded-xl shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
           {/* Tab Navigation */}
-          <div className="border-b border-gray-200">
+          <div className="border-b border-gray-200 dark:border-gray-700">
             <nav className="flex gap-8 px-6" aria-label="Tabs">
               <button
                 onClick={() => setActiveTab('videos')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === 'videos'
                     ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
                 }`}
               >
                 Videos
@@ -311,7 +311,7 @@ const Profile: React.FC = () => {
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === 'about'
                     ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
                 }`}
               >
                 About
@@ -330,8 +330,8 @@ const Profile: React.FC = () => {
                 ) : videos.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="text-6xl mb-4">🎬</div>
-                    <h3 className="text-xl font-semibold text-gray-900">No videos yet</h3>
-                    <p className="text-gray-500 mt-2">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">No videos yet</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mt-2">
                       {isOwnProfile
                         ? "You haven't uploaded any videos yet"
                         : "This creator hasn't uploaded any videos yet"}
@@ -353,7 +353,7 @@ const Profile: React.FC = () => {
                         to={`/video/${video.id}`}
                         className="group"
                       >
-                        <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden relative">
+                        <div className="aspect-video bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden relative">
                           {video.thumbnailUrl ? (
                             <img
                               src={video.thumbnailUrl}
@@ -361,7 +361,7 @@ const Profile: React.FC = () => {
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700">
                               <span className="text-4xl">🎥</span>
                             </div>
                           )}
@@ -371,10 +371,10 @@ const Profile: React.FC = () => {
                             </span>
                           )}
                         </div>
-                        <h3 className="mt-2 font-medium text-gray-900 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                        <h3 className="mt-2 font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-indigo-600 transition-colors">
                           {video.title}
                         </h3>
-                        <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                        <div className="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
                           <span>{formatNumber(video.viewsCount)} views</span>
                           <span>-</span>
                           <span>{formatNumber(video.likesCount)} likes</span>
@@ -388,12 +388,12 @@ const Profile: React.FC = () => {
 
             {activeTab === 'about' && (
               <div className="max-w-3xl">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">About</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">About</h3>
 
                 {/* Bio Section */}
                 <div className="mb-8">
-                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">Bio</h4>
-                  <p className="text-gray-700 whitespace-pre-wrap">
+                  <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Bio</h4>
+                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
                     {profile.bio || 'No bio yet.'}
                   </p>
                 </div>
@@ -401,18 +401,18 @@ const Profile: React.FC = () => {
                 {/* Details Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">Details</h4>
+                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Details</h4>
                     <ul className="space-y-3">
-                      <li className="flex items-center gap-3 text-gray-700">
+                      <li className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                         <span className="text-gray-400">📅</span>
                         Joined {formatDate(profile.createdAt)}
                       </li>
-                      <li className="flex items-center gap-3 text-gray-700">
+                      <li className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                         <span className="text-gray-400">🎭</span>
                         {profile.role.charAt(0).toUpperCase() + profile.role.slice(1)}
                       </li>
                       {profile.isVerified && (
-                        <li className="flex items-center gap-3 text-gray-700">
+                        <li className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                           <span className="text-blue-500">✓</span>
                           Verified Account
                         </li>
@@ -421,17 +421,17 @@ const Profile: React.FC = () => {
                   </div>
 
                   <div>
-                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">Stats</h4>
+                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Stats</h4>
                     <ul className="space-y-3">
-                      <li className="flex items-center gap-3 text-gray-700">
+                      <li className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                         <span className="text-gray-400">🎬</span>
                         {profile.videoCount} videos uploaded
                       </li>
-                      <li className="flex items-center gap-3 text-gray-700">
+                      <li className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                         <span className="text-gray-400">👥</span>
                         {formatNumber(profile.followersCount)} followers
                       </li>
-                      <li className="flex items-center gap-3 text-gray-700">
+                      <li className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                         <span className="text-gray-400">👤</span>
                         Following {formatNumber(profile.followingCount)} creators
                       </li>
@@ -442,7 +442,7 @@ const Profile: React.FC = () => {
                 {/* Social Links Section */}
                 {profile.socialLinks && Object.values(profile.socialLinks).some(v => v) && (
                   <div className="mt-8">
-                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">Links & Profiles</h4>
+                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Links & Profiles</h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {profile.socialLinks.website && (
                         <a
@@ -560,9 +560,9 @@ const Profile: React.FC = () => {
 
                 {/* Contact Section for Creators */}
                 {profile.role === 'creator' && !isOwnProfile && (
-                  <div className="mt-8 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-2">Interested in working together?</h4>
-                    <p className="text-gray-600 mb-4">
+                  <div className="mt-8 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Interested in working together?</h4>
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">
                       Reach out to {profile.displayName || profile.username} for collaboration opportunities.
                     </p>
                     <button className="px-6 py-2.5 bg-indigo-600 text-white rounded-full font-medium hover:bg-indigo-700 transition-colors">

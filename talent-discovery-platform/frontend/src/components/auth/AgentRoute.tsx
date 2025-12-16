@@ -21,7 +21,9 @@ const AgentRoute: React.FC<AgentRouteProps> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (user?.role !== 'agent') {
+  // Allow agent, admin, and moderator roles to access agent routes
+  const allowedRoles = ['agent', 'admin', 'moderator'];
+  if (!user?.role || !allowedRoles.includes(user.role)) {
     return <Navigate to="/" replace />;
   }
 
