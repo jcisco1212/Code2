@@ -3,6 +3,14 @@ import { store } from '../store';
 import { setTokens, clearAuth } from '../store/slices/authSlice';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000/api/v1';
+export const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
+
+// Helper to get full URL for uploaded files
+export const getUploadUrl = (path: string | null | undefined): string | null => {
+  if (!path) return null;
+  if (path.startsWith('http')) return path; // Already absolute URL
+  return `${BACKEND_URL}${path}`;
+};
 
 const api = axios.create({
   baseURL: API_URL,

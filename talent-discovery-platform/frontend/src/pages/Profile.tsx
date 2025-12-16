@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { usersAPI, socialAPI } from '../services/api';
+import { usersAPI, socialAPI, getUploadUrl } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -193,7 +193,7 @@ const Profile: React.FC = () => {
                   <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white dark:border-gray-800 shadow-lg overflow-hidden bg-gradient-to-br from-indigo-400 to-purple-500">
                     {profile.avatarUrl ? (
                       <img
-                        src={profile.avatarUrl}
+                        src={getUploadUrl(profile.avatarUrl) || ''}
                         alt={profile.displayName || profile.username}
                         className="w-full h-full object-cover"
                       />
