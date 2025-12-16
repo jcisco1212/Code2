@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Video, Comment } from '../models';
+import { Video, Comment, CommentStatus } from '../models';
 import { logger } from '../utils/logger';
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:5000';
@@ -159,7 +159,7 @@ export async function analyzeComment(data: AnalyzeCommentData): Promise<void> {
     // Auto-hide if high troll confidence
     if (analysis.isTroll && analysis.trollConfidence > 0.8) {
       await Comment.update(
-        { status: 'flagged' },
+        { status: CommentStatus.FLAGGED },
         { where: { id: commentId } }
       );
       logger.info(`Comment ${commentId} auto-flagged as potential troll`);

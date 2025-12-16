@@ -39,9 +39,9 @@ router.post(
           // Remove like
           await existingLike.destroy();
           if (type === 'like') {
-            await video.decrement('likes');
+            await video.decrement('likesCount');
           } else {
-            await video.decrement('dislikes');
+            await video.decrement('dislikesCount');
           }
           res.json({ liked: false, type: null });
         } else {
@@ -50,11 +50,11 @@ router.post(
           await existingLike.update({ type });
 
           if (oldType === 'like') {
-            await video.decrement('likes');
-            await video.increment('dislikes');
+            await video.decrement('likesCount');
+            await video.increment('dislikesCount');
           } else {
-            await video.increment('likes');
-            await video.decrement('dislikes');
+            await video.increment('likesCount');
+            await video.decrement('dislikesCount');
           }
 
           res.json({ liked: true, type });
@@ -69,9 +69,9 @@ router.post(
         });
 
         if (type === 'like') {
-          await video.increment('likes');
+          await video.increment('likesCount');
         } else {
-          await video.increment('dislikes');
+          await video.increment('dislikesCount');
         }
 
         res.json({ liked: true, type });

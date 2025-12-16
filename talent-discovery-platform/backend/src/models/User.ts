@@ -35,6 +35,7 @@ interface UserAttributes {
   bannerUrl: string | null;
   location: string | null;
   socialLinks: SocialLinks | null;
+  agencyName: string | null;
   role: UserRole;
   isVerified: boolean;
   isActive: boolean;
@@ -51,7 +52,7 @@ interface UserAttributes {
 
 interface UserCreationAttributes extends Optional<UserAttributes,
   'id' | 'displayName' | 'firstName' | 'lastName' | 'bio' | 'avatarUrl' | 'bannerUrl' |
-  'location' | 'socialLinks' | 'role' | 'isVerified' | 'isActive' | 'twoFactorEnabled' |
+  'location' | 'socialLinks' | 'agencyName' | 'role' | 'isVerified' | 'isActive' | 'twoFactorEnabled' |
   'twoFactorSecret' | 'emailVerified' | 'emailVerificationToken' | 'passwordResetToken' |
   'passwordResetExpires' | 'lastLogin' | 'createdAt' | 'updatedAt'
 > {}
@@ -69,6 +70,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   declare bannerUrl: string | null;
   declare location: string | null;
   declare socialLinks: SocialLinks | null;
+  declare agencyName: string | null;
   declare role: UserRole;
   declare isVerified: boolean;
   declare isActive: boolean;
@@ -194,6 +196,11 @@ User.init(
       allowNull: true,
       defaultValue: null,
       field: 'social_links'
+    },
+    agencyName: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      field: 'agency_name'
     },
     role: {
       type: DataTypes.ENUM('user', 'creator', 'agent', 'admin'),

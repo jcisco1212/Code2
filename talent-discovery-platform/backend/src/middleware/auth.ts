@@ -154,6 +154,26 @@ export const requireAgent: RequestHandler = (
   next();
 };
 
+// Check if user is admin
+export const requireAdmin: RequestHandler = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  const authReq = req as AuthRequest;
+  if (!authReq.user) {
+    res.status(401).json({ error: 'Authentication required' });
+    return;
+  }
+
+  if (authReq.user.role !== UserRole.ADMIN) {
+    res.status(403).json({ error: 'Admin access required' });
+    return;
+  }
+
+  next();
+};
+
 // Check if user is admin or moderator
 export const requireModeratorOrAdmin: RequestHandler = (
   req: Request,
@@ -191,6 +211,7 @@ export default {
   requireRole,
   requireVerifiedEmail,
   requireAgent,
+  requireAdmin,
   requireModeratorOrAdmin,
   require2FA
 };

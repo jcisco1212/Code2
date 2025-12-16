@@ -4,9 +4,12 @@ import { sequelize } from '../config/database';
 export enum VideoStatus {
   PENDING = 'pending',
   PROCESSING = 'processing',
+  SCANNING = 'scanning',
+  TRANSCODING = 'transcoding',
   READY = 'ready',
   FAILED = 'failed',
-  DELETED = 'deleted'
+  DELETED = 'deleted',
+  REMOVED = 'removed'
 }
 
 export enum VideoVisibility {
@@ -22,7 +25,9 @@ interface VideoAttributes {
   title: string;
   description: string | null;
   originalFilename: string | null;
+  originalKey: string | null;
   s3Key: string | null;
+  hlsKey: string | null;
   hlsUrl: string | null;
   thumbnailUrl: string | null;
   duration: number | null;
@@ -33,6 +38,7 @@ interface VideoAttributes {
   visibility: VideoVisibility;
   viewsCount: number;
   likesCount: number;
+  dislikesCount: number;
   commentsCount: number;
   sharesCount: number;
   aiOverallScore: number | null;
@@ -41,23 +47,37 @@ interface VideoAttributes {
   aiExpressionScore: number | null;
   aiTimingScore: number | null;
   aiPresenceScore: number | null;
+  aiPerformanceScore: number | null;
+  aiQualityScore: number | null;
+  aiAnalysisStatus: string | null;
+  aiAnalysisError: string | null;
+  aiCategoryTags: string[] | null;
   discoverScore: number;
   trendingScore: number;
+  engagementScore: number;
+  watchTimeTotal: number;
+  watchTimeAverage: number;
   tags: string[];
   isFeatured: boolean;
+  featuredAt: Date | null;
   commentsEnabled: boolean;
+  moderationStatus: string | null;
+  moderationNotes: string | null;
   publishedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
 interface VideoCreationAttributes extends Optional<VideoAttributes,
-  'id' | 'categoryId' | 'description' | 'originalFilename' | 's3Key' | 'hlsUrl' |
-  'thumbnailUrl' | 'duration' | 'fileSize' | 'width' | 'height' | 'status' |
-  'visibility' | 'viewsCount' | 'likesCount' | 'commentsCount' | 'sharesCount' |
-  'aiOverallScore' | 'aiVocalScore' | 'aiMovementScore' | 'aiExpressionScore' |
-  'aiTimingScore' | 'aiPresenceScore' | 'discoverScore' | 'trendingScore' |
-  'tags' | 'isFeatured' | 'commentsEnabled' | 'publishedAt' | 'createdAt' | 'updatedAt'
+  'id' | 'categoryId' | 'description' | 'originalFilename' | 'originalKey' | 's3Key' |
+  'hlsKey' | 'hlsUrl' | 'thumbnailUrl' | 'duration' | 'fileSize' | 'width' | 'height' |
+  'status' | 'visibility' | 'viewsCount' | 'likesCount' | 'dislikesCount' | 'commentsCount' |
+  'sharesCount' | 'aiOverallScore' | 'aiVocalScore' | 'aiMovementScore' | 'aiExpressionScore' |
+  'aiTimingScore' | 'aiPresenceScore' | 'aiPerformanceScore' | 'aiQualityScore' |
+  'aiAnalysisStatus' | 'aiAnalysisError' | 'aiCategoryTags' | 'discoverScore' | 'trendingScore' |
+  'engagementScore' | 'watchTimeTotal' | 'watchTimeAverage' | 'tags' | 'isFeatured' |
+  'featuredAt' | 'commentsEnabled' | 'moderationStatus' | 'moderationNotes' | 'publishedAt' |
+  'createdAt' | 'updatedAt'
 > {}
 
 class Video extends Model<VideoAttributes, VideoCreationAttributes> implements VideoAttributes {
@@ -67,7 +87,9 @@ class Video extends Model<VideoAttributes, VideoCreationAttributes> implements V
   public title!: string;
   public description!: string | null;
   public originalFilename!: string | null;
+  public originalKey!: string | null;
   public s3Key!: string | null;
+  public hlsKey!: string | null;
   public hlsUrl!: string | null;
   public thumbnailUrl!: string | null;
   public duration!: number | null;
@@ -78,6 +100,7 @@ class Video extends Model<VideoAttributes, VideoCreationAttributes> implements V
   public visibility!: VideoVisibility;
   public viewsCount!: number;
   public likesCount!: number;
+  public dislikesCount!: number;
   public commentsCount!: number;
   public sharesCount!: number;
   public aiOverallScore!: number | null;
@@ -86,14 +109,31 @@ class Video extends Model<VideoAttributes, VideoCreationAttributes> implements V
   public aiExpressionScore!: number | null;
   public aiTimingScore!: number | null;
   public aiPresenceScore!: number | null;
+  public aiPerformanceScore!: number | null;
+  public aiQualityScore!: number | null;
+  public aiAnalysisStatus!: string | null;
+  public aiAnalysisError!: string | null;
+  public aiCategoryTags!: string[] | null;
   public discoverScore!: number;
   public trendingScore!: number;
+  public engagementScore!: number;
+  public watchTimeTotal!: number;
+  public watchTimeAverage!: number;
   public tags!: string[];
   public isFeatured!: boolean;
+  public featuredAt!: Date | null;
   public commentsEnabled!: boolean;
+  public moderationStatus!: string | null;
+  public moderationNotes!: string | null;
   public publishedAt!: Date | null;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  // Aliases for backward compatibility
+  public get views(): number { return this.viewsCount; }
+  public get likes(): number { return this.likesCount; }
+  public get dislikes(): number { return this.dislikesCount; }
+  public get commentCount(): number { return this.commentsCount; }
 
   // Calculate discover-me ranking score
   public calculateRankingScore(): number {
@@ -186,10 +226,20 @@ Video.init(
       allowNull: true,
       field: 'original_filename'
     },
+    originalKey: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      field: 'original_key'
+    },
     s3Key: {
       type: DataTypes.STRING(500),
       allowNull: true,
       field: 's3_key'
+    },
+    hlsKey: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      field: 'hls_key'
     },
     hlsUrl: {
       type: DataTypes.STRING(500),
@@ -219,7 +269,7 @@ Video.init(
       allowNull: true
     },
     status: {
-      type: DataTypes.ENUM('pending', 'processing', 'ready', 'failed', 'deleted'),
+      type: DataTypes.ENUM('pending', 'processing', 'scanning', 'transcoding', 'ready', 'failed', 'deleted', 'removed'),
       defaultValue: 'pending'
     },
     visibility: {
@@ -235,6 +285,11 @@ Video.init(
       type: DataTypes.INTEGER,
       defaultValue: 0,
       field: 'likes_count'
+    },
+    dislikesCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      field: 'dislikes_count'
     },
     commentsCount: {
       type: DataTypes.INTEGER,
@@ -276,6 +331,31 @@ Video.init(
       allowNull: true,
       field: 'ai_presence_score'
     },
+    aiPerformanceScore: {
+      type: DataTypes.DECIMAL(5, 2),
+      allowNull: true,
+      field: 'ai_performance_score'
+    },
+    aiQualityScore: {
+      type: DataTypes.DECIMAL(5, 2),
+      allowNull: true,
+      field: 'ai_quality_score'
+    },
+    aiAnalysisStatus: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      field: 'ai_analysis_status'
+    },
+    aiAnalysisError: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      field: 'ai_analysis_error'
+    },
+    aiCategoryTags: {
+      type: DataTypes.ARRAY(DataTypes.TEXT),
+      allowNull: true,
+      field: 'ai_category_tags'
+    },
     discoverScore: {
       type: DataTypes.DECIMAL(10, 2),
       defaultValue: 0,
@@ -286,6 +366,21 @@ Video.init(
       defaultValue: 0,
       field: 'trending_score'
     },
+    engagementScore: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0,
+      field: 'engagement_score'
+    },
+    watchTimeTotal: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      field: 'watch_time_total'
+    },
+    watchTimeAverage: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0,
+      field: 'watch_time_average'
+    },
     tags: {
       type: DataTypes.ARRAY(DataTypes.TEXT),
       defaultValue: []
@@ -295,10 +390,25 @@ Video.init(
       defaultValue: false,
       field: 'is_featured'
     },
+    featuredAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'featured_at'
+    },
     commentsEnabled: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
       field: 'comments_enabled'
+    },
+    moderationStatus: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      field: 'moderation_status'
+    },
+    moderationNotes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      field: 'moderation_notes'
     },
     publishedAt: {
       type: DataTypes.DATE,

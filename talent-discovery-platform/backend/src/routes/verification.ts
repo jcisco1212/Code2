@@ -320,13 +320,14 @@ router.post(
       const analysis = scamDetectionService.analyzeMessage(message, sender);
       const safetyTips = scamDetectionService.getSafetyTips(analysis);
 
+      const senderWithVerification = sender as any;
       res.json({
         analysis,
         safetyTips,
-        senderVerification: sender?.verification ? {
-          status: sender.verification.status,
-          badgeLevel: sender.verification.getBadgeLevel(),
-          trustScore: sender.verification.calculateTrustScore(),
+        senderVerification: senderWithVerification?.verification ? {
+          status: senderWithVerification.verification.status,
+          badgeLevel: senderWithVerification.verification.getBadgeLevel(),
+          trustScore: senderWithVerification.verification.calculateTrustScore(),
         } : null,
       });
     } catch (error) {

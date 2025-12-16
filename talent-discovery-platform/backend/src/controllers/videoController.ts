@@ -141,7 +141,10 @@ export const getStreamUrl = async (req: AuthRequest, res: Response, next: NextFu
     }
 
     // Generate signed URL for HLS manifest
-    const hlsKey = video.hlsKey || video.originalKey;
+    const hlsKey = video.hlsKey || video.s3Key || video.originalKey;
+    if (!hlsKey) {
+      throw new NotFoundError('Video file not available');
+    }
     const streamUrl = await generateDownloadUrl(hlsKey, 3600);
 
     res.json({ streamUrl });
@@ -274,7 +277,7 @@ export const recordView = async (req: AuthRequest, res: Response, next: NextFunc
       });
 
       // Increment view count
-      await video.increment('views');
+      await video.increment('viewsCount');
     }
 
     res.json({ success: true });

@@ -11,10 +11,10 @@ const auth = authenticate as RequestHandler;
 const optAuth = optionalAuth as RequestHandler;
 
 // Get trending videos
-router.get('/trending', optAuth, videoController.getTrendingVideos);
+router.get('/trending', optAuth, videoController.getTrendingVideos as RequestHandler);
 
 // Get featured videos
-router.get('/featured', optAuth, videoController.getFeaturedVideos);
+router.get('/featured', optAuth, videoController.getFeaturedVideos as RequestHandler);
 
 // Get videos by category
 router.get(
@@ -23,7 +23,7 @@ router.get(
   validate([
     param('categoryId').isUUID().withMessage('Valid category ID required')
   ]),
-  videoController.getVideosByCategory
+  videoController.getVideosByCategory as RequestHandler
 );
 
 // Search videos
@@ -33,11 +33,11 @@ router.get(
   validate([
     query('q').notEmpty().withMessage('Search query required')
   ]),
-  videoController.searchVideos
+  videoController.searchVideos as RequestHandler
 );
 
 // Get all videos (with filters)
-router.get('/', optAuth, videoController.getVideos);
+router.get('/', optAuth, videoController.getVideos as RequestHandler);
 
 // Get single video
 router.get(
@@ -46,7 +46,7 @@ router.get(
   validate([
     param('id').isUUID().withMessage('Valid video ID required')
   ]),
-  videoController.getVideo
+  videoController.getVideo as RequestHandler
 );
 
 // Get video streaming URL
@@ -56,7 +56,7 @@ router.get(
   validate([
     param('id').isUUID().withMessage('Valid video ID required')
   ]),
-  videoController.getStreamUrl
+  videoController.getStreamUrl as RequestHandler
 );
 
 // Create video (metadata only - actual upload via presigned URL)
@@ -71,7 +71,7 @@ router.post(
     body('visibility').optional().isIn(['public', 'unlisted', 'private']).withMessage('Invalid visibility'),
     body('commentsEnabled').optional().isBoolean().withMessage('commentsEnabled must be boolean')
   ]),
-  videoController.createVideo
+  videoController.createVideo as RequestHandler
 );
 
 // Update video
@@ -87,7 +87,7 @@ router.put(
     body('visibility').optional().isIn(['public', 'unlisted', 'private']).withMessage('Invalid visibility'),
     body('commentsEnabled').optional().isBoolean().withMessage('commentsEnabled must be boolean')
   ]),
-  videoController.updateVideo
+  videoController.updateVideo as RequestHandler
 );
 
 // Delete video
@@ -97,7 +97,7 @@ router.delete(
   validate([
     param('id').isUUID().withMessage('Valid video ID required')
   ]),
-  videoController.deleteVideo
+  videoController.deleteVideo as RequestHandler
 );
 
 // Record view
@@ -109,7 +109,7 @@ router.post(
     body('watchTime').optional().isInt({ min: 0 }).withMessage('Watch time must be positive integer'),
     body('sessionId').notEmpty().withMessage('Session ID required')
   ]),
-  videoController.recordView
+  videoController.recordView as RequestHandler
 );
 
 // Get video analytics (owner only)
@@ -119,7 +119,7 @@ router.get(
   validate([
     param('id').isUUID().withMessage('Valid video ID required')
   ]),
-  videoController.getVideoAnalytics
+  videoController.getVideoAnalytics as RequestHandler
 );
 
 // Get AI analysis results
@@ -129,7 +129,7 @@ router.get(
   validate([
     param('id').isUUID().withMessage('Valid video ID required')
   ]),
-  videoController.getAIAnalysis
+  videoController.getAIAnalysis as RequestHandler
 );
 
 // Request AI re-analysis
@@ -139,7 +139,7 @@ router.post(
   validate([
     param('id').isUUID().withMessage('Valid video ID required')
   ]),
-  videoController.requestReanalysis
+  videoController.requestReanalysis as RequestHandler
 );
 
 export default router;

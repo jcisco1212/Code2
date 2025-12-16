@@ -152,7 +152,7 @@ router.post(
       });
 
       // Update comment count on video
-      await video.increment('commentCount');
+      await video.increment('commentsCount');
 
       // Update reply count on parent
       if (parentId) {
@@ -244,7 +244,7 @@ router.delete(
       await comment.update({ status: CommentStatus.DELETED });
 
       // Update comment count
-      await Video.decrement('commentCount', { where: { id: comment.videoId } });
+      await Video.decrement('commentsCount', { where: { id: comment.videoId } });
 
       // Update parent reply count
       if (comment.parentId) {
