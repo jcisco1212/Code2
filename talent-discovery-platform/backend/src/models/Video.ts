@@ -45,6 +45,7 @@ interface VideoAttributes {
   trendingScore: number;
   tags: string[];
   isFeatured: boolean;
+  commentsEnabled: boolean;
   publishedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -56,7 +57,7 @@ interface VideoCreationAttributes extends Optional<VideoAttributes,
   'visibility' | 'viewsCount' | 'likesCount' | 'commentsCount' | 'sharesCount' |
   'aiOverallScore' | 'aiVocalScore' | 'aiMovementScore' | 'aiExpressionScore' |
   'aiTimingScore' | 'aiPresenceScore' | 'discoverScore' | 'trendingScore' |
-  'tags' | 'isFeatured' | 'publishedAt' | 'createdAt' | 'updatedAt'
+  'tags' | 'isFeatured' | 'commentsEnabled' | 'publishedAt' | 'createdAt' | 'updatedAt'
 > {}
 
 class Video extends Model<VideoAttributes, VideoCreationAttributes> implements VideoAttributes {
@@ -89,6 +90,7 @@ class Video extends Model<VideoAttributes, VideoCreationAttributes> implements V
   public trendingScore!: number;
   public tags!: string[];
   public isFeatured!: boolean;
+  public commentsEnabled!: boolean;
   public publishedAt!: Date | null;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -138,6 +140,7 @@ class Video extends Model<VideoAttributes, VideoCreationAttributes> implements V
       aiPresenceScore: this.aiPresenceScore,
       tags: this.tags,
       isFeatured: this.isFeatured,
+      commentsEnabled: this.commentsEnabled,
       publishedAt: this.publishedAt,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
@@ -291,6 +294,11 @@ Video.init(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
       field: 'is_featured'
+    },
+    commentsEnabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+      field: 'comments_enabled'
     },
     publishedAt: {
       type: DataTypes.DATE,

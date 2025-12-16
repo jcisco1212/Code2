@@ -342,4 +342,63 @@ router.post(
   }
 );
 
+// ===========================================
+// Direct Profile Image Upload (for development without S3)
+// ===========================================
+
+// Configure multer for profile image uploads
+const profileImageStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const authReq = req;
+    const userDir = path.join(UPLOADS_DIR, 'profiles', authReq.userId || 'anonymous');
+    if (!fs.existsSync(userDir)) fs.mkdirSync(userDir, { recursive: true });
+    cb(null, userDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `avatar${ext}`);
+  }
+});
+
+const profileImageUpload = multer({
+  storage: profileImageStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Allowed: JPG, PNG, WebP'));
+    }
+  }
+});
+
+// Direct profile image upload - stores files locally
+router.post(
+  '/profile-image/direct',
+  authenticate as RequestHandler,
+  profileImageUpload.single('image'),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.file) {
+        throw new BadRequestError('No image file uploaded');
+      }
+
+      // Generate a local URL for the image
+      const localKey = `profiles/${req.userId}/avatar${path.extname(req.file.originalname)}`;
+      const imageUrl = `/uploads/${localKey}`;
+
+      logger.info(`Profile image uploaded for user ${req.userId}`);
+
+      res.json({
+        message: 'Profile image uploaded successfully',
+        imageUrl,
+        key: localKey
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 export default router;

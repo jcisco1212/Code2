@@ -176,6 +176,14 @@ export const uploadAPI = {
         }
       }
     });
+  },
+  // Direct profile image upload for development without S3
+  directProfileImageUpload: (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    return api.post('/upload/profile-image/direct', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
   }
 };
 

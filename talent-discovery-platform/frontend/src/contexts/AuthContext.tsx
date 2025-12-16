@@ -18,6 +18,7 @@ interface AuthContextType {
   register: (data: { email: string; username: string; password: string; firstName: string; lastName: string }) => Promise<any>;
   logout: () => Promise<void>;
   clearAuthError: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -58,6 +59,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch(clearError());
   };
 
+  const refreshUser = async () => {
+    await dispatch(getCurrentUser());
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -68,7 +73,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
-        clearAuthError
+        clearAuthError,
+        refreshUser
       }}
     >
       {children}

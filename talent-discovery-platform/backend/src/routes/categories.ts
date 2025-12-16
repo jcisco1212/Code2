@@ -29,19 +29,33 @@ router.get('/', async (req: Request, res: Response, next: NextFunction): Promise
       where.isTalentType = true;
     }
 
+    // Don't include subcategories in query to avoid circular reference issues
     const categories = await Category.findAll({
       where,
-      include: [
-        { model: Category, as: 'subcategories', required: false }
-      ],
       order: [['sortOrder', 'ASC'], ['name', 'ASC']]
     });
 
+    // Convert to plain objects first
+    const plainCategories = categories.map(c => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      description: c.description,
+      parentId: c.parentId,
+      icon: c.icon,
+      iconUrl: c.iconUrl,
+      color: c.color,
+      sortOrder: c.sortOrder,
+      isActive: c.isActive,
+      isTalentType: c.isTalentType,
+      createdAt: c.createdAt
+    }));
+
     // Build tree structure
-    const rootCategories = categories.filter(c => !c.parentId);
-    const buildTree = (cat: Category): any => ({
-      ...cat.toJSON(),
-      subcategories: categories
+    const rootCategories = plainCategories.filter(c => !c.parentId);
+    const buildTree = (cat: any): any => ({
+      ...cat,
+      subcategories: plainCategories
         .filter(c => c.parentId === cat.id)
         .map(buildTree)
     });

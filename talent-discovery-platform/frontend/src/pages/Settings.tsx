@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { profileAPI } from '../services/api';
+import { profileAPI, uploadAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import {
   UserCircleIcon,
@@ -16,10 +16,11 @@ import {
 type SettingsTab = 'profile' | 'account' | 'notifications' | 'privacy' | 'appearance' | 'links';
 
 const Settings: React.FC = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
@@ -108,6 +109,49 @@ const Settings: React.FC = () => {
       }
     }
   }, [user]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Invalid file type. Please use JPG, PNG, or WebP.');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File too large. Maximum size is 5MB.');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      // Upload the image
+      const uploadResponse = await uploadAPI.directProfileImageUpload(file);
+      const imageUrl = uploadResponse.data.imageUrl;
+
+      // Update the user's profile with the new image URL
+      await profileAPI.updateProfileImage(imageUrl);
+
+      // Refresh user data to show new avatar
+      if (refreshUser) {
+        await refreshUser();
+      }
+
+      toast.success('Profile picture updated!');
+    } catch (err: any) {
+      toast.error(err.response?.data?.error?.message || 'Failed to upload profile picture');
+    } finally {
+      setUploadingAvatar(false);
+      // Reset the input so the same file can be selected again
+      if (avatarInputRef.current) {
+        avatarInputRef.current.value = '';
+      }
+    }
+  };
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -234,8 +278,10 @@ const Settings: React.FC = () => {
                 <div className="flex items-center gap-6">
                   <div className="relative">
                     <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center overflow-hidden">
-                      {user?.avatarUrl ? (
-                        <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                      {uploadingAvatar ? (
+                        <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
+                      ) : user?.profileImageUrl ? (
+                        <img src={user.profileImageUrl} alt="Avatar" className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-3xl text-white font-bold">
                           {(user?.displayName || user?.username || 'U').charAt(0).toUpperCase()}
@@ -245,11 +291,18 @@ const Settings: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => avatarInputRef.current?.click()}
-                      className="absolute bottom-0 right-0 p-1.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700"
+                      disabled={uploadingAvatar}
+                      className="absolute bottom-0 right-0 p-1.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:opacity-50"
                     >
                       <CameraIcon className="w-4 h-4" />
                     </button>
-                    <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" />
+                    <input
+                      ref={avatarInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                    />
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900 dark:text-white">Profile Photo</h3>
