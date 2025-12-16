@@ -153,7 +153,7 @@ const Upload: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6 text-gray-900">Upload Video</h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Upload Video</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* File Drop Zone */}
@@ -164,10 +164,10 @@ const Upload: React.FC = () => {
           onClick={() => fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-colors ${
             dragOver
-              ? 'border-indigo-500 bg-indigo-50'
+              ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
               : selectedFile
-                ? 'border-green-500 bg-green-50'
-                : 'border-gray-300 hover:border-indigo-400'
+                ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
+                : 'border-gray-300 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500 dark:bg-gray-800'
           }`}
         >
           <input
@@ -181,8 +181,8 @@ const Upload: React.FC = () => {
           {selectedFile ? (
             <div>
               <div className="text-4xl mb-2">🎬</div>
-              <p className="text-lg font-medium text-gray-900">{selectedFile.name}</p>
-              <p className="text-gray-600">{formatFileSize(selectedFile.size)}</p>
+              <p className="text-lg font-medium text-gray-900 dark:text-white">{selectedFile.name}</p>
+              <p className="text-gray-600 dark:text-gray-400">{formatFileSize(selectedFile.size)}</p>
               <button
                 type="button"
                 onClick={(e) => {
@@ -197,19 +197,19 @@ const Upload: React.FC = () => {
           ) : (
             <div>
               <div className="text-4xl mb-2">📤</div>
-              <p className="text-gray-700">Drag and drop your video here</p>
-              <p className="text-gray-500 text-sm">or click to browse</p>
-              <p className="text-gray-400 text-xs mt-2">MP4, MOV, AVI, WebM up to 500MB</p>
+              <p className="text-gray-700 dark:text-gray-300">Drag and drop your video here</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">or click to browse</p>
+              <p className="text-gray-400 dark:text-gray-500 text-xs mt-2">MP4, MOV, AVI, WebM up to 500MB</p>
             </div>
           )}
         </div>
 
         {/* Video Details */}
-        <div className="bg-white rounded-lg shadow p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Video Details</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Video Details</h2>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Title *
             </label>
             <input
@@ -219,13 +219,13 @@ const Upload: React.FC = () => {
               onChange={handleInputChange}
               placeholder="Enter video title"
               maxLength={255}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder-gray-500"
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Description
             </label>
             <textarea
@@ -235,20 +235,20 @@ const Upload: React.FC = () => {
               placeholder="Describe your video..."
               rows={4}
               maxLength={5000}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder-gray-500"
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Category
               </label>
               <select
                 name="categoryId"
                 value={formData.categoryId}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-white dark:bg-gray-700"
               >
                 <option value="">Select a category</option>
                 {categories.map(cat => (
@@ -260,14 +260,14 @@ const Upload: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Visibility
               </label>
               <select
                 name="visibility"
                 value={formData.visibility}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900"
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-white dark:bg-gray-700"
               >
                 <option value="public">Public</option>
                 <option value="unlisted">Unlisted</option>
@@ -277,7 +277,7 @@ const Upload: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Tags
             </label>
             <input
@@ -286,9 +286,9 @@ const Upload: React.FC = () => {
               value={formData.tags}
               onChange={handleInputChange}
               placeholder="Enter tags separated by commas"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder-gray-500"
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400"
             />
-            <p className="text-xs text-gray-500 mt-1">Separate multiple tags with commas</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Separate multiple tags with commas</p>
           </div>
 
           <div className="flex items-center">
@@ -298,9 +298,9 @@ const Upload: React.FC = () => {
               name="commentsEnabled"
               checked={formData.commentsEnabled}
               onChange={handleInputChange}
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
             />
-            <label htmlFor="commentsEnabled" className="ml-2 text-sm text-gray-700">
+            <label htmlFor="commentsEnabled" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
               Allow comments on this video
             </label>
           </div>
@@ -308,12 +308,12 @@ const Upload: React.FC = () => {
 
         {/* Upload Progress */}
         {uploading && (
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">{uploadStage}</span>
-              <span className="text-sm text-gray-500">{uploadProgress}%</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{uploadStage}</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">{uploadProgress}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
               <div
                 className="bg-indigo-600 h-3 rounded-full transition-all duration-300"
                 style={{ width: `${uploadProgress}%` }}

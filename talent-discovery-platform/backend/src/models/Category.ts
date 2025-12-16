@@ -8,14 +8,17 @@ interface CategoryAttributes {
   description: string | null;
   parentId: string | null;
   icon: string | null;
+  iconUrl: string | null;
+  color: string | null;
   sortOrder: number;
   isActive: boolean;
+  isTalentType: boolean;
   createdAt: Date;
 }
 
 interface CategoryCreationAttributes extends Optional<CategoryAttributes,
-  'id' | 'description' | 'parentId' | 'icon' | 'sortOrder' |
-  'isActive' | 'createdAt'
+  'id' | 'description' | 'parentId' | 'icon' | 'iconUrl' | 'color' | 'sortOrder' |
+  'isActive' | 'isTalentType' | 'createdAt'
 > {}
 
 class Category extends Model<CategoryAttributes, CategoryCreationAttributes> implements CategoryAttributes {
@@ -25,8 +28,11 @@ class Category extends Model<CategoryAttributes, CategoryCreationAttributes> imp
   public description!: string | null;
   public parentId!: string | null;
   public icon!: string | null;
+  public iconUrl!: string | null;
+  public color!: string | null;
   public sortOrder!: number;
   public isActive!: boolean;
+  public isTalentType!: boolean;
   public readonly createdAt!: Date;
 }
 
@@ -63,6 +69,15 @@ Category.init(
       type: DataTypes.STRING(50),
       allowNull: true
     },
+    iconUrl: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      field: 'icon_url'
+    },
+    color: {
+      type: DataTypes.STRING(20),
+      allowNull: true
+    },
     sortOrder: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
@@ -72,6 +87,11 @@ Category.init(
       type: DataTypes.BOOLEAN,
       defaultValue: true,
       field: 'is_active'
+    },
+    isTalentType: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+      field: 'is_talent_type'
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -87,6 +107,7 @@ Category.init(
       { fields: ['slug'], unique: true },
       { fields: ['parent_id'] },
       { fields: ['is_active'] },
+      { fields: ['is_talent_type'] },
       { fields: ['sort_order'] }
     ]
   }
