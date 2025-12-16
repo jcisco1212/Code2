@@ -1,10 +1,13 @@
-import { Router } from 'express';
+import { Router, RequestHandler } from 'express';
 import { body, query } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { authenticate, AuthRequest } from '../middleware/auth';
+import { authenticate } from '../middleware/auth';
 import * as authController from '../controllers/authController';
 
 const router = Router();
+
+// Cast middleware and handlers to RequestHandler to avoid TypeScript conflicts
+const auth = authenticate as RequestHandler;
 
 // Register new user
 router.post(
@@ -23,7 +26,7 @@ router.post(
     body('lastName').trim().isLength({ min: 1, max: 100 }).withMessage('Last name required'),
     body('role').optional().isIn(['user', 'creator', 'agent']).withMessage('Invalid role')
   ]),
-  authController.register
+  authController.register as RequestHandler
 );
 
 // Login
@@ -33,7 +36,7 @@ router.post(
     body('identifier').notEmpty().withMessage('Email or username required'),
     body('password').notEmpty().withMessage('Password required')
   ]),
-  authController.login
+  authController.login as RequestHandler
 );
 
 // Verify 2FA token
@@ -43,7 +46,7 @@ router.post(
     body('userId').isUUID().withMessage('Valid user ID required'),
     body('token').isLength({ min: 6, max: 6 }).withMessage('6-digit token required')
   ]),
-  authController.verify2FA
+  authController.verify2FA as RequestHandler
 );
 
 // Refresh access token
@@ -52,14 +55,14 @@ router.post(
   validate([
     body('refreshToken').notEmpty().withMessage('Refresh token required')
   ]),
-  authController.refreshToken
+  authController.refreshToken as RequestHandler
 );
 
 // Logout
-router.post('/logout', authenticate, authController.logout);
+router.post('/logout', auth, authController.logout as RequestHandler);
 
 // Request email verification
-router.post('/resend-verification', authenticate, authController.resendVerification);
+router.post('/resend-verification', auth, authController.resendVerification as RequestHandler);
 
 // Verify email with token
 router.get(
@@ -67,7 +70,7 @@ router.get(
   validate([
     query('token').notEmpty().withMessage('Verification token required')
   ]),
-  authController.verifyEmail
+  authController.verifyEmail as RequestHandler
 );
 
 // Request password reset
@@ -76,7 +79,7 @@ router.post(
   validate([
     body('email').isEmail().normalizeEmail().withMessage('Valid email required')
   ]),
-  authController.forgotPassword
+  authController.forgotPassword as RequestHandler
 );
 
 // Reset password with token
@@ -89,37 +92,37 @@ router.post(
       .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
       .withMessage('Password must be 8+ chars with uppercase, lowercase, number, and special char')
   ]),
-  authController.resetPassword
+  authController.resetPassword as RequestHandler
 );
 
 // Enable 2FA - Step 1: Generate secret
-router.post('/2fa/enable', authenticate, authController.enable2FA);
+router.post('/2fa/enable', auth, authController.enable2FA as RequestHandler);
 
 // Enable 2FA - Step 2: Verify and confirm
 router.post(
   '/2fa/confirm',
-  authenticate,
+  auth,
   validate([
     body('token').isLength({ min: 6, max: 6 }).withMessage('6-digit token required')
   ]),
-  authController.confirm2FA
+  authController.confirm2FA as RequestHandler
 );
 
 // Disable 2FA
 router.post(
   '/2fa/disable',
-  authenticate,
+  auth,
   validate([
     body('password').notEmpty().withMessage('Password required'),
     body('token').isLength({ min: 6, max: 6 }).withMessage('6-digit token required')
   ]),
-  authController.disable2FA
+  authController.disable2FA as RequestHandler
 );
 
 // Change password
 router.post(
   '/change-password',
-  authenticate,
+  auth,
   validate([
     body('currentPassword').notEmpty().withMessage('Current password required'),
     body('newPassword')
@@ -127,10 +130,10 @@ router.post(
       .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
       .withMessage('Password must be 8+ chars with uppercase, lowercase, number, and special char')
   ]),
-  authController.changePassword
+  authController.changePassword as RequestHandler
 );
 
 // Get current user
-router.get('/me', authenticate, authController.getCurrentUser);
+router.get('/me', auth, authController.getCurrentUser as RequestHandler);
 
 export default router;

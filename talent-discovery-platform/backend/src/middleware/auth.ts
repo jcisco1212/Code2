@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import { User, UserRole } from '../models';
 import { logger } from '../utils/logger';
@@ -17,8 +17,8 @@ export interface JWTPayload {
 }
 
 // Authenticate JWT token
-export const authenticate = async (
-  req: AuthRequest,
+export const authenticate: RequestHandler = async (
+  req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -47,8 +47,8 @@ export const authenticate = async (
       return;
     }
 
-    req.user = user;
-    req.userId = user.id;
+    (req as AuthRequest).user = user;
+    (req as AuthRequest).userId = user.id;
     next();
   } catch (error: any) {
     if (error.name === 'TokenExpiredError') {
@@ -65,8 +65,8 @@ export const authenticate = async (
 };
 
 // Optional authentication (doesn't fail if no token)
-export const optionalAuth = async (
-  req: AuthRequest,
+export const optionalAuth: RequestHandler = async (
+  req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -85,8 +85,8 @@ export const optionalAuth = async (
     const user = await User.findByPk(decoded.userId);
 
     if (user && user.isActive) {
-      req.user = user;
-      req.userId = user.id;
+      (req as AuthRequest).user = user;
+      (req as AuthRequest).userId = user.id;
     }
 
     next();
@@ -97,14 +97,15 @@ export const optionalAuth = async (
 };
 
 // Check if user has required role
-export const requireRole = (...roles: UserRole[]) => {
-  return (req: AuthRequest, res: Response, next: NextFunction): void => {
-    if (!req.user) {
+export const requireRole = (...roles: UserRole[]): RequestHandler => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const authReq = req as AuthRequest;
+    if (!authReq.user) {
       res.status(401).json({ error: 'Authentication required' });
       return;
     }
 
-    if (!roles.includes(req.user.role)) {
+    if (!roles.includes(authReq.user.role)) {
       res.status(403).json({ error: 'Insufficient permissions' });
       return;
     }
@@ -114,17 +115,18 @@ export const requireRole = (...roles: UserRole[]) => {
 };
 
 // Check if email is verified
-export const requireVerifiedEmail = (
-  req: AuthRequest,
+export const requireVerifiedEmail: RequestHandler = (
+  req: Request,
   res: Response,
   next: NextFunction
 ): void => {
-  if (!req.user) {
+  const authReq = req as AuthRequest;
+  if (!authReq.user) {
     res.status(401).json({ error: 'Authentication required' });
     return;
   }
 
-  if (!req.user.emailVerified) {
+  if (!authReq.user.emailVerified) {
     res.status(403).json({ error: 'Email verification required' });
     return;
   }
@@ -133,17 +135,18 @@ export const requireVerifiedEmail = (
 };
 
 // Check if user is an agent
-export const requireAgent = (
-  req: AuthRequest,
+export const requireAgent: RequestHandler = (
+  req: Request,
   res: Response,
   next: NextFunction
 ): void => {
-  if (!req.user) {
+  const authReq = req as AuthRequest;
+  if (!authReq.user) {
     res.status(401).json({ error: 'Authentication required' });
     return;
   }
 
-  if (req.user.role !== UserRole.AGENT) {
+  if (authReq.user.role !== UserRole.AGENT) {
     res.status(403).json({ error: 'Agent access required' });
     return;
   }
@@ -152,17 +155,18 @@ export const requireAgent = (
 };
 
 // Check if user is admin or moderator
-export const requireModeratorOrAdmin = (
-  req: AuthRequest,
+export const requireModeratorOrAdmin: RequestHandler = (
+  req: Request,
   res: Response,
   next: NextFunction
 ): void => {
-  if (!req.user) {
+  const authReq = req as AuthRequest;
+  if (!authReq.user) {
     res.status(401).json({ error: 'Authentication required' });
     return;
   }
 
-  if (req.user.role !== UserRole.ADMIN) {
+  if (authReq.user.role !== UserRole.ADMIN) {
     res.status(403).json({ error: 'Admin access required' });
     return;
   }
@@ -171,8 +175,8 @@ export const requireModeratorOrAdmin = (
 };
 
 // Check if 2FA is complete (if enabled)
-export const require2FA = (
-  req: AuthRequest,
+export const require2FA: RequestHandler = (
+  req: Request,
   res: Response,
   next: NextFunction
 ): void => {
