@@ -130,12 +130,8 @@ const Settings: React.FC = () => {
 
     setUploadingAvatar(true);
     try {
-      // Upload the image
-      const uploadResponse = await uploadAPI.directProfileImageUpload(file);
-      const imageUrl = uploadResponse.data.imageUrl;
-
-      // Update the user's profile with the new image URL
-      await profileAPI.updateProfileImage(imageUrl);
+      // Upload the image - this also updates the user's avatarUrl
+      await uploadAPI.directProfileImageUpload(file);
 
       // Refresh user data to show new avatar
       if (refreshUser) {

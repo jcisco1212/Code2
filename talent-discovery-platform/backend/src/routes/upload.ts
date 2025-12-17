@@ -373,7 +373,7 @@ const profileImageUpload = multer({
   }
 });
 
-// Direct profile image upload - stores files locally
+// Direct profile image upload - stores files locally and updates user profile
 router.post(
   '/profile-image/direct',
   authenticate as RequestHandler,
@@ -388,11 +388,19 @@ router.post(
       const localKey = `profiles/${req.userId}/avatar${path.extname(req.file.originalname)}`;
       const imageUrl = `/uploads/${localKey}`;
 
+      // Update user's avatarUrl directly
+      const { User } = await import('../models');
+      const user = await User.findByPk(req.userId);
+      if (user) {
+        await user.update({ avatarUrl: imageUrl });
+      }
+
       logger.info(`Profile image uploaded for user ${req.userId}`);
 
       res.json({
         message: 'Profile image uploaded successfully',
         imageUrl,
+        avatarUrl: imageUrl,
         key: localKey
       });
     } catch (error) {
