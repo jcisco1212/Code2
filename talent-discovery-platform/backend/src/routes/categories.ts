@@ -51,16 +51,24 @@ router.get('/', async (req: Request, res: Response, next: NextFunction): Promise
       createdAt: c.createdAt
     }));
 
-    // Build tree structure
+    // Build tree structure with protection against circular references
     const rootCategories = plainCategories.filter(c => !c.parentId);
-    const buildTree = (cat: any): any => ({
-      ...cat,
-      subcategories: plainCategories
-        .filter(c => c.parentId === cat.id)
-        .map(buildTree)
-    });
+    const buildTree = (cat: any, visited: Set<string> = new Set()): any => {
+      // Prevent circular references
+      if (visited.has(cat.id)) {
+        return { ...cat, subcategories: [] };
+      }
+      visited.add(cat.id);
 
-    const tree = rootCategories.map(buildTree);
+      return {
+        ...cat,
+        subcategories: plainCategories
+          .filter(c => c.parentId === cat.id)
+          .map(c => buildTree(c, new Set(visited)))
+      };
+    };
+
+    const tree = rootCategories.map(c => buildTree(c));
 
     // Cache for 1 hour
     await cacheSet(cacheKey, tree, 3600);
