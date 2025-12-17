@@ -32,7 +32,7 @@ interface Video {
 }
 
 const Watch: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { videoId } = useParams<{ videoId: string }>();
   const [video, setVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,10 +40,10 @@ const Watch: React.FC = () => {
 
   useEffect(() => {
     const fetchVideo = async () => {
-      if (!id) return;
+      if (!videoId) return;
       try {
         setLoading(true);
-        const response = await videosAPI.getVideo(id);
+        const response = await videosAPI.getVideo(videoId);
         setVideo(response.data.video);
         setLiked(response.data.userLiked === true);
       } catch (err: any) {
@@ -54,7 +54,7 @@ const Watch: React.FC = () => {
       }
     };
     fetchVideo();
-  }, [id]);
+  }, [videoId]);
 
   const handleLike = async () => {
     if (!video) return;
