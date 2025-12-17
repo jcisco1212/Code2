@@ -158,7 +158,11 @@ export const videosAPI = {
   getAnalytics: (id: string) =>
     api.get(`/videos/${id}/analytics`),
   getAIAnalysis: (id: string) =>
-    api.get(`/videos/${id}/ai-analysis`)
+    api.get(`/videos/${id}/ai-analysis`),
+  likeVideo: (id: string) =>
+    api.post(`/likes/video/${id}`, { type: 'like' }),
+  unlikeVideo: (id: string) =>
+    api.post(`/likes/video/${id}`, { type: 'like' })
 };
 
 export const uploadAPI = {

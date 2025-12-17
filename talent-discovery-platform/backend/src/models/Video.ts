@@ -178,6 +178,7 @@ class Video extends Model<VideoAttributes, VideoCreationAttributes> implements V
       aiExpressionScore: this.aiExpressionScore,
       aiTimingScore: this.aiTimingScore,
       aiPresenceScore: this.aiPresenceScore,
+      aiPerformanceScore: this.aiPerformanceScore,
       tags: this.tags,
       isFeatured: this.isFeatured,
       commentsEnabled: this.commentsEnabled,

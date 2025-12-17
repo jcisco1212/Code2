@@ -27,10 +27,14 @@ interface VideoCardProps {
 }
 
 const VideoCard: React.FC<VideoCardProps> = ({ video, featured }) => {
-  // Handle both naming conventions from API
+  // Early return if video is null/undefined
+  if (!video) return null;
+
+  // Handle both naming conventions from API with safe defaults
   const views = video.views ?? video.viewsCount ?? 0;
   const likes = video.likes ?? video.likesCount ?? 0;
   const userAvatar = video.user?.profileImageUrl || video.user?.avatarUrl;
+  const userInitial = video.user?.firstName?.[0] || video.user?.username?.[0] || '?';
 
   const formatDuration = (seconds: number | null) => {
     if (!seconds) return '0:00';
@@ -46,7 +50,8 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, featured }) => {
     return count.toString();
   };
 
-  const timeAgo = (date: string) => {
+  const timeAgo = (date: string | undefined | null) => {
+    if (!date) return '';
     const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
     if (seconds < 60) return 'just now';
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
@@ -117,7 +122,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, featured }) => {
               />
             ) : (
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-medium">
-                {video.user.firstName?.[0] || '?'}
+                {userInitial}
               </div>
             )}
           </div>

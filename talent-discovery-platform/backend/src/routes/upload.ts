@@ -12,6 +12,7 @@ import { videoQueue } from '../jobs/videoQueue';
 import { NotFoundError, BadRequestError, ForbiddenError } from '../middleware/errorHandler';
 import { logger } from '../utils/logger';
 import rateLimit from 'express-rate-limit';
+import { cacheDelete } from '../config/redis';
 
 const router = Router();
 
@@ -324,6 +325,10 @@ router.post(
         status: VideoStatus.READY, // Mark as ready since we're not processing
         hlsUrl: videoUrl // Use the direct video URL for now
       });
+
+      // Clear trending cache so new videos appear immediately
+      await cacheDelete('trending:12');
+      await cacheDelete('trending:20');
 
       logger.info(`Video ${videoId} uploaded directly to local storage`);
 

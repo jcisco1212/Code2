@@ -308,7 +308,7 @@ export const getTrendingVideos = async (req: AuthRequest, res: Response, next: N
         { model: User, as: 'user', attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl'] },
         { model: Category, as: 'category', attributes: ['id', 'name', 'slug'] }
       ],
-      order: [['trendingScore', 'DESC']],
+      order: [['trendingScore', 'DESC'], ['createdAt', 'DESC']],
       limit: Number(limit)
     });
 
