@@ -162,7 +162,7 @@ export const createVideo = async (req: AuthRequest, res: Response, next: NextFun
       userId: req.userId!,
       title,
       description,
-      categoryId,
+      ...(categoryId && { categoryId }),
       tags: tags || [],
       visibility: visibility || VideoVisibility.PUBLIC,
       commentsEnabled: commentsEnabled !== false,

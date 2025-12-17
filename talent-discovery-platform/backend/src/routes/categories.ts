@@ -35,7 +35,7 @@ router.get('/', async (req: Request, res: Response, next: NextFunction): Promise
       order: [['sortOrder', 'ASC'], ['name', 'ASC']]
     });
 
-    // Convert to plain objects first
+    // Convert to plain objects - return flat list for simplicity
     const plainCategories = categories.map(c => ({
       id: c.id,
       name: c.name,
@@ -51,29 +51,10 @@ router.get('/', async (req: Request, res: Response, next: NextFunction): Promise
       createdAt: c.createdAt
     }));
 
-    // Build tree structure with protection against circular references
-    const rootCategories = plainCategories.filter(c => !c.parentId);
-    const buildTree = (cat: any, visited: Set<string> = new Set()): any => {
-      // Prevent circular references
-      if (visited.has(cat.id)) {
-        return { ...cat, subcategories: [] };
-      }
-      visited.add(cat.id);
-
-      return {
-        ...cat,
-        subcategories: plainCategories
-          .filter(c => c.parentId === cat.id)
-          .map(c => buildTree(c, new Set(visited)))
-      };
-    };
-
-    const tree = rootCategories.map(c => buildTree(c));
-
     // Cache for 1 hour
-    await cacheSet(cacheKey, tree, 3600);
+    await cacheSet(cacheKey, plainCategories, 3600);
 
-    res.json({ categories: tree });
+    res.json({ categories: plainCategories });
   } catch (error) {
     next(error);
   }
