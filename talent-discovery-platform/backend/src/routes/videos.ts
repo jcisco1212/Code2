@@ -66,7 +66,7 @@ router.post(
   validate([
     body('title').trim().isLength({ min: 1, max: 255 }).withMessage('Title required (1-255 chars)'),
     body('description').optional().trim().isLength({ max: 5000 }).withMessage('Description too long'),
-    body('categoryId').optional().isUUID().withMessage('Valid category ID required'),
+    body('categoryId').optional({ nullable: true, checkFalsy: true }).isUUID().withMessage('Valid category ID required'),
     body('tags').optional().isArray().withMessage('Tags must be an array'),
     body('visibility').optional().isIn(['public', 'unlisted', 'private']).withMessage('Invalid visibility'),
     body('commentsEnabled').optional().isBoolean().withMessage('commentsEnabled must be boolean')
@@ -82,7 +82,7 @@ router.put(
     param('id').isUUID().withMessage('Valid video ID required'),
     body('title').optional().trim().isLength({ min: 1, max: 255 }).withMessage('Title must be 1-255 chars'),
     body('description').optional().trim().isLength({ max: 5000 }).withMessage('Description too long'),
-    body('categoryId').optional().isUUID().withMessage('Valid category ID required'),
+    body('categoryId').optional({ nullable: true, checkFalsy: true }).isUUID().withMessage('Valid category ID required'),
     body('tags').optional().isArray().withMessage('Tags must be an array'),
     body('visibility').optional().isIn(['public', 'unlisted', 'private']).withMessage('Invalid visibility'),
     body('commentsEnabled').optional().isBoolean().withMessage('commentsEnabled must be boolean')

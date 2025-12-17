@@ -110,7 +110,7 @@ const Upload: React.FC = () => {
       const createResponse = await videosAPI.createVideo({
         title: formData.title,
         description: formData.description || undefined,
-        categoryId: formData.categoryId || null,
+        ...(formData.categoryId && { categoryId: formData.categoryId }),
         visibility: formData.visibility,
         tags: tagsArray,
         commentsEnabled: formData.commentsEnabled
