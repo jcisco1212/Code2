@@ -134,7 +134,7 @@ router.get(
           {
             model: User,
             as: 'follower',
-            attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl', 'bio']
+            attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl', 'bio']
           }
         ],
         order: [['createdAt', 'DESC']],
@@ -176,7 +176,7 @@ router.get(
           {
             model: User,
             as: 'following',
-            attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl', 'bio']
+            attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl', 'bio']
           }
         ],
         order: [['createdAt', 'DESC']],
@@ -227,7 +227,7 @@ router.get(
 
       const { count, rows } = await User.findAndCountAll({
         where,
-        attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl', 'bio', 'role', 'talentCategories'],
+        attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl', 'bio', 'role', 'talentCategories'],
         order: [['createdAt', 'DESC']],
         limit: Number(limit),
         offset

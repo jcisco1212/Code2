@@ -42,7 +42,7 @@ router.get(
           {
             model: User,
             as: 'user',
-            attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl']
+            attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl']
           }
         ],
         order: sortBy === 'likes'
@@ -90,7 +90,7 @@ router.get(
           {
             model: User,
             as: 'user',
-            attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl']
+            attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl']
           }
         ],
         order: [['createdAt', 'ASC']],
@@ -168,7 +168,7 @@ router.post(
           {
             model: User,
             as: 'user',
-            attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl']
+            attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl']
           }
         ]
       });

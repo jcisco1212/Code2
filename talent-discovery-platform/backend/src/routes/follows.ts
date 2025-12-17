@@ -181,7 +181,7 @@ router.get(
 
       const users = await User.findAll({
         where: { id: paginatedIds },
-        attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl']
+        attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl']
       });
 
       res.json({

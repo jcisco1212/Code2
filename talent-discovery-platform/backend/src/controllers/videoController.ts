@@ -52,7 +52,7 @@ export const getVideos = async (req: AuthRequest, res: Response, next: NextFunct
     const { count, rows } = await Video.findAndCountAll({
       where,
       include: [
-        { model: User, as: 'user', attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl'] },
+        { model: User, as: 'user', attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl'] },
         { model: Category, as: 'category', attributes: ['id', 'name', 'slug'] }
       ],
       order: [[sortField as string, order as string]],
@@ -81,7 +81,7 @@ export const getVideo = async (req: AuthRequest, res: Response, next: NextFuncti
 
     const video = await Video.findByPk(id, {
       include: [
-        { model: User, as: 'user', attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl', 'bio'] },
+        { model: User, as: 'user', attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl', 'bio'] },
         { model: Category, as: 'category', attributes: ['id', 'name', 'slug'] }
       ]
     });
@@ -305,7 +305,7 @@ export const getTrendingVideos = async (req: AuthRequest, res: Response, next: N
         visibility: VideoVisibility.PUBLIC
       },
       include: [
-        { model: User, as: 'user', attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl'] },
+        { model: User, as: 'user', attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl'] },
         { model: Category, as: 'category', attributes: ['id', 'name', 'slug'] }
       ],
       order: [['trendingScore', 'DESC']],
@@ -339,7 +339,7 @@ export const getFeaturedVideos = async (req: AuthRequest, res: Response, next: N
         featuredAt: { [Op.not]: null }
       },
       include: [
-        { model: User, as: 'user', attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl'] },
+        { model: User, as: 'user', attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl'] },
         { model: Category, as: 'category', attributes: ['id', 'name', 'slug'] }
       ],
       order: [['featuredAt', 'DESC']],
@@ -373,7 +373,7 @@ export const getVideosByCategory = async (req: AuthRequest, res: Response, next:
         visibility: VideoVisibility.PUBLIC
       },
       include: [
-        { model: User, as: 'user', attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl'] }
+        { model: User, as: 'user', attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl'] }
       ],
       order: [[sortBy as string, order as string]],
       limit: Number(limit),
@@ -428,7 +428,7 @@ export const searchVideos = async (req: AuthRequest, res: Response, next: NextFu
     const { count, rows } = await Video.findAndCountAll({
       where,
       include: [
-        { model: User, as: 'user', attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl'] },
+        { model: User, as: 'user', attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl'] },
         { model: Category, as: 'category', attributes: ['id', 'name', 'slug'] }
       ],
       order: orderClause,

@@ -63,7 +63,7 @@ router.get(
             model: User,
             as: 'user',
             where: userWhere,
-            attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl', 'bio', 'talentCategories', 'location', 'dateOfBirth']
+            attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl', 'bio', 'talentCategories', 'location', 'dateOfBirth']
           }
         ],
         order: [[sortField as string, 'DESC']],
@@ -137,7 +137,7 @@ router.get(
             where: {
               role: { [Op.in]: [UserRole.CREATOR, UserRole.USER] }
             },
-            attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl', 'bio', 'talentCategories', 'location']
+            attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl', 'bio', 'talentCategories', 'location']
           }
         ],
         order: [['aiPerformanceScore', 'DESC'], ['trendingScore', 'DESC']],
@@ -187,7 +187,7 @@ router.get(
           {
             model: User,
             as: 'user',
-            attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl', 'talentCategories']
+            attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl', 'talentCategories']
           }
         ],
         order: [
@@ -288,7 +288,7 @@ router.get(
           {
             model: User,
             as: 'talent',
-            attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl', 'bio', 'talentCategories', 'location']
+            attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl', 'bio', 'talentCategories', 'location']
           }
         ],
         order: [['createdAt', 'DESC']],
@@ -437,7 +437,7 @@ router.get(
               {
                 model: User,
                 as: 'user',
-                attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl']
+                attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl']
               }
             ],
             order: [['aiPerformanceScore', 'DESC']],

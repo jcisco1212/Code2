@@ -33,7 +33,7 @@ router.get(
             ]
           },
           include: [
-            { model: User, as: 'user', attributes: ['id', 'username', 'profileImageUrl'] }
+            { model: User, as: 'user', attributes: ['id', 'username', 'avatarUrl'] }
           ],
           order: [['views', 'DESC']],
           limit: Number(limit)
@@ -50,7 +50,7 @@ router.get(
               { lastName: { [Op.iLike]: `%${searchTerm}%` } }
             ]
           },
-          attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl', 'bio', 'talentCategories'],
+          attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl', 'bio', 'talentCategories'],
           limit: Number(limit)
         });
         results.users = users;

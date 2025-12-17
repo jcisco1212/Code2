@@ -49,7 +49,7 @@ router.get('/conversations', authenticate as RequestHandler, async (req: Request
           : lastMessage!.senderId;
 
         const otherUser = await User.findByPk(otherUserId, {
-          attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl', 'role', 'agencyName']
+          attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl', 'role', 'agencyName']
         });
 
         // Get unread count
@@ -109,7 +109,7 @@ router.get(
       const { count, rows } = await Message.findAndCountAll({
         where: { conversationId },
         include: [
-          { model: User, as: 'sender', attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl'] }
+          { model: User, as: 'sender', attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl'] }
         ],
         order: [['createdAt', 'DESC']],
         limit: Number(limit),
@@ -182,7 +182,7 @@ router.post(
 
       const messageWithSender = await Message.findByPk(message.id, {
         include: [
-          { model: User, as: 'sender', attributes: ['id', 'username', 'firstName', 'lastName', 'profileImageUrl'] }
+          { model: User, as: 'sender', attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl'] }
         ]
       });
 
