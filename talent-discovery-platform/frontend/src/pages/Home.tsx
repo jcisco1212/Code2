@@ -101,11 +101,16 @@ const Home: React.FC = () => {
         <h2 className="text-2xl font-bold mb-6">Browse by Category</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           {[
-            { name: 'Singers', slug: 'singer', color: 'from-pink-500 to-rose-500', icon: '🎤' },
-            { name: 'Actors', slug: 'actor', color: 'from-purple-500 to-indigo-500', icon: '🎭' },
-            { name: 'Dancers', slug: 'dancer', color: 'from-blue-500 to-cyan-500', icon: '💃' },
-            { name: 'Comedians', slug: 'comedian', color: 'from-yellow-500 to-orange-500', icon: '😂' },
-            { name: 'Voice Over', slug: 'voice-over', color: 'from-green-500 to-teal-500', icon: '🎙️' }
+            { name: 'Singing', slug: 'singing', color: 'from-pink-500 to-rose-500', icon: '🎤' },
+            { name: 'Acting', slug: 'acting', color: 'from-purple-500 to-indigo-500', icon: '🎭' },
+            { name: 'Dancing', slug: 'dancing', color: 'from-blue-500 to-cyan-500', icon: '💃' },
+            { name: 'Comedy', slug: 'comedy', color: 'from-yellow-500 to-orange-500', icon: '😂' },
+            { name: 'Music', slug: 'music', color: 'from-green-500 to-teal-500', icon: '🎵' },
+            { name: 'Modeling', slug: 'modeling', color: 'from-red-500 to-pink-500', icon: '📸' },
+            { name: 'Sports', slug: 'sports', color: 'from-emerald-500 to-green-500', icon: '⚽' },
+            { name: 'Art', slug: 'art', color: 'from-violet-500 to-purple-500', icon: '🎨' },
+            { name: 'Magic', slug: 'magic', color: 'from-indigo-500 to-blue-500', icon: '🪄' },
+            { name: 'Other', slug: 'other', color: 'from-gray-500 to-slate-500', icon: '✨' }
           ].map((category) => (
             <Link
               key={category.slug}
