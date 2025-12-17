@@ -8,8 +8,10 @@ interface VideoCardProps {
     title: string;
     thumbnailUrl: string | null;
     duration: number | null;
-    views: number;
-    likes: number;
+    views?: number;
+    viewsCount?: number;
+    likes?: number;
+    likesCount?: number;
     aiPerformanceScore: number | null;
     createdAt: string;
     user?: {
@@ -17,13 +19,19 @@ interface VideoCardProps {
       username: string;
       firstName: string;
       lastName: string;
-      profileImageUrl: string | null;
+      profileImageUrl?: string | null;
+      avatarUrl?: string | null;
     };
   };
   featured?: boolean;
 }
 
 const VideoCard: React.FC<VideoCardProps> = ({ video, featured }) => {
+  // Handle both naming conventions from API
+  const views = video.views ?? video.viewsCount ?? 0;
+  const likes = video.likes ?? video.likesCount ?? 0;
+  const userAvatar = video.user?.profileImageUrl || video.user?.avatarUrl;
+
   const formatDuration = (seconds: number | null) => {
     if (!seconds) return '0:00';
     const mins = Math.floor(seconds / 60);
@@ -31,7 +39,8 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, featured }) => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const formatViews = (count: number) => {
+  const formatViews = (count: number | null | undefined) => {
+    if (count == null) return '0';
     if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
     if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
     return count.toString();
@@ -100,15 +109,15 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, featured }) => {
       <div className="mt-3 flex gap-3">
         {video.user && (
           <div className="flex-shrink-0">
-            {video.user.profileImageUrl ? (
+            {userAvatar ? (
               <img
-                src={video.user.profileImageUrl}
+                src={userAvatar}
                 alt={video.user.username}
                 className="w-9 h-9 rounded-full object-cover"
               />
             ) : (
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-medium">
-                {video.user.firstName[0]}
+                {video.user.firstName?.[0] || '?'}
               </div>
             )}
           </div>
@@ -125,11 +134,11 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, featured }) => {
           <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mt-1">
             <span className="flex items-center gap-1">
               <EyeIcon className="w-3.5 h-3.5" />
-              {formatViews(video.views)}
+              {formatViews(views)}
             </span>
             <span className="flex items-center gap-1">
               <HeartIcon className="w-3.5 h-3.5" />
-              {formatViews(video.likes)}
+              {formatViews(likes)}
             </span>
             <span>{timeAgo(video.createdAt)}</span>
           </div>
