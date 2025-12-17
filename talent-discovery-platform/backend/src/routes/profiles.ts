@@ -55,20 +55,22 @@ router.put(
   validate([
     body('firstName').optional().trim().isLength({ min: 1, max: 100 }).withMessage('First name must be 1-100 chars'),
     body('lastName').optional().trim().isLength({ min: 1, max: 100 }).withMessage('Last name must be 1-100 chars'),
+    body('displayName').optional().trim().isLength({ max: 100 }).withMessage('Display name must be max 100 chars'),
     body('bio').optional().trim().isLength({ max: 500 }).withMessage('Bio must be max 500 chars'),
     body('location').optional().trim().isLength({ max: 255 }).withMessage('Location must be max 255 chars'),
-    body('website').optional().trim().isURL().withMessage('Invalid website URL'),
+    body('website').optional({ checkFalsy: true }).trim().isURL().withMessage('Invalid website URL'),
     body('dateOfBirth').optional().isISO8601().withMessage('Invalid date format'),
     body('talentCategories').optional().isArray().withMessage('Talent categories must be an array')
   ]),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = req.user!;
-      const { firstName, lastName, bio, location, website, dateOfBirth, talentCategories } = req.body;
+      const { firstName, lastName, displayName, bio, location, website, dateOfBirth, talentCategories } = req.body;
 
       await user.update({
         ...(firstName && { firstName }),
         ...(lastName && { lastName }),
+        ...(displayName !== undefined && { displayName }),
         ...(bio !== undefined && { bio }),
         ...(location !== undefined && { location }),
         ...(website !== undefined && { website }),

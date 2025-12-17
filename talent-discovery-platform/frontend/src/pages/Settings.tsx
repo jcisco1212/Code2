@@ -12,6 +12,7 @@ import {
   CameraIcon,
   LinkIcon
 } from '@heroicons/react/24/outline';
+import { getUploadUrl } from '../services/api';
 
 type SettingsTab = 'profile' | 'account' | 'notifications' | 'privacy' | 'appearance' | 'links';
 
@@ -157,7 +158,9 @@ const Settings: React.FC = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      await profileAPI.updateProfile(profileForm);
+      // Don't send username in profile update - it has its own endpoint
+      const { username, ...profileData } = profileForm;
+      await profileAPI.updateProfile(profileData);
       toast.success('Profile updated successfully');
     } catch (err: any) {
       toast.error(err.response?.data?.error?.message || 'Failed to update profile');
@@ -280,8 +283,8 @@ const Settings: React.FC = () => {
                     <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center overflow-hidden">
                       {uploadingAvatar ? (
                         <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
-                      ) : user?.profileImageUrl ? (
-                        <img src={user.profileImageUrl} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (user?.profileImageUrl || user?.avatarUrl) ? (
+                        <img src={getUploadUrl(user?.profileImageUrl || user?.avatarUrl) || ''} alt="Avatar" className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-3xl text-white font-bold">
                           {(user?.displayName || user?.username || 'U').charAt(0).toUpperCase()}
