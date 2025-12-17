@@ -99,6 +99,11 @@ declare module '@heroicons/react/24/outline' {
   export const BackwardIcon: ComponentType<SVGProps<SVGSVGElement>>;
   export const PauseIcon: ComponentType<SVGProps<SVGSVGElement>>;
   export const StopIcon: ComponentType<SVGProps<SVGSVGElement>>;
+  export const UserGroupIcon: ComponentType<SVGProps<SVGSVGElement>>;
+  export const ChatBubbleLeftRightIcon: ComponentType<SVGProps<SVGSVGElement>>;
+  export const ArrowTrendingUpIcon: ComponentType<SVGProps<SVGSVGElement>>;
+  export const KeyIcon: ComponentType<SVGProps<SVGSVGElement>>;
+  export const PaintBrushIcon: ComponentType<SVGProps<SVGSVGElement>>;
 }
 
 declare module '@heroicons/react/24/solid' {
