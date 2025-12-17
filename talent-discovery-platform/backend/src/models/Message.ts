@@ -26,16 +26,16 @@ interface MessageCreationAttributes extends Optional<MessageAttributes,
 > {}
 
 class Message extends Model<MessageAttributes, MessageCreationAttributes> implements MessageAttributes {
-  public id!: string;
-  public senderId!: string;
-  public receiverId!: string;
-  public conversationId!: string;
-  public content!: string;
-  public status!: MessageStatus;
-  public readAt!: Date | null;
-  public isAgentMessage!: boolean;
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  declare id: string;
+  declare senderId: string;
+  declare receiverId: string;
+  declare conversationId: string;
+  declare content: string;
+  declare status: MessageStatus;
+  declare readAt: Date | null;
+  declare isAgentMessage: boolean;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 }
 
 Message.init(

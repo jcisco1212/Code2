@@ -22,18 +22,18 @@ interface CategoryCreationAttributes extends Optional<CategoryAttributes,
 > {}
 
 class Category extends Model<CategoryAttributes, CategoryCreationAttributes> implements CategoryAttributes {
-  public id!: string;
-  public name!: string;
-  public slug!: string;
-  public description!: string | null;
-  public parentId!: string | null;
-  public icon!: string | null;
-  public iconUrl!: string | null;
-  public color!: string | null;
-  public sortOrder!: number;
-  public isActive!: boolean;
-  public isTalentType!: boolean;
-  public readonly createdAt!: Date;
+  declare id: string;
+  declare name: string;
+  declare slug: string;
+  declare description: string | null;
+  declare parentId: string | null;
+  declare icon: string | null;
+  declare iconUrl: string | null;
+  declare color: string | null;
+  declare sortOrder: number;
+  declare isActive: boolean;
+  declare isTalentType: boolean;
+  declare readonly createdAt: Date;
 }
 
 Category.init(

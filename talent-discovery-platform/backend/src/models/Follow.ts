@@ -11,10 +11,10 @@ interface FollowAttributes {
 interface FollowCreationAttributes extends Optional<FollowAttributes, 'id' | 'createdAt'> {}
 
 class Follow extends Model<FollowAttributes, FollowCreationAttributes> implements FollowAttributes {
-  public id!: string;
-  public followerId!: string;
-  public followingId!: string;
-  public readonly createdAt!: Date;
+  declare id: string;
+  declare followerId: string;
+  declare followingId: string;
+  declare readonly createdAt: Date;
 }
 
 Follow.init(

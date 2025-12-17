@@ -90,51 +90,51 @@ interface AgentVerificationCreationAttributes extends Optional<AgentVerification
 
 class AgentVerification extends Model<AgentVerificationAttributes, AgentVerificationCreationAttributes>
   implements AgentVerificationAttributes {
-  public id!: string;
-  public userId!: string;
+  declare id: string;
+  declare userId: string;
 
-  public agencyName!: string;
-  public agencyWebsite!: string | null;
-  public agencyEmail!: string;
-  public agencyPhone!: string;
-  public agencyAddress!: string;
-  public jobTitle!: string;
-  public yearsInIndustry!: number;
+  declare agencyName: string;
+  declare agencyWebsite: string | null;
+  declare agencyEmail: string;
+  declare agencyPhone: string;
+  declare agencyAddress: string;
+  declare jobTitle: string;
+  declare yearsInIndustry: number;
 
-  public status!: VerificationStatus;
-  public verificationLevel!: number;
+  declare status: VerificationStatus;
+  declare verificationLevel: number;
 
-  public stateLicenseNumber!: string | null;
-  public stateLicenseState!: string | null;
-  public stateLicenseVerified!: boolean;
-  public stateLicenseExpiry!: Date | null;
+  declare stateLicenseNumber: string | null;
+  declare stateLicenseState: string | null;
+  declare stateLicenseVerified: boolean;
+  declare stateLicenseExpiry: Date | null;
 
-  public sagAftraFranchised!: boolean;
-  public sagAftraVerified!: boolean;
+  declare sagAftraFranchised: boolean;
+  declare sagAftraVerified: boolean;
 
-  public imdbProLink!: string | null;
-  public imdbVerified!: boolean;
+  declare imdbProLink: string | null;
+  declare imdbVerified: boolean;
 
-  public linkedinUrl!: string | null;
-  public linkedinVerified!: boolean;
+  declare linkedinUrl: string | null;
+  declare linkedinVerified: boolean;
 
-  public documentsSubmitted!: string[];
-  public documentsVerified!: string[];
+  declare documentsSubmitted: string[];
+  declare documentsVerified: string[];
 
-  public redFlagCount!: number;
-  public redFlagReasons!: string[];
+  declare redFlagCount: number;
+  declare redFlagReasons: string[];
 
-  public averageRating!: number;
-  public totalReviews!: number;
-  public successfulPlacements!: number;
+  declare averageRating: number;
+  declare totalReviews: number;
+  declare successfulPlacements: number;
 
-  public verifiedBy!: string | null;
-  public verifiedAt!: Date | null;
-  public rejectionReason!: string | null;
-  public notes!: string | null;
+  declare verifiedBy: string | null;
+  declare verifiedAt: Date | null;
+  declare rejectionReason: string | null;
+  declare notes: string | null;
 
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 
   // Calculate trust score based on verifications
   public calculateTrustScore(): number {

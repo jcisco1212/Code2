@@ -23,12 +23,12 @@ interface LikeAttributes {
 interface LikeCreationAttributes extends Optional<LikeAttributes, 'id' | 'createdAt'> {}
 
 class Like extends Model<LikeAttributes, LikeCreationAttributes> implements LikeAttributes {
-  public id!: string;
-  public userId!: string;
-  public targetId!: string;
-  public targetType!: LikeTarget;
-  public type!: LikeType;
-  public readonly createdAt!: Date;
+  declare id: string;
+  declare userId: string;
+  declare targetId: string;
+  declare targetType: LikeTarget;
+  declare type: LikeType;
+  declare readonly createdAt: Date;
 }
 
 Like.init(

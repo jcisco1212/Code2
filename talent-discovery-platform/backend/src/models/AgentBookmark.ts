@@ -17,14 +17,14 @@ interface AgentBookmarkCreationAttributes extends Optional<AgentBookmarkAttribut
 > {}
 
 class AgentBookmark extends Model<AgentBookmarkAttributes, AgentBookmarkCreationAttributes> implements AgentBookmarkAttributes {
-  public id!: string;
-  public agentId!: string;
-  public talentId!: string;
-  public listName!: string | null;
-  public notes!: string | null;
-  public rating!: number | null;
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  declare id: string;
+  declare agentId: string;
+  declare talentId: string;
+  declare listName: string | null;
+  declare notes: string | null;
+  declare rating: number | null;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 }
 
 AgentBookmark.init(

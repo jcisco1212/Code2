@@ -47,18 +47,18 @@ interface ReportCreationAttributes extends Optional<ReportAttributes,
 > {}
 
 class Report extends Model<ReportAttributes, ReportCreationAttributes> implements ReportAttributes {
-  public id!: string;
-  public reporterId!: string;
-  public targetId!: string;
-  public targetType!: ReportTarget;
-  public type!: ReportType;
-  public description!: string | null;
-  public status!: ReportStatus;
-  public reviewedBy!: string | null;
-  public reviewedAt!: Date | null;
-  public resolution!: string | null;
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  declare id: string;
+  declare reporterId: string;
+  declare targetId: string;
+  declare targetType: ReportTarget;
+  declare type: ReportType;
+  declare description: string | null;
+  declare status: ReportStatus;
+  declare reviewedBy: string | null;
+  declare reviewedAt: Date | null;
+  declare resolution: string | null;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 }
 
 Report.init(

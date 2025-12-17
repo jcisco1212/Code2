@@ -34,22 +34,22 @@ interface CommentCreationAttributes extends Optional<CommentAttributes,
 > {}
 
 class Comment extends Model<CommentAttributes, CommentCreationAttributes> implements CommentAttributes {
-  public id!: string;
-  public videoId!: string;
-  public userId!: string;
-  public parentId!: string | null;
-  public content!: string;
-  public status!: CommentStatus;
-  public likes!: number;
-  public replyCount!: number;
-  public sentimentScore!: number | null;
-  public isTroll!: boolean;
-  public trollConfidence!: number | null;
-  public isPinned!: boolean;
-  public isCreatorHighlighted!: boolean;
-  public editedAt!: Date | null;
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  declare id: string;
+  declare videoId: string;
+  declare userId: string;
+  declare parentId: string | null;
+  declare content: string;
+  declare status: CommentStatus;
+  declare likes: number;
+  declare replyCount: number;
+  declare sentimentScore: number | null;
+  declare isTroll: boolean;
+  declare trollConfidence: number | null;
+  declare isPinned: boolean;
+  declare isCreatorHighlighted: boolean;
+  declare editedAt: Date | null;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 }
 
 Comment.init(

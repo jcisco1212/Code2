@@ -22,18 +22,18 @@ interface VideoViewCreationAttributes extends Optional<VideoViewAttributes,
 > {}
 
 class VideoView extends Model<VideoViewAttributes, VideoViewCreationAttributes> implements VideoViewAttributes {
-  public id!: string;
-  public videoId!: string;
-  public userId!: string | null;
-  public sessionId!: string;
-  public ipAddress!: string | null;
-  public userAgent!: string | null;
-  public country!: string | null;
-  public city!: string | null;
-  public watchTime!: number;
-  public completedPercent!: number;
-  public source!: string | null;
-  public readonly createdAt!: Date;
+  declare id: string;
+  declare videoId: string;
+  declare userId: string | null;
+  declare sessionId: string;
+  declare ipAddress: string | null;
+  declare userAgent: string | null;
+  declare country: string | null;
+  declare city: string | null;
+  declare watchTime: number;
+  declare completedPercent: number;
+  declare source: string | null;
+  declare readonly createdAt: Date;
 }
 
 VideoView.init(
