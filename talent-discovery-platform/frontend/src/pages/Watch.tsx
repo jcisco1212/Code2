@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 import { videosAPI, savedVideosAPI, getUploadUrl } from '../services/api';
 import { EyeIcon, HeartIcon, ShareIcon, BookmarkIcon, EnvelopeIcon, ChatBubbleLeftIcon, LinkIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
@@ -69,6 +70,9 @@ const Watch: React.FC = () => {
   const [saved, setSaved] = useState(false);
   const [relatedVideos, setRelatedVideos] = useState<RelatedVideo[]>([]);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [viewRecorded, setViewRecorded] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const sessionIdRef = useRef<string>(uuidv4());
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -109,6 +113,29 @@ const Watch: React.FC = () => {
     };
     fetchVideo();
   }, [videoId, isAuthenticated]);
+
+  // Reset view recorded state when video changes
+  useEffect(() => {
+    setViewRecorded(false);
+    sessionIdRef.current = uuidv4();
+  }, [videoId]);
+
+  // Record view when video starts playing
+  const handleVideoPlay = async () => {
+    if (!videoId || viewRecorded) return;
+
+    try {
+      await videosAPI.recordView(videoId, {
+        sessionId: sessionIdRef.current,
+        watchTime: 0
+      });
+      setViewRecorded(true);
+      // Update local view count
+      setVideo(prev => prev ? { ...prev, viewsCount: prev.viewsCount + 1 } : null);
+    } catch (err) {
+      console.error('Failed to record view:', err);
+    }
+  };
 
   const handleLike = async () => {
     if (!video) return;
@@ -225,11 +252,13 @@ const Watch: React.FC = () => {
           <div className="aspect-video bg-black rounded-xl overflow-hidden mb-4">
             {videoUrl ? (
               <video
+                ref={videoRef}
                 src={videoUrl}
                 controls
                 autoPlay
                 className="w-full h-full"
                 poster={video.thumbnailUrl ? getUploadUrl(video.thumbnailUrl) || undefined : undefined}
+                onPlay={handleVideoPlay}
               >
                 Your browser does not support the video tag.
               </video>
