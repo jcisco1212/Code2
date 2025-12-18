@@ -10,7 +10,6 @@ import {
   ArrowUpTrayIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
-  BellIcon,
   ChatBubbleLeftIcon,
   ChartBarIcon,
   Bars3Icon,
@@ -22,6 +21,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
+import NotificationDropdown from '../notifications/NotificationDropdown';
 
 const Layout: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -103,10 +103,7 @@ const Layout: React.FC = () => {
                   <ArrowUpTrayIcon className="w-5 h-5" />
                   <span>Upload</span>
                 </Link>
-                <button className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                  <BellIcon className="w-6 h-6" />
-                  <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
-                </button>
+                <NotificationDropdown />
                 <Menu as="div" className="relative">
                   <Menu.Button className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
                     {user?.profileImageUrl ? (
