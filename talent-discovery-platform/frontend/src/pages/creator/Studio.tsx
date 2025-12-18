@@ -80,7 +80,7 @@ const Studio: React.FC = () => {
           totalLikes,
           totalComments,
           totalVideos: userVideos.length,
-          subscriberCount: user?.followersCount || 0
+          subscriberCount: (user as any)?.followersCount || 0
         });
       } catch (err) {
         console.error('Failed to fetch studio data:', err);

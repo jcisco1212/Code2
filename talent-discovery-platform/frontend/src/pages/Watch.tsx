@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 import { videosAPI, savedVideosAPI, getUploadUrl } from '../services/api';
 import { EyeIcon, HeartIcon, ShareIcon, BookmarkIcon, EnvelopeIcon, ChatBubbleLeftIcon, LinkIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
@@ -60,6 +59,9 @@ interface RelatedVideo {
   };
 }
 
+// Simple random ID generator
+const generateSessionId = () => Math.random().toString(36).substring(2) + Date.now().toString(36);
+
 const Watch: React.FC = () => {
   const { videoId } = useParams<{ videoId: string }>();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
@@ -72,7 +74,7 @@ const Watch: React.FC = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [viewRecorded, setViewRecorded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const sessionIdRef = useRef<string>(uuidv4());
+  const sessionIdRef = useRef<string>(generateSessionId());
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -117,7 +119,7 @@ const Watch: React.FC = () => {
   // Reset view recorded state when video changes
   useEffect(() => {
     setViewRecorded(false);
-    sessionIdRef.current = uuidv4();
+    sessionIdRef.current = generateSessionId();
   }, [videoId]);
 
   // Record view when video starts playing

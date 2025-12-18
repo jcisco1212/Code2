@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { commentsAPI, socialAPI, getUploadUrl } from '../../services/api';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { HeartIcon, ChatBubbleLeftIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
+import { HeartIcon, ChatBubbleLeftIcon, EllipsisHorizontalIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 
@@ -280,7 +280,7 @@ const Comments: React.FC<CommentsProps> = ({ videoId, videoOwnerId, commentsEnab
                   onClick={() => setShowOptions(!showOptions)}
                   className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 >
-                  <EllipsisVerticalIcon className="w-4 h-4" />
+                  <EllipsisHorizontalIcon className="w-4 h-4" />
                 </button>
 
                 {showOptions && (
@@ -408,9 +408,9 @@ const Comments: React.FC<CommentsProps> = ({ videoId, videoOwnerId, commentsEnab
         <form onSubmit={handleSubmitComment} className="mb-6">
           <div className="flex gap-3">
             <div className="flex-shrink-0">
-              {user?.avatarUrl ? (
+              {user?.profileImageUrl ? (
                 <img
-                  src={getUploadUrl(user.avatarUrl) || ''}
+                  src={getUploadUrl(user.profileImageUrl) || ''}
                   alt={user.username}
                   className="w-10 h-10 rounded-full object-cover"
                 />

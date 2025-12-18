@@ -13,7 +13,7 @@ interface VideoCardProps {
     viewsCount?: number;
     likes?: number;
     likesCount?: number;
-    aiPerformanceScore: number | null;
+    aiPerformanceScore?: number | null;
     createdAt: string;
     user?: {
       id: string;
