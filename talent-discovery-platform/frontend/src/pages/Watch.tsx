@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { videosAPI, getUploadUrl } from '../services/api';
+import { videosAPI, savedVideosAPI, getUploadUrl } from '../services/api';
 import { EyeIcon, HeartIcon, ShareIcon, BookmarkIcon, EnvelopeIcon, ChatBubbleLeftIcon, LinkIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import { HeartIcon as HeartSolidIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 import Comments from '../components/video/Comments';
 import VideoCard from '../components/video/VideoCard';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 
 interface Video {
   id: string;
@@ -59,10 +61,12 @@ interface RelatedVideo {
 
 const Watch: React.FC = () => {
   const { videoId } = useParams<{ videoId: string }>();
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [video, setVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [relatedVideos, setRelatedVideos] = useState<RelatedVideo[]>([]);
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -74,6 +78,16 @@ const Watch: React.FC = () => {
         const response = await videosAPI.getVideo(videoId);
         setVideo(response.data.video);
         setLiked(response.data.userLiked === true);
+
+        // Check if video is saved (only if authenticated)
+        if (isAuthenticated) {
+          try {
+            const savedResponse = await savedVideosAPI.checkSaved(videoId);
+            setSaved(savedResponse.data.saved);
+          } catch {
+            // Ignore error if not authenticated
+          }
+        }
 
         // Fetch related videos (same category or trending)
         const categoryId = response.data.video.category?.id;
@@ -94,7 +108,7 @@ const Watch: React.FC = () => {
       }
     };
     fetchVideo();
-  }, [videoId]);
+  }, [videoId, isAuthenticated]);
 
   const handleLike = async () => {
     if (!video) return;
@@ -110,6 +124,28 @@ const Watch: React.FC = () => {
       }
     } catch (err: any) {
       toast.error('Please log in to like videos');
+    }
+  };
+
+  const handleSave = async () => {
+    if (!video) return;
+    if (!isAuthenticated) {
+      toast.error('Please log in to save videos');
+      return;
+    }
+
+    try {
+      if (saved) {
+        await savedVideosAPI.unsaveVideo(video.id);
+        setSaved(false);
+        toast.success('Video removed from saved');
+      } else {
+        await savedVideosAPI.saveVideo(video.id);
+        setSaved(true);
+        toast.success('Video saved!');
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.error?.message || 'Failed to save video');
     }
   };
 
@@ -255,9 +291,20 @@ const Watch: React.FC = () => {
                 <span>Share</span>
               </button>
 
-              <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                <BookmarkIcon className="w-5 h-5" />
-                <span>Save</span>
+              <button
+                onClick={handleSave}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${
+                  saved
+                    ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
+                    : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+                }`}
+              >
+                {saved ? (
+                  <BookmarkSolidIcon className="w-5 h-5" />
+                ) : (
+                  <BookmarkIcon className="w-5 h-5" />
+                )}
+                <span>{saved ? 'Saved' : 'Save'}</span>
               </button>
             </div>
           </div>

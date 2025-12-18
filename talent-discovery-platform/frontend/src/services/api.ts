@@ -330,3 +330,14 @@ export const searchAPI = {
   getTrending: () =>
     api.get('/search/trending')
 };
+
+export const savedVideosAPI = {
+  getSavedVideos: (params?: any) =>
+    api.get('/saved-videos', { params }),
+  saveVideo: (videoId: string) =>
+    api.post(`/saved-videos/${videoId}`),
+  unsaveVideo: (videoId: string) =>
+    api.delete(`/saved-videos/${videoId}`),
+  checkSaved: (videoId: string) =>
+    api.get(`/saved-videos/check/${videoId}`)
+};

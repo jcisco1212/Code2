@@ -9,6 +9,7 @@ import Message, { MessageStatus } from './Message';
 import AgentBookmark from './AgentBookmark';
 import Report, { ReportType, ReportStatus, ReportTarget } from './Report';
 import VideoView from './VideoView';
+import SavedVideo from './SavedVideo';
 
 // User associations
 User.hasMany(Video, { foreignKey: 'userId', as: 'videos' });
@@ -83,6 +84,12 @@ VideoView.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 AgentBookmark.belongsTo(User, { foreignKey: 'agentId', as: 'agent' });
 AgentBookmark.belongsTo(User, { foreignKey: 'talentId', as: 'talent' });
 
+// SavedVideo associations
+SavedVideo.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+SavedVideo.belongsTo(Video, { foreignKey: 'videoId', as: 'video' });
+User.hasMany(SavedVideo, { foreignKey: 'userId', as: 'savedVideos' });
+Video.hasMany(SavedVideo, { foreignKey: 'videoId', as: 'saves' });
+
 export {
   User,
   UserRole,
@@ -105,7 +112,8 @@ export {
   ReportType,
   ReportStatus,
   ReportTarget,
-  VideoView
+  VideoView,
+  SavedVideo
 };
 
 export default {
@@ -119,5 +127,6 @@ export default {
   Message,
   AgentBookmark,
   Report,
-  VideoView
+  VideoView,
+  SavedVideo
 };

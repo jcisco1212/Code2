@@ -31,6 +31,7 @@ import searchRoutes from './routes/search';
 import notificationRoutes from './routes/notifications';
 import reportRoutes from './routes/reports';
 import messageRoutes from './routes/messages';
+import savedVideoRoutes from './routes/savedVideos';
 
 dotenv.config();
 
@@ -132,6 +133,7 @@ app.use('/api/v1/search', searchRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/reports', reportRoutes);
 app.use('/api/v1/messages', messageRoutes);
+app.use('/api/v1/saved-videos', savedVideoRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
