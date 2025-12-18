@@ -1,5 +1,5 @@
 import { sequelize } from '../config/database';
-import { User } from '../models';
+import { User, UserRole } from '../models';
 import bcrypt from 'bcryptjs';
 
 async function seedAdmin() {
@@ -18,7 +18,7 @@ async function seedAdmin() {
         firstName: 'Jason',
         lastName: 'Cisco',
         passwordHash: passwordHash,
-        role: 'admin',
+        role: UserRole.ADMIN,
         isVerified: true,
         isActive: true
       }
@@ -30,7 +30,7 @@ async function seedAdmin() {
       console.log('Password: Admin123!');
     } else {
       console.log('User already exists, updating to admin...');
-      await user.update({ role: 'admin', isVerified: true, isActive: true });
+      await user.update({ role: UserRole.ADMIN, isVerified: true, isActive: true });
       console.log('User updated to admin');
     }
 
