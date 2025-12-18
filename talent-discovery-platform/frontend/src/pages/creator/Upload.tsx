@@ -16,6 +16,7 @@ const Upload: React.FC = () => {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [videoDuration, setVideoDuration] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -55,6 +56,19 @@ const Upload: React.FC = () => {
       return;
     }
     setSelectedFile(file);
+    setVideoDuration(null);
+
+    // Extract video duration using HTML5 Video API
+    const videoElement = document.createElement('video');
+    videoElement.preload = 'metadata';
+    videoElement.onloadedmetadata = () => {
+      window.URL.revokeObjectURL(videoElement.src);
+      const duration = Math.round(videoElement.duration);
+      setVideoDuration(duration);
+      console.log('Video duration:', duration, 'seconds');
+    };
+    videoElement.src = URL.createObjectURL(file);
+
     // Auto-fill title from filename if empty
     if (!formData.title) {
       const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
@@ -126,6 +140,12 @@ const Upload: React.FC = () => {
         setUploadProgress(10 + Math.round(progress * 0.85));
       });
 
+      // Step 3: Update video with duration if we extracted it
+      if (videoDuration) {
+        setUploadStage('Finalizing...');
+        await videosAPI.updateVideo(videoId, { duration: videoDuration });
+      }
+
       setUploadProgress(100);
       toast.success('Video uploaded successfully!');
 
@@ -149,6 +169,12 @@ const Upload: React.FC = () => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -182,7 +208,10 @@ const Upload: React.FC = () => {
             <div>
               <div className="text-4xl mb-2">🎬</div>
               <p className="text-lg font-medium text-gray-900 dark:text-white">{selectedFile.name}</p>
-              <p className="text-gray-600 dark:text-gray-400">{formatFileSize(selectedFile.size)}</p>
+              <p className="text-gray-600 dark:text-gray-400">
+                {formatFileSize(selectedFile.size)}
+                {videoDuration !== null && ` • ${formatDuration(videoDuration)}`}
+              </p>
               <button
                 type="button"
                 onClick={(e) => {

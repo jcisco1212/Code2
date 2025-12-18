@@ -85,7 +85,8 @@ router.put(
     body('categoryId').optional({ nullable: true, checkFalsy: true }).isUUID().withMessage('Valid category ID required'),
     body('tags').optional().isArray().withMessage('Tags must be an array'),
     body('visibility').optional().isIn(['public', 'unlisted', 'private']).withMessage('Invalid visibility'),
-    body('commentsEnabled').optional().isBoolean().withMessage('commentsEnabled must be boolean')
+    body('commentsEnabled').optional().isBoolean().withMessage('commentsEnabled must be boolean'),
+    body('duration').optional().isInt({ min: 0 }).withMessage('Duration must be a positive integer')
   ]),
   videoController.updateVideo as RequestHandler
 );

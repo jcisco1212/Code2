@@ -180,7 +180,7 @@ export const createVideo = async (req: AuthRequest, res: Response, next: NextFun
 export const updateVideo = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
-    const { title, description, categoryId, tags, visibility, commentsEnabled } = req.body;
+    const { title, description, categoryId, tags, visibility, commentsEnabled, duration } = req.body;
 
     const video = await Video.findByPk(id);
     if (!video) {
@@ -197,7 +197,8 @@ export const updateVideo = async (req: AuthRequest, res: Response, next: NextFun
       ...(categoryId && { categoryId }),
       ...(tags && { tags }),
       ...(visibility && { visibility }),
-      ...(commentsEnabled !== undefined && { commentsEnabled })
+      ...(commentsEnabled !== undefined && { commentsEnabled }),
+      ...(duration !== undefined && { duration })
     });
 
     // Clear cache

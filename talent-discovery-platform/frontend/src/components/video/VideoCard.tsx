@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { EyeIcon, HeartIcon, ClockIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { getUploadUrl } from '../../services/api';
 
 interface VideoCardProps {
   video: {
@@ -77,7 +78,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, featured }) => {
       <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-700">
         {video.thumbnailUrl ? (
           <img
-            src={video.thumbnailUrl}
+            src={getUploadUrl(video.thumbnailUrl) || ''}
             alt={video.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
@@ -116,7 +117,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, featured }) => {
           <div className="flex-shrink-0">
             {userAvatar ? (
               <img
-                src={userAvatar}
+                src={getUploadUrl(userAvatar) || ''}
                 alt={video.user.username}
                 className="w-9 h-9 rounded-full object-cover"
               />
