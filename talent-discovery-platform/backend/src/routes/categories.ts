@@ -60,7 +60,29 @@ router.get('/', async (req: Request, res: Response, next: NextFunction): Promise
   }
 });
 
-// Get single category
+// Get category by slug
+router.get(
+  '/by-slug/:slug',
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { slug } = req.params;
+
+      const category = await Category.findOne({
+        where: { slug, isActive: true }
+      });
+
+      if (!category) {
+        throw new NotFoundError('Category not found');
+      }
+
+      res.json({ category });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Get single category by ID
 router.get(
   '/:id',
   validate([

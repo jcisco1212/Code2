@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { videosAPI, getUploadUrl } from '../services/api';
-import { EyeIcon, HeartIcon, ShareIcon, BookmarkIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, HeartIcon, ShareIcon, BookmarkIcon, EnvelopeIcon, ChatBubbleLeftIcon, LinkIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
+import Comments from '../components/video/Comments';
+import VideoCard from '../components/video/VideoCard';
 
 interface Video {
   id: string;
@@ -15,6 +17,7 @@ interface Video {
   viewsCount: number;
   likesCount: number;
   commentsCount: number;
+  commentsEnabled: boolean;
   createdAt: string;
   user?: {
     id: string;
@@ -31,12 +34,37 @@ interface Video {
   };
 }
 
+interface RelatedVideo {
+  id: string;
+  title: string;
+  description: string | null;
+  thumbnailUrl: string | null;
+  duration: number | null;
+  viewsCount: number;
+  likesCount: number;
+  createdAt: string;
+  user?: {
+    id: string;
+    username: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl: string | null;
+  };
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+}
+
 const Watch: React.FC = () => {
   const { videoId } = useParams<{ videoId: string }>();
   const [video, setVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [liked, setLiked] = useState(false);
+  const [relatedVideos, setRelatedVideos] = useState<RelatedVideo[]>([]);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -46,6 +74,18 @@ const Watch: React.FC = () => {
         const response = await videosAPI.getVideo(videoId);
         setVideo(response.data.video);
         setLiked(response.data.userLiked === true);
+
+        // Fetch related videos (same category or trending)
+        const categoryId = response.data.video.category?.id;
+        if (categoryId) {
+          const relatedResponse = await videosAPI.getByCategory(categoryId, { limit: 8 });
+          // Filter out current video
+          setRelatedVideos((relatedResponse.data.videos || []).filter((v: RelatedVideo) => v.id !== videoId));
+        } else {
+          // Fall back to trending videos
+          const trendingResponse = await videosAPI.getTrending(8);
+          setRelatedVideos((trendingResponse.data.videos || []).filter((v: RelatedVideo) => v.id !== videoId));
+        }
       } catch (err: any) {
         console.error('Failed to fetch video:', err);
         setError(err.response?.data?.error?.message || 'Failed to load video');
@@ -74,8 +114,27 @@ const Watch: React.FC = () => {
   };
 
   const handleShare = () => {
+    setShowShareModal(true);
+  };
+
+  const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     toast.success('Link copied to clipboard!');
+    setShowShareModal(false);
+  };
+
+  const handleEmailShare = () => {
+    const subject = encodeURIComponent(`Check out this video: ${video?.title}`);
+    const body = encodeURIComponent(`I found this great video on TalentVault:\n\n${video?.title}\n${window.location.href}`);
+    window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+    setShowShareModal(false);
+  };
+
+  const handleTextShare = () => {
+    const text = encodeURIComponent(`Check out this video: ${video?.title} ${window.location.href}`);
+    window.open(`sms:?body=${text}`, '_blank');
+    toast.success('Opening SMS app...');
+    setShowShareModal(false);
   };
 
   const formatViews = (count: number | null | undefined) => {
@@ -243,27 +302,105 @@ const Watch: React.FC = () => {
             </div>
           )}
 
-          {/* Comments Section Placeholder */}
-          <div className="py-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              {video.commentsCount} Comments
-            </h2>
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              <p>Comments coming soon...</p>
-            </div>
-          </div>
+          {/* Comments Section */}
+          <Comments
+            videoId={video.id}
+            videoOwnerId={video.user?.id}
+            commentsEnabled={video.commentsEnabled !== false}
+            commentsCount={video.commentsCount}
+          />
         </div>
 
         {/* Sidebar - Related Videos */}
         <div className="lg:col-span-1">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            More Videos
+            Related Videos
           </h2>
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <p>Related videos coming soon...</p>
-          </div>
+          {relatedVideos.length > 0 ? (
+            <div className="space-y-4">
+              {relatedVideos.map((relatedVideo) => (
+                <VideoCard key={relatedVideo.id} video={relatedVideo} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              <p>No related videos found</p>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowShareModal(false)}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Share Video</h3>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+              >
+                <XMarkIcon className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={handleCopyLink}
+                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                  <LinkIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900 dark:text-white">Copy Link</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Copy video URL to clipboard</p>
+                </div>
+              </button>
+
+              <button
+                onClick={handleEmailShare}
+                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                  <EnvelopeIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900 dark:text-white">Email</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Share via email</p>
+                </div>
+              </button>
+
+              <button
+                onClick={handleTextShare}
+                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <ChatBubbleLeftIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900 dark:text-white">Text Message</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Share via SMS</p>
+                </div>
+              </button>
+
+              <Link
+                to={`/messages?share=${encodeURIComponent(window.location.href)}`}
+                onClick={() => setShowShareModal(false)}
+                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                  <ChatBubbleLeftIcon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium text-gray-900 dark:text-white">Send to User</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Share via TalentVault message</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

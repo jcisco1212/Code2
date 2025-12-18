@@ -23,6 +23,11 @@ interface VideoCardProps {
       profileImageUrl?: string | null;
       avatarUrl?: string | null;
     };
+    category?: {
+      id: string;
+      name: string;
+      slug: string;
+    };
   };
   featured?: boolean;
 }
@@ -137,7 +142,12 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, featured }) => {
               {video.user.firstName} {video.user.lastName}
             </p>
           )}
-          <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <div className="flex items-center flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
+            {video.category && (
+              <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full">
+                {video.category.name}
+              </span>
+            )}
             <span className="flex items-center gap-1">
               <EyeIcon className="w-3.5 h-3.5" />
               {formatViews(views)}

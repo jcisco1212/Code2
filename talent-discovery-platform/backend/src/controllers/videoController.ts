@@ -374,7 +374,8 @@ export const getVideosByCategory = async (req: AuthRequest, res: Response, next:
         visibility: VideoVisibility.PUBLIC
       },
       include: [
-        { model: User, as: 'user', attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl'] }
+        { model: User, as: 'user', attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl'] },
+        { model: Category, as: 'category', attributes: ['id', 'name', 'slug'] }
       ],
       order: [[sortBy as string, order as string]],
       limit: Number(limit),
@@ -382,7 +383,7 @@ export const getVideosByCategory = async (req: AuthRequest, res: Response, next:
     });
 
     res.json({
-      videos: rows.map(v => ({ ...v.toPublicJSON(), user: (v as any).user })),
+      videos: rows.map(v => ({ ...v.toPublicJSON(), user: (v as any).user, category: (v as any).category })),
       pagination: {
         page: Number(page),
         limit: Number(limit),

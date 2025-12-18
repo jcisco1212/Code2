@@ -263,7 +263,9 @@ export const categoriesAPI = {
   getCategories: (params?: any) =>
     api.get('/categories', { params }),
   getCategory: (id: string) =>
-    api.get(`/categories/${id}`)
+    api.get(`/categories/${id}`),
+  getCategoryBySlug: (slug: string) =>
+    api.get(`/categories/by-slug/${slug}`)
 };
 
 export const analyticsAPI = {
