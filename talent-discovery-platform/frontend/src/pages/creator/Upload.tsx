@@ -151,7 +151,7 @@ const Upload: React.FC = () => {
 
       // Redirect to the video page
       setTimeout(() => {
-        navigate(`/video/${videoId}`);
+        navigate(`/watch/${videoId}`);
       }, 1500);
 
     } catch (err: any) {
