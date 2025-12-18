@@ -99,7 +99,11 @@ const globalLimiter = rateLimit({
 app.use(globalLimiter);
 
 // Serve uploaded files (for development without S3)
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Disable CORP header for uploads to allow cross-origin access
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static(path.join(__dirname, '../uploads')));
 
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
