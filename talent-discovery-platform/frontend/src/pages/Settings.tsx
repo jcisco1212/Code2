@@ -16,6 +16,16 @@ import { getUploadUrl } from '../services/api';
 
 type SettingsTab = 'profile' | 'account' | 'notifications' | 'privacy' | 'appearance' | 'links';
 
+// Helper to normalize URLs - adds https:// if missing
+const normalizeUrl = (url: string): string => {
+  if (!url || url.trim() === '') return '';
+  const trimmed = url.trim();
+  // If it already has a protocol, return as-is
+  if (trimmed.match(/^https?:\/\//i)) return trimmed;
+  // Otherwise, prepend https://
+  return `https://${trimmed}`;
+};
+
 const Settings: React.FC = () => {
   const { user, refreshUser } = useAuth();
   const { theme, setTheme } = useTheme();
@@ -156,7 +166,12 @@ const Settings: React.FC = () => {
     try {
       // Don't send username in profile update - it has its own endpoint
       const { username, ...profileData } = profileForm;
-      await profileAPI.updateProfile(profileData);
+      // Normalize website URL
+      const dataToSend = {
+        ...profileData,
+        website: normalizeUrl(profileData.website)
+      };
+      await profileAPI.updateProfile(dataToSend);
       toast.success('Profile updated successfully');
     } catch (err: any) {
       toast.error(err.response?.data?.error?.message || 'Failed to update profile');
@@ -222,7 +237,20 @@ const Settings: React.FC = () => {
   const handleSocialLinksSave = async () => {
     setSaving(true);
     try {
-      await profileAPI.updateSocialLinks(socialLinks);
+      // Normalize all URLs before saving
+      const normalizedLinks = {
+        website: normalizeUrl(socialLinks.website),
+        imdb: normalizeUrl(socialLinks.imdb),
+        instagram: normalizeUrl(socialLinks.instagram),
+        twitter: normalizeUrl(socialLinks.twitter),
+        tiktok: normalizeUrl(socialLinks.tiktok),
+        youtube: normalizeUrl(socialLinks.youtube),
+        linkedin: normalizeUrl(socialLinks.linkedin),
+        spotify: normalizeUrl(socialLinks.spotify),
+        soundcloud: normalizeUrl(socialLinks.soundcloud),
+        agency: normalizeUrl(socialLinks.agency)
+      };
+      await profileAPI.updateSocialLinks(normalizedLinks);
       toast.success('Social links saved');
     } catch (err: any) {
       toast.error('Failed to save social links');
@@ -397,10 +425,10 @@ const Settings: React.FC = () => {
                       Website
                     </label>
                     <input
-                      type="url"
+                      type="text"
                       value={profileForm.website}
                       onChange={e => setProfileForm(prev => ({ ...prev, website: e.target.value }))}
-                      placeholder="https://yourwebsite.com"
+                      placeholder="yourwebsite.com"
                       className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
@@ -640,10 +668,10 @@ const Settings: React.FC = () => {
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🌐</span>
                       <input
-                        type="url"
+                        type="text"
                         value={socialLinks.website}
                         onChange={e => setSocialLinks(prev => ({ ...prev, website: e.target.value }))}
-                        placeholder="https://yourwebsite.com"
+                        placeholder="yourwebsite.com"
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
@@ -657,10 +685,10 @@ const Settings: React.FC = () => {
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🎬</span>
                       <input
-                        type="url"
+                        type="text"
                         value={socialLinks.imdb}
                         onChange={e => setSocialLinks(prev => ({ ...prev, imdb: e.target.value }))}
-                        placeholder="https://imdb.com/name/..."
+                        placeholder="imdb.com/name/..."
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
@@ -674,10 +702,10 @@ const Settings: React.FC = () => {
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">📷</span>
                       <input
-                        type="url"
+                        type="text"
                         value={socialLinks.instagram}
                         onChange={e => setSocialLinks(prev => ({ ...prev, instagram: e.target.value }))}
-                        placeholder="https://instagram.com/username"
+                        placeholder="instagram.com/username"
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
@@ -691,10 +719,10 @@ const Settings: React.FC = () => {
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">𝕏</span>
                       <input
-                        type="url"
+                        type="text"
                         value={socialLinks.twitter}
                         onChange={e => setSocialLinks(prev => ({ ...prev, twitter: e.target.value }))}
-                        placeholder="https://twitter.com/username"
+                        placeholder="twitter.com/username"
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
@@ -708,10 +736,10 @@ const Settings: React.FC = () => {
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🎵</span>
                       <input
-                        type="url"
+                        type="text"
                         value={socialLinks.tiktok}
                         onChange={e => setSocialLinks(prev => ({ ...prev, tiktok: e.target.value }))}
-                        placeholder="https://tiktok.com/@username"
+                        placeholder="tiktok.com/@username"
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
@@ -725,10 +753,10 @@ const Settings: React.FC = () => {
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">▶️</span>
                       <input
-                        type="url"
+                        type="text"
                         value={socialLinks.youtube}
                         onChange={e => setSocialLinks(prev => ({ ...prev, youtube: e.target.value }))}
-                        placeholder="https://youtube.com/@channel"
+                        placeholder="youtube.com/@channel"
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
@@ -742,10 +770,10 @@ const Settings: React.FC = () => {
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">💼</span>
                       <input
-                        type="url"
+                        type="text"
                         value={socialLinks.linkedin}
                         onChange={e => setSocialLinks(prev => ({ ...prev, linkedin: e.target.value }))}
-                        placeholder="https://linkedin.com/in/username"
+                        placeholder="linkedin.com/in/username"
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
@@ -759,10 +787,10 @@ const Settings: React.FC = () => {
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🎧</span>
                       <input
-                        type="url"
+                        type="text"
                         value={socialLinks.spotify}
                         onChange={e => setSocialLinks(prev => ({ ...prev, spotify: e.target.value }))}
-                        placeholder="https://open.spotify.com/artist/..."
+                        placeholder="open.spotify.com/artist/..."
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
@@ -776,10 +804,10 @@ const Settings: React.FC = () => {
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">☁️</span>
                       <input
-                        type="url"
+                        type="text"
                         value={socialLinks.soundcloud}
                         onChange={e => setSocialLinks(prev => ({ ...prev, soundcloud: e.target.value }))}
-                        placeholder="https://soundcloud.com/username"
+                        placeholder="soundcloud.com/username"
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
@@ -793,10 +821,10 @@ const Settings: React.FC = () => {
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🏢</span>
                       <input
-                        type="url"
+                        type="text"
                         value={socialLinks.agency}
                         onChange={e => setSocialLinks(prev => ({ ...prev, agency: e.target.value }))}
-                        placeholder="https://agency-website.com/talent/you"
+                        placeholder="agency-website.com/talent/you"
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
