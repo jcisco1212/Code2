@@ -1,21 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
 interface User {
   id: string;
   email: string;
   username: string;
   displayName: string | null;
+  firstName: string | null;
+  lastName: string | null;
   role: string;
   isActive: boolean;
   isVerified: boolean;
   emailVerified: boolean;
+  gender: string | null;
+  location: string | null;
   createdAt: string;
 }
 
+const ethnicityOptions = [
+  'American Indian or Alaska Native',
+  'Asian',
+  'Black or African American',
+  'Hispanic or Latino',
+  'Native Hawaiian or Pacific Islander',
+  'White',
+  'Two or More Races',
+  'Prefer not to say',
+  'Other'
+];
+
 const AdminUsers: React.FC = () => {
+  const currentUser = useSelector((state: RootState) => state.auth.user);
+  const isSuperAdmin = currentUser?.role === 'super_admin';
+
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -25,9 +47,23 @@ const AdminUsers: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [modalAction, setModalAction] = useState<'edit' | 'resetPassword' | 'delete'>('edit');
+  const [modalAction, setModalAction] = useState<'edit' | 'resetPassword' | 'delete' | 'create'>('edit');
   const [newPassword, setNewPassword] = useState('');
   const [editRole, setEditRole] = useState('');
+
+  // Create user form
+  const [createForm, setCreateForm] = useState({
+    firstName: '',
+    lastName: '',
+    username: '',
+    email: '',
+    password: '',
+    role: 'creator',
+    gender: '',
+    dateOfBirth: '',
+    ethnicity: '',
+    location: ''
+  });
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -57,11 +93,27 @@ const AdminUsers: React.FC = () => {
     fetchUsers();
   };
 
-  const openModal = (user: User, action: 'edit' | 'resetPassword' | 'delete') => {
+  const openModal = (user: User | null, action: 'edit' | 'resetPassword' | 'delete' | 'create') => {
     setSelectedUser(user);
     setModalAction(action);
-    setEditRole(user.role);
+    if (user) {
+      setEditRole(user.role);
+    }
     setNewPassword('');
+    if (action === 'create') {
+      setCreateForm({
+        firstName: '',
+        lastName: '',
+        username: '',
+        email: '',
+        password: '',
+        role: 'creator',
+        gender: '',
+        dateOfBirth: '',
+        ethnicity: '',
+        location: ''
+      });
+    }
     setShowModal(true);
   };
 
@@ -115,6 +167,42 @@ const AdminUsers: React.FC = () => {
     }
   };
 
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createForm.firstName || !createForm.lastName || !createForm.username || !createForm.email || !createForm.password) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    if (createForm.password.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
+    try {
+      await api.post('/admin/users', {
+        ...createForm,
+        dateOfBirth: createForm.dateOfBirth || undefined,
+        gender: createForm.gender || undefined,
+        ethnicity: createForm.ethnicity || undefined,
+        location: createForm.location || undefined
+      });
+      toast.success('User created successfully');
+      setShowModal(false);
+      fetchUsers();
+    } catch (err: any) {
+      toast.error(err.response?.data?.error?.message || 'Failed to create user');
+    }
+  };
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'super_admin': return 'bg-purple-100 text-purple-800';
+      case 'admin': return 'bg-red-100 text-red-800';
+      case 'creator': return 'bg-indigo-100 text-indigo-800';
+      case 'agent': return 'bg-blue-100 text-blue-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
@@ -122,9 +210,18 @@ const AdminUsers: React.FC = () => {
           <h1 className="text-3xl font-bold">User Management</h1>
           <p className="text-gray-600">Manage users, roles, and permissions</p>
         </div>
-        <Link to="/admin" className="text-indigo-600 hover:text-indigo-800">
-          &larr; Back to Dashboard
-        </Link>
+        <div className="flex gap-4 items-center">
+          <button
+            onClick={() => openModal(null, 'create')}
+            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
+          >
+            <PlusIcon className="w-5 h-5" />
+            Create User
+          </button>
+          <Link to="/admin" className="text-indigo-600 hover:text-indigo-800">
+            &larr; Back to Dashboard
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}
@@ -147,6 +244,7 @@ const AdminUsers: React.FC = () => {
             <option value="creator">Creator</option>
             <option value="agent">Agent</option>
             <option value="admin">Admin</option>
+            <option value="super_admin">Super Admin</option>
           </select>
           <select
             value={statusFilter}
@@ -187,13 +285,8 @@ const AdminUsers: React.FC = () => {
                     <div className="text-xs text-gray-400">@{user.username}</div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      user.role === 'admin' ? 'bg-red-100 text-red-800' :
-                      user.role === 'creator' ? 'bg-purple-100 text-purple-800' :
-                      user.role === 'agent' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {user.role}
+                    <span className={`px-2 py-1 text-xs rounded-full ${getRoleBadgeColor(user.role)}`}>
+                      {user.role.replace('_', ' ')}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -264,10 +357,146 @@ const AdminUsers: React.FC = () => {
       </div>
 
       {/* Modal */}
-      {showModal && selectedUser && (
+      {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            {modalAction === 'edit' && (
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+            {modalAction === 'create' && (
+              <>
+                <h2 className="text-xl font-bold mb-4">Create New User</h2>
+                <form onSubmit={handleCreateUser} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                      <input
+                        type="text"
+                        value={createForm.firstName}
+                        onChange={(e) => setCreateForm({ ...createForm, firstName: e.target.value })}
+                        className="w-full p-2 border rounded-lg"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                      <input
+                        type="text"
+                        value={createForm.lastName}
+                        onChange={(e) => setCreateForm({ ...createForm, lastName: e.target.value })}
+                        className="w-full p-2 border rounded-lg"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Username *</label>
+                    <input
+                      type="text"
+                      value={createForm.username}
+                      onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
+                      className="w-full p-2 border rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <input
+                      type="email"
+                      value={createForm.email}
+                      onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                      className="w-full p-2 border rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+                    <input
+                      type="password"
+                      value={createForm.password}
+                      onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                      className="w-full p-2 border rounded-lg"
+                      placeholder="Min 8 characters"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Role *</label>
+                    <select
+                      value={createForm.role}
+                      onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}
+                      className="w-full p-2 border rounded-lg"
+                    >
+                      <option value="user">User</option>
+                      <option value="creator">Creator</option>
+                      <option value="agent">Agent</option>
+                      {isSuperAdmin && <option value="admin">Admin</option>}
+                      {isSuperAdmin && <option value="super_admin">Super Admin</option>}
+                    </select>
+                    {(createForm.role === 'admin' || createForm.role === 'super_admin') && (
+                      <p className="text-xs text-orange-600 mt-1">
+                        Warning: This will grant administrative privileges
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                      <select
+                        value={createForm.gender}
+                        onChange={(e) => setCreateForm({ ...createForm, gender: e.target.value })}
+                        className="w-full p-2 border rounded-lg"
+                      >
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                        <option value="prefer_not_to_say">Prefer not to say</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                      <input
+                        type="date"
+                        value={createForm.dateOfBirth}
+                        onChange={(e) => setCreateForm({ ...createForm, dateOfBirth: e.target.value })}
+                        className="w-full p-2 border rounded-lg"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Ethnicity</label>
+                    <select
+                      value={createForm.ethnicity}
+                      onChange={(e) => setCreateForm({ ...createForm, ethnicity: e.target.value })}
+                      className="w-full p-2 border rounded-lg"
+                    >
+                      <option value="">Select ethnicity</option>
+                      {ethnicityOptions.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                    <input
+                      type="text"
+                      value={createForm.location}
+                      onChange={(e) => setCreateForm({ ...createForm, location: e.target.value })}
+                      className="w-full p-2 border rounded-lg"
+                      placeholder="City, State"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2 pt-4">
+                    <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 border rounded-lg">
+                      Cancel
+                    </button>
+                    <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                      Create User
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+
+            {modalAction === 'edit' && selectedUser && (
               <>
                 <h2 className="text-xl font-bold mb-4">Edit User Role</h2>
                 <p className="text-gray-600 mb-4">User: {selectedUser.email}</p>
@@ -279,8 +508,12 @@ const AdminUsers: React.FC = () => {
                   <option value="user">User</option>
                   <option value="creator">Creator</option>
                   <option value="agent">Agent</option>
-                  <option value="admin">Admin</option>
+                  {isSuperAdmin && <option value="admin">Admin</option>}
+                  {isSuperAdmin && <option value="super_admin">Super Admin</option>}
                 </select>
+                {!isSuperAdmin && (editRole === 'admin' || editRole === 'super_admin') && (
+                  <p className="text-xs text-red-600 mb-4">Only Super Admins can assign admin roles</p>
+                )}
                 <div className="flex justify-end gap-2">
                   <button onClick={() => setShowModal(false)} className="px-4 py-2 border rounded-lg">Cancel</button>
                   <button onClick={handleRoleChange} className="px-4 py-2 bg-indigo-600 text-white rounded-lg">Save</button>
@@ -288,7 +521,7 @@ const AdminUsers: React.FC = () => {
               </>
             )}
 
-            {modalAction === 'resetPassword' && (
+            {modalAction === 'resetPassword' && selectedUser && (
               <>
                 <h2 className="text-xl font-bold mb-4">Reset Password</h2>
                 <p className="text-gray-600 mb-4">User: {selectedUser.email}</p>
@@ -306,7 +539,7 @@ const AdminUsers: React.FC = () => {
               </>
             )}
 
-            {modalAction === 'delete' && (
+            {modalAction === 'delete' && selectedUser && (
               <>
                 <h2 className="text-xl font-bold mb-4 text-red-600">Delete User</h2>
                 <p className="text-gray-600 mb-4">Are you sure you want to delete <strong>{selectedUser.email}</strong>? This action cannot be undone.</p>
