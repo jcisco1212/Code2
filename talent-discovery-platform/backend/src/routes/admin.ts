@@ -4,11 +4,12 @@ import { validate } from '../middleware/validate';
 import { authenticate, requireRole, requireModeratorOrAdmin, requireSuperAdmin, AuthRequest } from '../middleware/auth';
 import { User, UserRole, Video, VideoStatus, Comment, CommentStatus, Report, ReportStatus, Category } from '../models';
 import { NotFoundError, ForbiddenError } from '../middleware/errorHandler';
-import { Op, fn, col } from 'sequelize';
+import { Op, fn, col, literal } from 'sequelize';
 import { cacheDelete } from '../config/redis';
 import { logAudit } from '../utils/logger';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import ExcelJS from 'exceljs';
 
 const router = Router();
 
@@ -647,6 +648,444 @@ router.put(
       });
 
       res.json({ report });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// === User Reports & Data Export ===
+
+// Helper function to calculate age from date of birth
+const calculateAge = (dateOfBirth: Date | null): number | null => {
+  if (!dateOfBirth) return null;
+  const today = new Date();
+  const birth = new Date(dateOfBirth);
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+};
+
+// Helper function to parse location into city and state
+const parseLocation = (location: string | null): { city: string; state: string } => {
+  if (!location) return { city: '', state: '' };
+  const parts = location.split(',').map(p => p.trim());
+  return {
+    city: parts[0] || '',
+    state: parts[1] || ''
+  };
+};
+
+// Get user report data with filters
+router.get(
+  '/reports/users',
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const {
+        page = 1,
+        limit = 100,
+        role,
+        gender,
+        ethnicity,
+        minAge,
+        maxAge,
+        state,
+        city,
+        startDate,
+        endDate,
+        search,
+        talentCategory,
+        artistType,
+        genre,
+        sortBy = 'createdAt',
+        sortOrder = 'DESC'
+      } = req.query;
+
+      const offset = (Number(page) - 1) * Number(limit);
+      const where: any = {};
+
+      // Role filter
+      if (role) where.role = role;
+
+      // Gender filter
+      if (gender) where.gender = gender;
+
+      // Ethnicity filter
+      if (ethnicity) where.ethnicity = ethnicity;
+
+      // Location filters (city/state)
+      if (city || state) {
+        const locationFilters: any[] = [];
+        if (city) locationFilters.push({ location: { [Op.iLike]: `${city}%` } });
+        if (state) locationFilters.push({ location: { [Op.iLike]: `%${state}%` } });
+        where[Op.and] = locationFilters;
+      }
+
+      // Date range filter
+      if (startDate || endDate) {
+        where.createdAt = {};
+        if (startDate) where.createdAt[Op.gte] = new Date(startDate as string);
+        if (endDate) where.createdAt[Op.lte] = new Date(endDate as string);
+      }
+
+      // Age range filter (calculated from dateOfBirth)
+      if (minAge || maxAge) {
+        const today = new Date();
+        if (maxAge) {
+          const minBirthDate = new Date(today.getFullYear() - Number(maxAge) - 1, today.getMonth(), today.getDate());
+          where.dateOfBirth = { ...where.dateOfBirth, [Op.gte]: minBirthDate };
+        }
+        if (minAge) {
+          const maxBirthDate = new Date(today.getFullYear() - Number(minAge), today.getMonth(), today.getDate());
+          where.dateOfBirth = { ...where.dateOfBirth, [Op.lte]: maxBirthDate };
+        }
+      }
+
+      // Artist type filter
+      if (artistType) where.artistType = artistType;
+
+      // Genre filter
+      if (genre) where.genre = { [Op.iLike]: `%${genre}%` };
+
+      // Talent category filter
+      if (talentCategory) {
+        where.talentCategories = { [Op.contains]: [talentCategory] };
+      }
+
+      // Search filter
+      if (search) {
+        where[Op.or] = [
+          { email: { [Op.iLike]: `%${search}%` } },
+          { username: { [Op.iLike]: `%${search}%` } },
+          { firstName: { [Op.iLike]: `%${search}%` } },
+          { lastName: { [Op.iLike]: `%${search}%` } }
+        ];
+      }
+
+      // Valid sort fields
+      const validSortFields = ['createdAt', 'firstName', 'lastName', 'email', 'username', 'dateOfBirth', 'role'];
+      const orderField = validSortFields.includes(sortBy as string) ? sortBy : 'createdAt';
+      const orderDir = (sortOrder as string).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+      const { count, rows } = await User.findAndCountAll({
+        where,
+        attributes: [
+          'id', 'firstName', 'lastName', 'username', 'email', 'role',
+          'gender', 'dateOfBirth', 'ethnicity', 'location',
+          'artistType', 'genre', 'talentCategories',
+          'isActive', 'isVerified', 'emailVerified',
+          'createdAt', 'lastLoginAt'
+        ],
+        order: [[orderField as string, orderDir]],
+        limit: Number(limit),
+        offset
+      });
+
+      // Transform data to include calculated fields
+      const users = rows.map(user => {
+        const userData = user.toJSON() as any;
+        const { city, state } = parseLocation(userData.location);
+        return {
+          id: userData.id,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          fullName: `${userData.firstName || ''} ${userData.lastName || ''}`.trim(),
+          username: userData.username,
+          email: userData.email,
+          role: userData.role,
+          gender: userData.gender,
+          dateOfBirth: userData.dateOfBirth,
+          age: calculateAge(userData.dateOfBirth),
+          ethnicity: userData.ethnicity,
+          city,
+          state,
+          location: userData.location,
+          artistType: userData.artistType,
+          genre: userData.genre,
+          talentCategories: userData.talentCategories,
+          isActive: userData.isActive,
+          isVerified: userData.isVerified,
+          emailVerified: userData.emailVerified,
+          createdAt: userData.createdAt,
+          lastLoginAt: userData.lastLoginAt
+        };
+      });
+
+      res.json({
+        users,
+        pagination: {
+          page: Number(page),
+          limit: Number(limit),
+          total: count,
+          pages: Math.ceil(count / Number(limit))
+        },
+        filters: {
+          role, gender, ethnicity, minAge, maxAge, state, city,
+          startDate, endDate, talentCategory, artistType, genre
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Export user report to CSV or Excel
+router.get(
+  '/reports/users/export',
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const {
+        format = 'csv',
+        role,
+        gender,
+        ethnicity,
+        minAge,
+        maxAge,
+        state,
+        city,
+        startDate,
+        endDate,
+        talentCategory,
+        artistType,
+        genre
+      } = req.query;
+
+      const where: any = {};
+
+      // Apply same filters as the report endpoint
+      if (role) where.role = role;
+      if (gender) where.gender = gender;
+      if (ethnicity) where.ethnicity = ethnicity;
+
+      if (city || state) {
+        const locationFilters: any[] = [];
+        if (city) locationFilters.push({ location: { [Op.iLike]: `${city}%` } });
+        if (state) locationFilters.push({ location: { [Op.iLike]: `%${state}%` } });
+        where[Op.and] = locationFilters;
+      }
+
+      if (startDate || endDate) {
+        where.createdAt = {};
+        if (startDate) where.createdAt[Op.gte] = new Date(startDate as string);
+        if (endDate) where.createdAt[Op.lte] = new Date(endDate as string);
+      }
+
+      if (minAge || maxAge) {
+        const today = new Date();
+        if (maxAge) {
+          const minBirthDate = new Date(today.getFullYear() - Number(maxAge) - 1, today.getMonth(), today.getDate());
+          where.dateOfBirth = { ...where.dateOfBirth, [Op.gte]: minBirthDate };
+        }
+        if (minAge) {
+          const maxBirthDate = new Date(today.getFullYear() - Number(minAge), today.getMonth(), today.getDate());
+          where.dateOfBirth = { ...where.dateOfBirth, [Op.lte]: maxBirthDate };
+        }
+      }
+
+      if (artistType) where.artistType = artistType;
+      if (genre) where.genre = { [Op.iLike]: `%${genre}%` };
+      if (talentCategory) where.talentCategories = { [Op.contains]: [talentCategory] };
+
+      // Fetch all matching users (no pagination for export)
+      const users = await User.findAll({
+        where,
+        attributes: [
+          'id', 'firstName', 'lastName', 'username', 'email', 'role',
+          'gender', 'dateOfBirth', 'ethnicity', 'location',
+          'artistType', 'genre', 'talentCategories',
+          'isActive', 'isVerified', 'emailVerified',
+          'createdAt', 'lastLoginAt'
+        ],
+        order: [['createdAt', 'DESC']]
+      });
+
+      // Transform data
+      const reportData = users.map(user => {
+        const userData = user.toJSON() as any;
+        const { city, state } = parseLocation(userData.location);
+        return {
+          'Full Name': `${userData.firstName || ''} ${userData.lastName || ''}`.trim(),
+          'First Name': userData.firstName || '',
+          'Last Name': userData.lastName || '',
+          'Username': userData.username,
+          'Email': userData.email,
+          'Role': userData.role,
+          'Gender': userData.gender || '',
+          'Date of Birth': userData.dateOfBirth ? new Date(userData.dateOfBirth).toLocaleDateString() : '',
+          'Age': calculateAge(userData.dateOfBirth) || '',
+          'Ethnicity': userData.ethnicity || '',
+          'City': city,
+          'State': state,
+          'Artist Type': userData.artistType || '',
+          'Genre': userData.genre || '',
+          'Talent Categories': (userData.talentCategories || []).join(', '),
+          'Account Status': userData.isActive ? 'Active' : 'Inactive',
+          'Email Verified': userData.emailVerified ? 'Yes' : 'No',
+          'Account Verified': userData.isVerified ? 'Yes' : 'No',
+          'Registration Date': userData.createdAt ? new Date(userData.createdAt).toLocaleDateString() : '',
+          'Last Login': userData.lastLoginAt ? new Date(userData.lastLoginAt).toLocaleDateString() : 'Never'
+        };
+      });
+
+      const timestamp = new Date().toISOString().split('T')[0];
+
+      if (format === 'excel' || format === 'xlsx') {
+        // Generate Excel file
+        const workbook = new ExcelJS.Workbook();
+        workbook.creator = 'TalentVault Admin';
+        workbook.created = new Date();
+
+        const worksheet = workbook.addWorksheet('User Report');
+
+        // Define columns
+        worksheet.columns = [
+          { header: 'Full Name', key: 'Full Name', width: 25 },
+          { header: 'First Name', key: 'First Name', width: 15 },
+          { header: 'Last Name', key: 'Last Name', width: 15 },
+          { header: 'Username', key: 'Username', width: 20 },
+          { header: 'Email', key: 'Email', width: 30 },
+          { header: 'Role', key: 'Role', width: 12 },
+          { header: 'Gender', key: 'Gender', width: 12 },
+          { header: 'Date of Birth', key: 'Date of Birth', width: 15 },
+          { header: 'Age', key: 'Age', width: 8 },
+          { header: 'Ethnicity', key: 'Ethnicity', width: 25 },
+          { header: 'City', key: 'City', width: 20 },
+          { header: 'State', key: 'State', width: 15 },
+          { header: 'Artist Type', key: 'Artist Type', width: 12 },
+          { header: 'Genre', key: 'Genre', width: 15 },
+          { header: 'Talent Categories', key: 'Talent Categories', width: 30 },
+          { header: 'Account Status', key: 'Account Status', width: 15 },
+          { header: 'Email Verified', key: 'Email Verified', width: 15 },
+          { header: 'Account Verified', key: 'Account Verified', width: 15 },
+          { header: 'Registration Date', key: 'Registration Date', width: 18 },
+          { header: 'Last Login', key: 'Last Login', width: 15 }
+        ];
+
+        // Style header row
+        worksheet.getRow(1).font = { bold: true };
+        worksheet.getRow(1).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF4F46E5' }
+        };
+        worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+
+        // Add data rows
+        reportData.forEach(row => {
+          worksheet.addRow(row);
+        });
+
+        // Add filters
+        worksheet.autoFilter = {
+          from: 'A1',
+          to: `T${reportData.length + 1}`
+        };
+
+        // Generate buffer
+        const buffer = await workbook.xlsx.writeBuffer();
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=user-report-${timestamp}.xlsx`);
+        res.send(buffer);
+      } else {
+        // Generate CSV
+        const headers = Object.keys(reportData[0] || {});
+        const csvRows = [
+          headers.join(','),
+          ...reportData.map(row =>
+            headers.map(header => {
+              const value = (row as any)[header];
+              // Escape quotes and wrap in quotes if contains comma
+              const escaped = String(value).replace(/"/g, '""');
+              return escaped.includes(',') || escaped.includes('"') || escaped.includes('\n')
+                ? `"${escaped}"`
+                : escaped;
+            }).join(',')
+          )
+        ];
+
+        const csvContent = csvRows.join('\n');
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename=user-report-${timestamp}.csv`);
+        res.send(csvContent);
+      }
+
+      logAudit('USER_REPORT_EXPORTED', req.userId!, {
+        format,
+        recordCount: reportData.length,
+        filters: { role, gender, ethnicity, minAge, maxAge, state, city, startDate, endDate }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Get report summary statistics
+router.get(
+  '/reports/users/summary',
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      // Get counts by role
+      const roleStats = await User.findAll({
+        attributes: ['role', [fn('COUNT', col('id')), 'count']],
+        group: ['role'],
+        raw: true
+      });
+
+      // Get counts by gender
+      const genderStats = await User.findAll({
+        attributes: ['gender', [fn('COUNT', col('id')), 'count']],
+        group: ['gender'],
+        raw: true
+      });
+
+      // Get counts by ethnicity
+      const ethnicityStats = await User.findAll({
+        attributes: ['ethnicity', [fn('COUNT', col('id')), 'count']],
+        group: ['ethnicity'],
+        raw: true
+      });
+
+      // Get total users
+      const totalUsers = await User.count();
+
+      // Get users registered in last 30 days
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const newUsersLast30Days = await User.count({
+        where: { createdAt: { [Op.gte]: thirtyDaysAgo } }
+      });
+
+      // Get active vs inactive
+      const activeUsers = await User.count({ where: { isActive: true } });
+      const inactiveUsers = await User.count({ where: { isActive: false } });
+
+      // Get verified vs unverified
+      const verifiedEmails = await User.count({ where: { emailVerified: true } });
+
+      res.json({
+        totalUsers,
+        newUsersLast30Days,
+        activeUsers,
+        inactiveUsers,
+        verifiedEmails,
+        unverifiedEmails: totalUsers - verifiedEmails,
+        byRole: roleStats,
+        byGender: genderStats,
+        byEthnicity: ethnicityStats
+      });
     } catch (error) {
       next(error);
     }
