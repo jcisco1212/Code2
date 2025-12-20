@@ -414,4 +414,62 @@ router.post(
   }
 );
 
+// ===========================================
+// Direct Category Image Upload (for admin use)
+// ===========================================
+
+// Configure multer for category image uploads
+const categoryImageStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const categoryDir = path.join(UPLOADS_DIR, 'categories');
+    if (!fs.existsSync(categoryDir)) fs.mkdirSync(categoryDir, { recursive: true });
+    cb(null, categoryDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${uuidv4()}${ext}`);
+  }
+});
+
+const categoryImageUpload = multer({
+  storage: categoryImageStorage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Allowed: JPG, PNG, WebP, GIF'));
+    }
+  }
+});
+
+// Direct category image upload - stores files locally
+router.post(
+  '/category-image/direct',
+  authenticate as RequestHandler,
+  categoryImageUpload.single('image'),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.file) {
+        throw new BadRequestError('No image file uploaded');
+      }
+
+      // Generate a local URL for the image
+      const localKey = `categories/${req.file.filename}`;
+      const imageUrl = `/uploads/${localKey}`;
+
+      logger.info(`Category image uploaded: ${imageUrl}`);
+
+      res.json({
+        message: 'Category image uploaded successfully',
+        url: imageUrl,
+        key: localKey
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 export default router;

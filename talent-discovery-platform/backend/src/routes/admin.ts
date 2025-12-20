@@ -370,20 +370,21 @@ router.post(
 router.put(
   '/categories/:id',
   authenticate as RequestHandler,
-  requireRole(UserRole.ADMIN) as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid category ID required'),
     body('name').optional().trim().notEmpty().withMessage('Name cannot be empty'),
     body('slug').optional().trim().notEmpty().withMessage('Slug cannot be empty'),
     body('description').optional().trim(),
     body('icon').optional().trim(),
+    body('iconUrl').optional().trim(),
     body('sortOrder').optional().isInt().withMessage('Sort order must be an integer'),
     body('isActive').optional().isBoolean()
   ]),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
-      const { name, slug, description, icon, sortOrder, isActive } = req.body;
+      const { name, slug, description, icon, iconUrl, sortOrder, isActive } = req.body;
 
       const category = await Category.findByPk(id);
       if (!category) {
@@ -404,6 +405,7 @@ router.put(
         ...(slug !== undefined && { slug }),
         ...(description !== undefined && { description }),
         ...(icon !== undefined && { icon }),
+        ...(iconUrl !== undefined && { iconUrl }),
         ...(sortOrder !== undefined && { sortOrder }),
         ...(isActive !== undefined && { isActive })
       });
@@ -421,7 +423,7 @@ router.put(
 router.delete(
   '/categories/:id',
   authenticate as RequestHandler,
-  requireRole(UserRole.ADMIN) as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid category ID required')
   ]),
