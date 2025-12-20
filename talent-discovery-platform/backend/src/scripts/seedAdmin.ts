@@ -18,20 +18,20 @@ async function seedAdmin() {
         firstName: 'Jason',
         lastName: 'Cisco',
         passwordHash: passwordHash,
-        role: UserRole.ADMIN,
+        role: UserRole.SUPER_ADMIN,
         isVerified: true,
         isActive: true
       }
     });
 
     if (created) {
-      console.log('Admin user created successfully!');
+      console.log('Super Admin user created successfully!');
       console.log('Email: jasonacisco@gmail.com');
       console.log('Password: Admin123!');
     } else {
-      console.log('User already exists, updating to admin...');
-      await user.update({ role: UserRole.ADMIN, isVerified: true, isActive: true });
-      console.log('User updated to admin');
+      console.log('User already exists, updating to super admin...');
+      await user.update({ role: UserRole.SUPER_ADMIN, isVerified: true, isActive: true });
+      console.log('User updated to super admin');
     }
 
     process.exit(0);
