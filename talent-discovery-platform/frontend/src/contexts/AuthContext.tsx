@@ -9,13 +9,29 @@ import {
   clearError
 } from '../store/slices/authSlice';
 
+interface RegisterData {
+  email: string;
+  username: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  gender?: string;
+  dateOfBirth?: string;
+  ethnicity?: string;
+  location?: string;
+  artistType?: string;
+  genre?: string;
+  talentCategories?: string[];
+  role?: string;
+}
+
 interface AuthContextType {
   user: any;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
   login: (identifier: string, password: string) => Promise<any>;
-  register: (data: { email: string; username: string; password: string; firstName: string; lastName: string }) => Promise<any>;
+  register: (data: RegisterData) => Promise<any>;
   logout: () => Promise<void>;
   clearAuthError: () => void;
   refreshUser: () => Promise<void>;
@@ -43,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result.payload;
   };
 
-  const register = async (data: { email: string; username: string; password: string; firstName: string; lastName: string }) => {
+  const register = async (data: RegisterData) => {
     const result = await dispatch(registerAction(data));
     if (registerAction.rejected.match(result)) {
       throw new Error(result.payload as string);

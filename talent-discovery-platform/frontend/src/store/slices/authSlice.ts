@@ -58,6 +58,13 @@ export const register = createAsyncThunk(
     password: string;
     firstName: string;
     lastName: string;
+    gender?: string;
+    dateOfBirth?: string;
+    ethnicity?: string;
+    location?: string;
+    artistType?: string;
+    genre?: string;
+    talentCategories?: string[];
     role?: string;
   }, { rejectWithValue }) => {
     try {
