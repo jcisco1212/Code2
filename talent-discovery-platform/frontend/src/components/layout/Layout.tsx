@@ -165,7 +165,7 @@ const Layout: React.FC = () => {
                             </Link>
                           )}
                         </Menu.Item>
-                        {(user?.role === 'agent' || user?.role === 'admin' || user?.role === 'moderator') && (
+                        {(user?.role === 'agent' || user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'moderator') && (
                           <Menu.Item>
                             {({ active }) => (
                               <Link
@@ -178,7 +178,7 @@ const Layout: React.FC = () => {
                             )}
                           </Menu.Item>
                         )}
-                        {(user?.role === 'admin' || user?.role === 'moderator') && (
+                        {(user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'moderator') && (
                           <Menu.Item>
                             {({ active }) => (
                               <Link
