@@ -24,7 +24,16 @@ router.post(
       .withMessage('Password must be 8+ chars with uppercase, lowercase, number, and special char'),
     body('firstName').trim().isLength({ min: 1, max: 100 }).withMessage('First name required'),
     body('lastName').trim().isLength({ min: 1, max: 100 }).withMessage('Last name required'),
-    body('role').optional().isIn(['user', 'creator', 'agent']).withMessage('Invalid role')
+    body('role').optional().isIn(['user', 'creator', 'agent']).withMessage('Invalid role'),
+    // New demographic fields
+    body('gender').optional().isIn(['male', 'female', 'other', 'prefer_not_to_say']).withMessage('Invalid gender'),
+    body('dateOfBirth').optional().isISO8601().withMessage('Valid date of birth required'),
+    body('ethnicity').optional().trim().isLength({ max: 100 }).withMessage('Ethnicity max 100 chars'),
+    body('location').optional().trim().isLength({ max: 255 }).withMessage('Location max 255 chars'),
+    // Music-specific fields
+    body('artistType').optional().isIn(['solo', 'band']).withMessage('Artist type must be solo or band'),
+    body('genre').optional().trim().isLength({ max: 100 }).withMessage('Genre max 100 chars'),
+    body('talentCategories').optional().isArray().withMessage('Talent categories must be an array')
   ]),
   authController.register as RequestHandler
 );

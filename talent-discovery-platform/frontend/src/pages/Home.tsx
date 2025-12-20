@@ -1,21 +1,97 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
 import { fetchTrendingVideos, fetchFeaturedVideos } from '../store/slices/videosSlice';
 import VideoCard from '../components/video/VideoCard';
 import { FireIcon, SparklesIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { categoriesAPI } from '../services/api';
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon: string | null;
+  color: string | null;
+  isActive: boolean;
+}
+
+// Default gradient colors for categories without a color set
+const defaultColors = [
+  'from-pink-500 to-rose-500',
+  'from-purple-500 to-indigo-500',
+  'from-blue-500 to-cyan-500',
+  'from-yellow-500 to-orange-500',
+  'from-green-500 to-teal-500',
+  'from-red-500 to-pink-500',
+  'from-emerald-500 to-green-500',
+  'from-violet-500 to-purple-500',
+  'from-indigo-500 to-blue-500',
+  'from-gray-500 to-slate-500'
+];
+
+// Default icons for common categories
+const defaultIcons: Record<string, string> = {
+  singing: '🎤',
+  acting: '🎭',
+  dancing: '💃',
+  comedy: '😂',
+  music: '🎵',
+  modeling: '📸',
+  sports: '⚽',
+  art: '🎨',
+  magic: '🪄',
+  'solo-artists': '🎤',
+  bands: '🎸',
+  other: '✨'
+};
 
 const Home: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { trendingVideos, featuredVideos, isLoading } = useSelector(
     (state: RootState) => state.videos
   );
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   useEffect(() => {
     dispatch(fetchTrendingVideos(12));
     dispatch(fetchFeaturedVideos(6));
+
+    // Fetch categories from database
+    const fetchCategories = async () => {
+      try {
+        const response = await categoriesAPI.getCategories();
+        setCategories(response.data.categories || []);
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+        // Fallback to empty - categories section won't show
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategories();
   }, [dispatch]);
+
+  // Get color for category (use stored color or default based on index)
+  const getCategoryColor = (category: Category, index: number) => {
+    if (category.color) {
+      // If color is a hex code, convert to gradient
+      if (category.color.startsWith('#')) {
+        return `from-[${category.color}] to-[${category.color}]`;
+      }
+      return category.color;
+    }
+    return defaultColors[index % defaultColors.length];
+  };
+
+  // Get icon for category
+  const getCategoryIcon = (category: Category) => {
+    if (category.icon) return category.icon;
+    return defaultIcons[category.slug] || '📁';
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8">
@@ -96,32 +172,33 @@ const Home: React.FC = () => {
         )}
       </section>
 
-      {/* Categories */}
+      {/* Categories - Now fetched from database */}
       <section className="mb-12">
         <h2 className="text-2xl font-bold mb-6">Browse by Category</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-          {[
-            { name: 'Singing', slug: 'singing', color: 'from-pink-500 to-rose-500', icon: '🎤' },
-            { name: 'Acting', slug: 'acting', color: 'from-purple-500 to-indigo-500', icon: '🎭' },
-            { name: 'Dancing', slug: 'dancing', color: 'from-blue-500 to-cyan-500', icon: '💃' },
-            { name: 'Comedy', slug: 'comedy', color: 'from-yellow-500 to-orange-500', icon: '😂' },
-            { name: 'Music', slug: 'music', color: 'from-green-500 to-teal-500', icon: '🎵' },
-            { name: 'Modeling', slug: 'modeling', color: 'from-red-500 to-pink-500', icon: '📸' },
-            { name: 'Sports', slug: 'sports', color: 'from-emerald-500 to-green-500', icon: '⚽' },
-            { name: 'Art', slug: 'art', color: 'from-violet-500 to-purple-500', icon: '🎨' },
-            { name: 'Magic', slug: 'magic', color: 'from-indigo-500 to-blue-500', icon: '🪄' },
-            { name: 'Other', slug: 'other', color: 'from-gray-500 to-slate-500', icon: '✨' }
-          ].map((category) => (
-            <Link
-              key={category.slug}
-              to={`/category/${category.slug}`}
-              className={`relative overflow-hidden rounded-xl p-6 bg-gradient-to-br ${category.color} text-white hover:scale-105 transition-transform`}
-            >
-              <div className="text-3xl mb-2">{category.icon}</div>
-              <div className="font-semibold">{category.name}</div>
-            </Link>
-          ))}
-        </div>
+        {categoriesLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {[...Array(10)].map((_, i) => (
+              <div key={i} className="animate-pulse rounded-xl p-6 bg-gray-200 dark:bg-gray-700 h-24" />
+            ))}
+          </div>
+        ) : categories.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {categories.map((category, index) => (
+              <Link
+                key={category.id}
+                to={`/category/${category.slug}`}
+                className={`relative overflow-hidden rounded-xl p-6 bg-gradient-to-br ${getCategoryColor(category, index)} text-white hover:scale-105 transition-transform`}
+              >
+                <div className="text-3xl mb-2">{getCategoryIcon(category)}</div>
+                <div className="font-semibold">{category.name}</div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <p>No categories available yet.</p>
+          </div>
+        )}
       </section>
 
       {/* CTA for Agents */}

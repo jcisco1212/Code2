@@ -32,7 +32,8 @@ const AdminCategories: React.FC = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/categories');
+      // Include inactive categories for admin view
+      const response = await api.get('/categories?includeInactive=true');
       setCategories(response.data.categories || response.data);
     } catch (err: any) {
       toast.error(err.response?.data?.error?.message || 'Failed to load categories');

@@ -154,7 +154,7 @@ export const requireAgent: RequestHandler = (
   next();
 };
 
-// Check if user is admin
+// Check if user is admin or super admin
 export const requireAdmin: RequestHandler = (
   req: Request,
   res: Response,
@@ -166,7 +166,7 @@ export const requireAdmin: RequestHandler = (
     return;
   }
 
-  if (authReq.user.role !== UserRole.ADMIN) {
+  if (authReq.user.role !== UserRole.ADMIN && authReq.user.role !== UserRole.SUPER_ADMIN) {
     res.status(403).json({ error: 'Admin access required' });
     return;
   }
@@ -174,7 +174,27 @@ export const requireAdmin: RequestHandler = (
   next();
 };
 
-// Check if user is admin or moderator
+// Check if user is super admin only
+export const requireSuperAdmin: RequestHandler = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  const authReq = req as AuthRequest;
+  if (!authReq.user) {
+    res.status(401).json({ error: 'Authentication required' });
+    return;
+  }
+
+  if (authReq.user.role !== UserRole.SUPER_ADMIN) {
+    res.status(403).json({ error: 'Super Admin access required' });
+    return;
+  }
+
+  next();
+};
+
+// Check if user is admin or moderator (includes super admin)
 export const requireModeratorOrAdmin: RequestHandler = (
   req: Request,
   res: Response,
@@ -186,7 +206,7 @@ export const requireModeratorOrAdmin: RequestHandler = (
     return;
   }
 
-  if (authReq.user.role !== UserRole.ADMIN) {
+  if (authReq.user.role !== UserRole.ADMIN && authReq.user.role !== UserRole.SUPER_ADMIN) {
     res.status(403).json({ error: 'Admin access required' });
     return;
   }
@@ -212,6 +232,7 @@ export default {
   requireVerifiedEmail,
   requireAgent,
   requireAdmin,
+  requireSuperAdmin,
   requireModeratorOrAdmin,
   require2FA
 };

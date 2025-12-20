@@ -33,7 +33,23 @@ const generateTokens = (user: User) => {
 // Register new user
 export const register = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { email, username, password, firstName, lastName, role } = req.body;
+    const {
+      email,
+      username,
+      password,
+      firstName,
+      lastName,
+      role,
+      // New demographic fields
+      gender,
+      dateOfBirth,
+      ethnicity,
+      location,
+      // Music-specific fields
+      artistType,
+      genre,
+      talentCategories
+    } = req.body;
 
     // Check if email already exists
     const existingEmail = await User.findOne({ where: { email } });
@@ -58,8 +74,19 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
       username,
       passwordHash: password, // Will be hashed by beforeCreate hook
       displayName,
-      role: role || UserRole.USER,
-      emailVerificationToken
+      firstName,
+      lastName,
+      role: role || UserRole.CREATOR,
+      emailVerificationToken,
+      // New demographic fields
+      gender: gender || null,
+      dateOfBirth: dateOfBirth || null,
+      ethnicity: ethnicity || null,
+      location: location || null,
+      // Music-specific fields
+      artistType: artistType || null,
+      genre: genre || null,
+      talentCategories: talentCategories || null
     });
 
     // Send verification email (don't await to not block response)

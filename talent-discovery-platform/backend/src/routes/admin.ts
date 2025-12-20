@@ -1,13 +1,14 @@
 import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validate';
-import { authenticate, requireRole, requireModeratorOrAdmin } from '../middleware/auth';
+import { authenticate, requireRole, requireModeratorOrAdmin, requireSuperAdmin, AuthRequest } from '../middleware/auth';
 import { User, UserRole, Video, VideoStatus, Comment, CommentStatus, Report, ReportStatus, Category } from '../models';
 import { NotFoundError, ForbiddenError } from '../middleware/errorHandler';
 import { Op, fn, col } from 'sequelize';
 import { cacheDelete } from '../config/redis';
 import { logAudit } from '../utils/logger';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const router = Router();
 
@@ -219,6 +220,101 @@ router.delete(
       logAudit('USER_DELETED', req.userId!, { deletedUserId: id, deletedEmail: user.email });
 
       res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Create new user (admin can create users and agents, only super admin can create admins)
+router.post(
+  '/users',
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
+  validate([
+    body('email').isEmail().normalizeEmail().withMessage('Valid email required'),
+    body('username')
+      .isLength({ min: 3, max: 50 })
+      .matches(/^[a-zA-Z0-9_]+$/)
+      .withMessage('Username must be 3-50 characters, alphanumeric and underscores only'),
+    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+    body('firstName').trim().isLength({ min: 1, max: 100 }).withMessage('First name required'),
+    body('lastName').trim().isLength({ min: 1, max: 100 }).withMessage('Last name required'),
+    body('role').isIn(['user', 'creator', 'agent', 'admin', 'super_admin']).withMessage('Invalid role'),
+    body('gender').optional().isIn(['male', 'female', 'other', 'prefer_not_to_say']).withMessage('Invalid gender'),
+    body('dateOfBirth').optional().isISO8601().withMessage('Valid date of birth required'),
+    body('ethnicity').optional().trim().isLength({ max: 100 }).withMessage('Ethnicity max 100 chars'),
+    body('location').optional().trim().isLength({ max: 255 }).withMessage('Location max 255 chars')
+  ]),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const authReq = req as AuthRequest;
+      const {
+        email,
+        username,
+        password,
+        firstName,
+        lastName,
+        role,
+        gender,
+        dateOfBirth,
+        ethnicity,
+        location
+      } = req.body;
+
+      // Only super admins can create admin or super_admin accounts
+      if ((role === 'admin' || role === 'super_admin') && authReq.user?.role !== UserRole.SUPER_ADMIN) {
+        res.status(403).json({ error: { message: 'Only Super Admins can create admin accounts' } });
+        return;
+      }
+
+      // Check if email already exists
+      const existingEmail = await User.findOne({ where: { email } });
+      if (existingEmail) {
+        res.status(400).json({ error: { message: 'Email already registered' } });
+        return;
+      }
+
+      // Check if username already exists
+      const existingUsername = await User.findOne({ where: { username } });
+      if (existingUsername) {
+        res.status(400).json({ error: { message: 'Username already taken' } });
+        return;
+      }
+
+      // Hash password
+      const salt = await bcrypt.genSalt(parseInt(process.env.BCRYPT_ROUNDS || '12'));
+      const passwordHash = await bcrypt.hash(password, salt);
+
+      // Create user
+      const displayName = firstName && lastName ? `${firstName} ${lastName}` : username;
+
+      const user = await User.create({
+        email,
+        username,
+        passwordHash,
+        displayName,
+        firstName,
+        lastName,
+        role: role as UserRole,
+        gender: gender || null,
+        dateOfBirth: dateOfBirth || null,
+        ethnicity: ethnicity || null,
+        location: location || null,
+        emailVerified: true, // Admin-created accounts are pre-verified
+        isActive: true
+      });
+
+      logAudit('ADMIN_USER_CREATED', authReq.userId!, {
+        createdUserId: user.id,
+        email,
+        role
+      });
+
+      res.status(201).json({
+        message: 'User created successfully',
+        user: user.toPublicJSON()
+      });
     } catch (error) {
       next(error);
     }

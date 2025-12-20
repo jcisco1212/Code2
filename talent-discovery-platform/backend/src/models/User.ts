@@ -6,7 +6,20 @@ export enum UserRole {
   USER = 'user',
   CREATOR = 'creator',
   AGENT = 'agent',
-  ADMIN = 'admin'
+  ADMIN = 'admin',
+  SUPER_ADMIN = 'super_admin'
+}
+
+export enum Gender {
+  MALE = 'male',
+  FEMALE = 'female',
+  OTHER = 'other',
+  PREFER_NOT_TO_SAY = 'prefer_not_to_say'
+}
+
+export enum ArtistType {
+  SOLO = 'solo',
+  BAND = 'band'
 }
 
 export interface SocialLinks {
@@ -46,6 +59,14 @@ interface UserAttributes {
   passwordResetToken: string | null;
   passwordResetExpires: Date | null;
   lastLogin: Date | null;
+  // New fields
+  gender: Gender | null;
+  dateOfBirth: Date | null;
+  ethnicity: string | null;
+  photoGallery: string[] | null;
+  artistType: ArtistType | null;
+  genre: string | null;
+  talentCategories: string[] | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -54,7 +75,8 @@ interface UserCreationAttributes extends Optional<UserAttributes,
   'id' | 'displayName' | 'firstName' | 'lastName' | 'bio' | 'avatarUrl' | 'bannerUrl' |
   'location' | 'socialLinks' | 'agencyName' | 'role' | 'isVerified' | 'isActive' | 'twoFactorEnabled' |
   'twoFactorSecret' | 'emailVerified' | 'emailVerificationToken' | 'passwordResetToken' |
-  'passwordResetExpires' | 'lastLogin' | 'createdAt' | 'updatedAt'
+  'passwordResetExpires' | 'lastLogin' | 'gender' | 'dateOfBirth' | 'ethnicity' | 'photoGallery' |
+  'artistType' | 'genre' | 'talentCategories' | 'createdAt' | 'updatedAt'
 > {}
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
@@ -81,15 +103,36 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   declare passwordResetToken: string | null;
   declare passwordResetExpires: Date | null;
   declare lastLogin: Date | null;
+  // New fields
+  declare gender: Gender | null;
+  declare dateOfBirth: Date | null;
+  declare ethnicity: string | null;
+  declare photoGallery: string[] | null;
+  declare artistType: ArtistType | null;
+  declare genre: string | null;
+  declare talentCategories: string[] | null;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
+
+  // Computed property for age
+  get age(): number | null {
+    if (!this.dateOfBirth) return null;
+    const today = new Date();
+    const birth = new Date(this.dateOfBirth);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  }
 
   // Instance methods
   public async comparePassword(candidatePassword: string): Promise<boolean> {
     return bcrypt.compare(candidatePassword, this.passwordHash);
   }
 
-  public toPublicJSON(): Partial<UserAttributes> {
+  public toPublicJSON(): Partial<UserAttributes> & { age?: number | null } {
     return {
       id: this.id,
       username: this.username,
@@ -103,11 +146,18 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       location: this.location,
       socialLinks: this.socialLinks,
       isVerified: this.isVerified,
+      gender: this.gender,
+      age: this.age,
+      ethnicity: this.ethnicity,
+      photoGallery: this.photoGallery,
+      artistType: this.artistType,
+      genre: this.genre,
+      talentCategories: this.talentCategories,
       createdAt: this.createdAt
     };
   }
 
-  public toAuthJSON(): Partial<UserAttributes> {
+  public toAuthJSON(): Partial<UserAttributes> & { age?: number | null } {
     return {
       id: this.id,
       email: this.email,
@@ -125,6 +175,14 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       location: this.location,
       socialLinks: this.socialLinks,
       isVerified: this.isVerified,
+      gender: this.gender,
+      age: this.age,
+      dateOfBirth: this.dateOfBirth,
+      ethnicity: this.ethnicity,
+      photoGallery: this.photoGallery,
+      artistType: this.artistType,
+      genre: this.genre,
+      talentCategories: this.talentCategories,
       createdAt: this.createdAt
     };
   }
@@ -203,7 +261,7 @@ User.init(
       field: 'agency_name'
     },
     role: {
-      type: DataTypes.ENUM('user', 'creator', 'agent', 'admin'),
+      type: DataTypes.ENUM('user', 'creator', 'agent', 'admin', 'super_admin'),
       defaultValue: 'user'
     },
     isVerified: {
@@ -251,6 +309,42 @@ User.init(
       allowNull: true,
       field: 'last_login'
     },
+    // New demographic and profile fields
+    gender: {
+      type: DataTypes.ENUM('male', 'female', 'other', 'prefer_not_to_say'),
+      allowNull: true
+    },
+    dateOfBirth: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+      field: 'date_of_birth'
+    },
+    ethnicity: {
+      type: DataTypes.STRING(100),
+      allowNull: true
+    },
+    photoGallery: {
+      type: DataTypes.ARRAY(DataTypes.STRING(500)),
+      allowNull: true,
+      defaultValue: [],
+      field: 'photo_gallery'
+    },
+    // Music-specific fields
+    artistType: {
+      type: DataTypes.ENUM('solo', 'band'),
+      allowNull: true,
+      field: 'artist_type'
+    },
+    genre: {
+      type: DataTypes.STRING(100),
+      allowNull: true
+    },
+    talentCategories: {
+      type: DataTypes.ARRAY(DataTypes.UUID),
+      allowNull: true,
+      defaultValue: [],
+      field: 'talent_categories'
+    },
     createdAt: {
       type: DataTypes.DATE,
       field: 'created_at'
@@ -267,7 +361,12 @@ User.init(
     indexes: [
       { fields: ['email'], unique: true },
       { fields: ['username'], unique: true },
-      { fields: ['role'] }
+      { fields: ['role'] },
+      { fields: ['gender'] },
+      { fields: ['ethnicity'] },
+      { fields: ['location'] },
+      { fields: ['artist_type'] },
+      { fields: ['genre'] }
     ],
     hooks: {
       beforeCreate: async (user: User) => {
