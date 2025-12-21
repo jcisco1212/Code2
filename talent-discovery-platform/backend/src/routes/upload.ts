@@ -19,11 +19,22 @@ const router = Router();
 
 // Check if ffmpeg is available
 let ffmpegAvailable = false;
-try {
-  execSync('ffmpeg -version', { stdio: 'ignore' });
-  ffmpegAvailable = true;
-  logger.info('FFmpeg is available - video transcoding enabled');
-} catch {
+let ffmpegPath = 'ffmpeg';
+const possiblePaths = ['/usr/bin/ffmpeg', '/usr/local/bin/ffmpeg', '/opt/homebrew/bin/ffmpeg', 'ffmpeg'];
+
+for (const testPath of possiblePaths) {
+  try {
+    execSync(`${testPath} -version`, { stdio: 'ignore' });
+    ffmpegAvailable = true;
+    ffmpegPath = testPath;
+    logger.info(`FFmpeg found at ${testPath} - video transcoding enabled`);
+    break;
+  } catch {
+    // Try next path
+  }
+}
+
+if (!ffmpegAvailable) {
   logger.warn('FFmpeg not found - videos will be served without transcoding');
 }
 
@@ -31,6 +42,8 @@ try {
 let ffmpeg: any = null;
 if (ffmpegAvailable) {
   ffmpeg = require('fluent-ffmpeg');
+  ffmpeg.setFfmpegPath(ffmpegPath);
+  ffmpeg.setFfprobePath(ffmpegPath.replace('ffmpeg', 'ffprobe'));
 }
 
 // Transcode video to web-compatible MP4
