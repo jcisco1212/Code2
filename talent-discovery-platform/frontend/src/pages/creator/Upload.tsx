@@ -156,12 +156,10 @@ const Upload: React.FC = () => {
       }
 
       setUploadProgress(100);
-      toast.success('Video uploaded successfully!');
+      toast.success('Video uploaded! Processing in background...');
 
-      // Redirect to the video page
-      setTimeout(() => {
-        navigate(`/watch/${videoId}`);
-      }, 1500);
+      // Redirect to the video page immediately
+      navigate(`/watch/${videoId}`);
 
     } catch (err: any) {
       console.error('Upload error:', err);

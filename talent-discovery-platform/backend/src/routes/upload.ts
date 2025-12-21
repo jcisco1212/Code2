@@ -357,71 +357,75 @@ router.post(
       const transcodedPath = path.join(videoDir, 'video.mp4');
       fs.renameSync(req.file.path, originalPath);
 
-      // Set status to processing while we transcode
+      // Set status to processing
       await video.update({
         status: VideoStatus.PROCESSING,
         originalFilename: req.file.originalname,
         fileSize: req.file.size
       });
 
-      logger.info(`Transcoding video ${videoId} to web-compatible format...`);
-
-      try {
-        // Get video duration
-        const duration = await getVideoDuration(originalPath);
-
-        // Transcode to web-compatible MP4
-        await transcodeToWebMP4(originalPath, transcodedPath);
-
-        // Generate a local URL for the transcoded video
-        const localKey = `videos/${req.userId}/${videoId}/video.mp4`;
-        const videoUrl = `/uploads/${localKey}`;
-
-        // Update video record with transcoded file
-        await video.update({
-          s3Key: localKey,
-          status: VideoStatus.READY,
-          hlsUrl: videoUrl,
-          duration
-        });
-
-        // Clean up original file to save space
-        try {
-          fs.unlinkSync(originalPath);
-        } catch (e) {
-          logger.warn(`Failed to delete original file: ${e}`);
-        }
-
-        logger.info(`Video ${videoId} transcoded and ready`);
-      } catch (transcodeError: any) {
-        logger.error(`Transcoding failed for video ${videoId}:`, transcodeError);
-
-        // Fallback: use original file if transcoding fails
-        const localKey = `videos/${req.userId}/${videoId}/original${ext}`;
-        const videoUrl = `/uploads/${localKey}`;
-
-        await video.update({
-          s3Key: localKey,
-          status: VideoStatus.READY,
-          hlsUrl: videoUrl
-        });
-
-        logger.warn(`Using original file for video ${videoId} (transcoding failed)`);
-      }
-
-      // Clear trending cache so new videos appear immediately
-      await cacheDelete('trending:12');
-      await cacheDelete('trending:20');
+      // Return response immediately - transcoding happens in background
+      const localKey = `videos/${req.userId}/${videoId}/video.mp4`;
+      const videoUrl = `/uploads/${localKey}`;
 
       res.json({
-        message: 'Video uploaded successfully',
+        message: 'Video uploaded successfully. Processing in background...',
         video: {
           id: video.id,
           title: video.title,
-          status: video.status,
+          status: VideoStatus.PROCESSING,
           videoUrl
         }
       });
+
+      // Run transcoding in background (don't await)
+      const userId = req.userId;
+      (async () => {
+        logger.info(`Transcoding video ${videoId} to web-compatible format...`);
+
+        try {
+          // Get video duration
+          const duration = await getVideoDuration(originalPath);
+
+          // Transcode to web-compatible MP4
+          await transcodeToWebMP4(originalPath, transcodedPath);
+
+          // Update video record with transcoded file
+          await video.update({
+            s3Key: localKey,
+            status: VideoStatus.READY,
+            hlsUrl: videoUrl,
+            duration
+          });
+
+          // Clean up original file to save space
+          try {
+            fs.unlinkSync(originalPath);
+          } catch (e) {
+            logger.warn(`Failed to delete original file: ${e}`);
+          }
+
+          logger.info(`Video ${videoId} transcoded and ready`);
+        } catch (transcodeError: any) {
+          logger.error(`Transcoding failed for video ${videoId}:`, transcodeError);
+
+          // Fallback: use original file if transcoding fails
+          const fallbackKey = `videos/${userId}/${videoId}/original${ext}`;
+          const fallbackUrl = `/uploads/${fallbackKey}`;
+
+          await video.update({
+            s3Key: fallbackKey,
+            status: VideoStatus.READY,
+            hlsUrl: fallbackUrl
+          });
+
+          logger.warn(`Using original file for video ${videoId} (transcoding failed)`);
+        }
+
+        // Clear trending cache so new videos appear
+        await cacheDelete('trending:12');
+        await cacheDelete('trending:20');
+      })();
     } catch (error) {
       next(error);
     }
