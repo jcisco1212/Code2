@@ -97,8 +97,10 @@ const AdminReports: React.FC = () => {
     try {
       const response = await api.get('/admin/reports/users/summary');
       setSummary(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch summary:', error);
+      const errorMsg = error.response?.data?.error?.message || error.response?.data?.message || 'Failed to load summary';
+      toast.error(errorMsg);
     }
   };
 
@@ -114,11 +116,12 @@ const AdminReports: React.FC = () => {
       });
 
       const response = await api.get(`/admin/reports/users?${params.toString()}`);
-      setUsers(response.data.users);
-      setPagination(response.data.pagination);
-    } catch (error) {
+      setUsers(response.data.users || []);
+      setPagination(response.data.pagination || { page: 1, limit: 50, total: 0, pages: 0 });
+    } catch (error: any) {
       console.error('Failed to fetch users:', error);
-      toast.error('Failed to load report data');
+      const errorMsg = error.response?.data?.error?.message || error.response?.data?.message || error.message || 'Failed to load report data';
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -149,9 +152,21 @@ const AdminReports: React.FC = () => {
       window.URL.revokeObjectURL(url);
 
       toast.success(`Report exported as ${format.toUpperCase()}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Export failed:', error);
-      toast.error('Failed to export report');
+      // For blob responses, we need to parse the error differently
+      if (error.response?.data instanceof Blob) {
+        const text = await error.response.data.text();
+        try {
+          const json = JSON.parse(text);
+          toast.error(json.error?.message || json.message || 'Failed to export report');
+        } catch {
+          toast.error('Failed to export report');
+        }
+      } else {
+        const errorMsg = error.response?.data?.error?.message || error.response?.data?.message || 'Failed to export report';
+        toast.error(errorMsg);
+      }
     } finally {
       setExporting(false);
     }

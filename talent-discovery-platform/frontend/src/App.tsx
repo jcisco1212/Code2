@@ -51,6 +51,7 @@ import AdminReports from './pages/admin/Reports';
 import AdminCategories from './pages/admin/Categories';
 import AdminModeration from './pages/admin/Moderation';
 import AdminComplaints from './pages/admin/Complaints';
+import AdminAgentVerification from './pages/admin/AgentVerification';
 
 function App() {
   return (
@@ -101,6 +102,7 @@ function App() {
               <Route path="admin/moderation" element={<AdminRoute><AdminModeration /></AdminRoute>} />
               <Route path="admin/complaints" element={<AdminRoute><AdminComplaints /></AdminRoute>} />
               <Route path="admin/ai-moderation" element={<AdminRoute><AdminModeration /></AdminRoute>} />
+              <Route path="admin/verify-agents" element={<AdminRoute><AdminAgentVerification /></AdminRoute>} />
 
               {/* 404 */}
               <Route path="*" element={<Navigate to="/" replace />} />

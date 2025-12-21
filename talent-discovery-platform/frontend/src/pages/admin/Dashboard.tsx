@@ -204,7 +204,7 @@ const AdminDashboard: React.FC = () => {
         </Link>
 
         <Link
-          to="/admin/users?role=agent&verified=false"
+          to="/admin/verify-agents"
           className="flex items-center gap-3 p-4 bg-blue-500/10 dark:bg-blue-500/20 rounded-xl
                    border border-blue-500/20 hover:border-blue-500/40 transition-colors"
         >
