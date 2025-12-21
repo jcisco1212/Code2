@@ -316,8 +316,12 @@ export const messagesAPI = {
     api.get('/messages/conversations'),
   getMessages: (conversationId: string, params?: any) =>
     api.get(`/messages/conversation/${conversationId}`, { params }),
-  sendMessage: (receiverId: string, content: string) =>
-    api.post('/messages', { receiverId, content }),
+  sendMessage: (conversationId: string, content: string) =>
+    api.post(`/messages/conversation/${conversationId}`, { content }),
+  startConversation: (userId: string, content: string) =>
+    api.post('/messages/start', { userId, content }),
+  markAsRead: (conversationId: string) =>
+    api.put(`/messages/conversation/${conversationId}/read`),
   getUnreadCount: () =>
     api.get('/messages/unread-count')
 };
@@ -340,4 +344,87 @@ export const savedVideosAPI = {
     api.delete(`/saved-videos/${videoId}`),
   checkSaved: (videoId: string) =>
     api.get(`/saved-videos/check/${videoId}`)
+};
+
+export const historyAPI = {
+  getHistory: (params?: any) =>
+    api.get('/history', { params }),
+  clearHistory: () =>
+    api.delete('/history'),
+  removeFromHistory: (videoId: string) =>
+    api.delete(`/history/${videoId}`),
+  getSaved: (params?: any) =>
+    api.get('/history/saved', { params }),
+  saveVideo: (videoId: string) =>
+    api.post(`/history/saved/${videoId}`),
+  unsaveVideo: (videoId: string) =>
+    api.delete(`/history/saved/${videoId}`),
+  checkSaved: (videoId: string) =>
+    api.get(`/history/saved/${videoId}/check`)
+};
+
+export const playlistsAPI = {
+  getPlaylists: () =>
+    api.get('/playlists'),
+  getUserPlaylists: (userId: string) =>
+    api.get(`/playlists/user/${userId}`),
+  getPlaylist: (id: string) =>
+    api.get(`/playlists/${id}`),
+  createPlaylist: (data: { name: string; description?: string; isPublic?: boolean }) =>
+    api.post('/playlists', data),
+  updatePlaylist: (id: string, data: any) =>
+    api.put(`/playlists/${id}`, data),
+  deletePlaylist: (id: string) =>
+    api.delete(`/playlists/${id}`),
+  addToPlaylist: (playlistId: string, videoId: string) =>
+    api.post(`/playlists/${playlistId}/videos`, { videoId }),
+  removeFromPlaylist: (playlistId: string, videoId: string) =>
+    api.delete(`/playlists/${playlistId}/videos/${videoId}`)
+};
+
+export const castingListsAPI = {
+  getLists: () =>
+    api.get('/casting-lists'),
+  getList: (id: string) =>
+    api.get(`/casting-lists/${id}`),
+  createList: (data: { name: string; description?: string; projectName?: string; deadline?: string }) =>
+    api.post('/casting-lists', data),
+  updateList: (id: string, data: any) =>
+    api.put(`/casting-lists/${id}`, data),
+  deleteList: (id: string) =>
+    api.delete(`/casting-lists/${id}`),
+  addTalent: (listId: string, talentId: string, data?: { notes?: string; status?: string }) =>
+    api.post(`/casting-lists/${listId}/talents`, { talentId, ...data }),
+  updateTalentStatus: (listId: string, talentId: string, status: string) =>
+    api.put(`/casting-lists/${listId}/talents/${talentId}`, { status }),
+  updateTalentNotes: (listId: string, talentId: string, notes: string) =>
+    api.put(`/casting-lists/${listId}/talents/${talentId}`, { notes }),
+  removeTalent: (listId: string, talentId: string) =>
+    api.delete(`/casting-lists/${listId}/talents/${talentId}`),
+  // Talent Notes (separate from casting lists)
+  getNotes: (talentId?: string) =>
+    api.get('/talent-notes', { params: { talentId } }),
+  createNote: (talentId: string, content: string) =>
+    api.post('/talent-notes', { talentId, content }),
+  updateNote: (noteId: string, content: string) =>
+    api.put(`/talent-notes/${noteId}`, { content }),
+  deleteNote: (noteId: string) =>
+    api.delete(`/talent-notes/${noteId}`),
+  togglePinNote: (noteId: string, isPinned: boolean) =>
+    api.put(`/talent-notes/${noteId}`, { isPinned })
+};
+
+export const announcementsAPI = {
+  getActive: () =>
+    api.get('/announcements/active'),
+  getAll: () =>
+    api.get('/announcements'),
+  create: (data: { title: string; content: string; type?: string; target?: string; isPinned?: boolean; startsAt?: string; expiresAt?: string }) =>
+    api.post('/announcements', data),
+  update: (id: string, data: any) =>
+    api.put(`/announcements/${id}`, data),
+  toggleActive: (id: string, isActive: boolean) =>
+    api.put(`/announcements/${id}`, { isActive }),
+  delete: (id: string) =>
+    api.delete(`/announcements/${id}`)
 };

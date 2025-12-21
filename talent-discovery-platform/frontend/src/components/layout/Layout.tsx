@@ -17,7 +17,15 @@ import {
   ChevronDownIcon,
   SunIcon,
   MoonIcon,
-  ComputerDesktopIcon
+  ComputerDesktopIcon,
+  BookmarkIcon,
+  ClockIcon,
+  EnvelopeIcon,
+  FolderIcon,
+  ClipboardDocumentListIcon,
+  PencilSquareIcon,
+  MegaphoneIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
@@ -52,7 +60,26 @@ const Layout: React.FC = () => {
     ? [
         { name: 'Upload', href: '/upload', icon: ArrowUpTrayIcon },
         { name: 'Studio', href: '/studio', icon: ChartBarIcon },
-        { name: 'Analytics', href: '/analytics', icon: ChartBarIcon }
+        { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
+        { name: 'Library', href: '/library', icon: FolderIcon },
+        { name: 'Messages', href: '/messages', icon: EnvelopeIcon }
+      ]
+    : [];
+
+  const agentNavigation = (user?.role === 'agent' || user?.role === 'admin' || user?.role === 'super_admin')
+    ? [
+        { name: 'Agent Dashboard', href: '/agent', icon: ChartBarIcon },
+        { name: 'Discover Talent', href: '/agent/discover', icon: MagnifyingGlassIcon },
+        { name: 'Casting Lists', href: '/agent/casting-lists', icon: ClipboardDocumentListIcon },
+        { name: 'Talent Notes', href: '/agent/notes', icon: PencilSquareIcon }
+      ]
+    : [];
+
+  const adminNavigation = (user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'moderator')
+    ? [
+        { name: 'Admin Panel', href: '/admin', icon: Cog6ToothIcon },
+        { name: 'Announcements', href: '/admin/announcements', icon: MegaphoneIcon },
+        { name: 'Audit Logs', href: '/admin/audit-logs', icon: DocumentTextIcon }
       ]
     : [];
 
@@ -169,6 +196,28 @@ const Layout: React.FC = () => {
                             >
                               <ChartBarIcon className="w-5 h-5" />
                               Creator Studio
+                            </Link>
+                          )}
+                        </Menu.Item>
+                        <Menu.Item>
+                          {({ active }) => (
+                            <Link
+                              to="/library"
+                              className={`${active ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-200'} flex items-center gap-3 px-4 py-2.5 text-sm transition-colors`}
+                            >
+                              <FolderIcon className="w-5 h-5" />
+                              Library
+                            </Link>
+                          )}
+                        </Menu.Item>
+                        <Menu.Item>
+                          {({ active }) => (
+                            <Link
+                              to="/messages"
+                              className={`${active ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-200'} flex items-center gap-3 px-4 py-2.5 text-sm transition-colors`}
+                            >
+                              <EnvelopeIcon className="w-5 h-5" />
+                              Messages
                             </Link>
                           )}
                         </Menu.Item>
@@ -317,7 +366,7 @@ const Layout: React.FC = () => {
                 <XMarkIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
               </button>
             </div>
-            <nav className="p-4 space-y-2">
+            <nav className="p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-80px)]">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
@@ -329,6 +378,57 @@ const Layout: React.FC = () => {
                   {item.name}
                 </Link>
               ))}
+              {userNavigation.length > 0 && (
+                <>
+                  <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-white/20 to-transparent my-4" />
+                  <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Your Content</p>
+                  {userNavigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      onClick={() => setSidebarOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-primary-500/10 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    >
+                      <item.icon className="w-5 h-5" />
+                      {item.name}
+                    </Link>
+                  ))}
+                </>
+              )}
+              {agentNavigation.length > 0 && (
+                <>
+                  <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-white/20 to-transparent my-4" />
+                  <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Agent Tools</p>
+                  {agentNavigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      onClick={() => setSidebarOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-primary-500/10 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    >
+                      <item.icon className="w-5 h-5" />
+                      {item.name}
+                    </Link>
+                  ))}
+                </>
+              )}
+              {adminNavigation.length > 0 && (
+                <>
+                  <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-white/20 to-transparent my-4" />
+                  <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</p>
+                  {adminNavigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      onClick={() => setSidebarOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-primary-500/10 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    >
+                      <item.icon className="w-5 h-5" />
+                      {item.name}
+                    </Link>
+                  ))}
+                </>
+              )}
               <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-white/20 to-transparent my-4" />
               <Link to="/about" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-colors">
                 About

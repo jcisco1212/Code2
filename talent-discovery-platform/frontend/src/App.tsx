@@ -36,12 +36,20 @@ import Studio from './pages/creator/Studio';
 import Analytics from './pages/creator/Analytics';
 import Settings from './pages/Settings';
 
+// User Library Pages
+import Library from './pages/Library';
+import PlaylistDetail from './pages/PlaylistDetail';
+import Messages from './pages/Messages';
+
 // Agent Pages
 import AgentDashboard from './pages/agent/Dashboard';
 import AgentDiscover from './pages/agent/Discover';
 import AgentBookmarks from './pages/agent/Bookmarks';
 import AgentMessages from './pages/agent/Messages';
 import AgentTrends from './pages/agent/Trends';
+import AgentCastingLists from './pages/agent/CastingLists';
+import AgentCastingListDetail from './pages/agent/CastingListDetail';
+import AgentTalentNotes from './pages/agent/TalentNotes';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/Dashboard';
@@ -52,6 +60,8 @@ import AdminCategories from './pages/admin/Categories';
 import AdminModeration from './pages/admin/Moderation';
 import AdminComplaints from './pages/admin/Complaints';
 import AdminAgentVerification from './pages/admin/AgentVerification';
+import AdminAnnouncements from './pages/admin/Announcements';
+import AdminAuditLogs from './pages/admin/AuditLogs';
 
 function App() {
   return (
@@ -86,12 +96,23 @@ function App() {
               <Route path="analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
               <Route path="settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
+              {/* User Library Routes */}
+              <Route path="library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
+              <Route path="library/:tab" element={<ProtectedRoute><Library /></ProtectedRoute>} />
+              <Route path="playlist/:playlistId" element={<ProtectedRoute><PlaylistDetail /></ProtectedRoute>} />
+              <Route path="messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+              <Route path="messages/:conversationId" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+
               {/* Agent Routes */}
               <Route path="agent" element={<AgentRoute><AgentDashboard /></AgentRoute>} />
               <Route path="agent/discover" element={<AgentRoute><AgentDiscover /></AgentRoute>} />
               <Route path="agent/bookmarks" element={<AgentRoute><AgentBookmarks /></AgentRoute>} />
               <Route path="agent/messages" element={<AgentRoute><AgentMessages /></AgentRoute>} />
               <Route path="agent/trends" element={<AgentRoute><AgentTrends /></AgentRoute>} />
+              <Route path="agent/casting-lists" element={<AgentRoute><AgentCastingLists /></AgentRoute>} />
+              <Route path="agent/casting-lists/:listId" element={<AgentRoute><AgentCastingListDetail /></AgentRoute>} />
+              <Route path="agent/notes" element={<AgentRoute><AgentTalentNotes /></AgentRoute>} />
+              <Route path="agent/notes/:talentId" element={<AgentRoute><AgentTalentNotes /></AgentRoute>} />
 
               {/* Admin Routes */}
               <Route path="admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
@@ -103,6 +124,8 @@ function App() {
               <Route path="admin/complaints" element={<AdminRoute><AdminComplaints /></AdminRoute>} />
               <Route path="admin/ai-moderation" element={<AdminRoute><AdminModeration /></AdminRoute>} />
               <Route path="admin/verify-agents" element={<AdminRoute><AdminAgentVerification /></AdminRoute>} />
+              <Route path="admin/announcements" element={<AdminRoute><AdminAnnouncements /></AdminRoute>} />
+              <Route path="admin/audit-logs" element={<AdminRoute><AdminAuditLogs /></AdminRoute>} />
 
               {/* 404 */}
               <Route path="*" element={<Navigate to="/" replace />} />

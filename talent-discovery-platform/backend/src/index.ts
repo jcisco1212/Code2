@@ -32,6 +32,12 @@ import notificationRoutes from './routes/notifications';
 import reportRoutes from './routes/reports';
 import messageRoutes from './routes/messages';
 import savedVideoRoutes from './routes/savedVideos';
+import historyRoutes from './routes/history';
+import playlistRoutes from './routes/playlists';
+import castingListRoutes from './routes/castingLists';
+import announcementRoutes from './routes/announcements';
+import talentNotesRoutes from './routes/talentNotes';
+import adminAuditLogsRoutes from './routes/adminAuditLogs';
 
 dotenv.config();
 
@@ -134,6 +140,12 @@ app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/reports', reportRoutes);
 app.use('/api/v1/messages', messageRoutes);
 app.use('/api/v1/saved-videos', savedVideoRoutes);
+app.use('/api/v1/history', historyRoutes);
+app.use('/api/v1/playlists', playlistRoutes);
+app.use('/api/v1/casting-lists', castingListRoutes);
+app.use('/api/v1/announcements', announcementRoutes);
+app.use('/api/v1/talent-notes', talentNotesRoutes);
+app.use('/api/v1/admin/audit-logs', adminAuditLogsRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
