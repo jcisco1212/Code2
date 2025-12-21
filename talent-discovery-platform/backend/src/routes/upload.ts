@@ -13,12 +13,29 @@ import { NotFoundError, BadRequestError, ForbiddenError } from '../middleware/er
 import { logger } from '../utils/logger';
 import rateLimit from 'express-rate-limit';
 import { cacheDelete } from '../config/redis';
-import ffmpeg from 'fluent-ffmpeg';
+import { execSync } from 'child_process';
 
 const router = Router();
 
+// Check if ffmpeg is available
+let ffmpegAvailable = false;
+try {
+  execSync('ffmpeg -version', { stdio: 'ignore' });
+  ffmpegAvailable = true;
+  logger.info('FFmpeg is available - video transcoding enabled');
+} catch {
+  logger.warn('FFmpeg not found - videos will be served without transcoding');
+}
+
+// Only import fluent-ffmpeg if ffmpeg is available
+let ffmpeg: any = null;
+if (ffmpegAvailable) {
+  ffmpeg = require('fluent-ffmpeg');
+}
+
 // Transcode video to web-compatible MP4
 function transcodeToWebMP4(inputPath: string, outputPath: string): Promise<void> {
+  if (!ffmpeg) return Promise.reject(new Error('FFmpeg not available'));
   return new Promise((resolve, reject) => {
     ffmpeg(inputPath)
       .outputOptions([
@@ -32,14 +49,15 @@ function transcodeToWebMP4(inputPath: string, outputPath: string): Promise<void>
       ])
       .output(outputPath)
       .on('end', () => resolve())
-      .on('error', (err) => reject(err));
+      .on('error', (err: Error) => reject(err));
   });
 }
 
 // Get video duration using ffprobe
 function getVideoDuration(filePath: string): Promise<number> {
+  if (!ffmpeg) return Promise.resolve(0);
   return new Promise((resolve, reject) => {
-    ffmpeg.ffprobe(filePath, (err, metadata) => {
+    ffmpeg.ffprobe(filePath, (err: Error | null, metadata: any) => {
       if (err) {
         reject(err);
         return;
@@ -381,6 +399,24 @@ router.post(
       // Run transcoding in background (don't await)
       const userId = req.userId;
       (async () => {
+        // If ffmpeg isn't available, just use the original file directly
+        if (!ffmpegAvailable) {
+          logger.info(`FFmpeg not available - using original file for video ${videoId}`);
+          const originalKey = `videos/${userId}/${videoId}/original${ext}`;
+          const originalUrl = `/uploads/${originalKey}`;
+
+          await video.update({
+            s3Key: originalKey,
+            status: VideoStatus.READY,
+            hlsUrl: originalUrl
+          });
+
+          // Clear trending cache
+          await cacheDelete('trending:12');
+          await cacheDelete('trending:20');
+          return;
+        }
+
         logger.info(`Transcoding video ${videoId} to web-compatible format...`);
 
         try {
