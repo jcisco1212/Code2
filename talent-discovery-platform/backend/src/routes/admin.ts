@@ -781,7 +781,7 @@ router.get(
           'gender', 'dateOfBirth', 'ethnicity', 'location',
           'artistType', 'genre', 'talentCategories',
           'isActive', 'isVerified', 'emailVerified',
-          'createdAt', 'lastLoginAt'
+          'createdAt', 'lastLogin'
         ],
         order: [[orderField as string, orderDir]],
         limit: Number(limit),
@@ -814,7 +814,7 @@ router.get(
           isVerified: userData.isVerified,
           emailVerified: userData.emailVerified,
           createdAt: userData.createdAt,
-          lastLoginAt: userData.lastLoginAt
+          lastLoginAt: userData.lastLogin
         };
       });
 
@@ -904,7 +904,7 @@ router.get(
           'gender', 'dateOfBirth', 'ethnicity', 'location',
           'artistType', 'genre', 'talentCategories',
           'isActive', 'isVerified', 'emailVerified',
-          'createdAt', 'lastLoginAt'
+          'createdAt', 'lastLogin'
         ],
         order: [['createdAt', 'DESC']]
       });
@@ -933,7 +933,7 @@ router.get(
           'Email Verified': userData.emailVerified ? 'Yes' : 'No',
           'Account Verified': userData.isVerified ? 'Yes' : 'No',
           'Registration Date': userData.createdAt ? new Date(userData.createdAt).toLocaleDateString() : '',
-          'Last Login': userData.lastLoginAt ? new Date(userData.lastLoginAt).toLocaleDateString() : 'Never'
+          'Last Login': userData.lastLogin ? new Date(userData.lastLogin).toLocaleDateString() : 'Never'
         };
       });
 
