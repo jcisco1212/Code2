@@ -43,12 +43,21 @@ const Upload: React.FC = () => {
     fetchCategories();
   }, []);
 
-  const allowedTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm'];
+  // Expanded MIME types for better compatibility
+  const allowedTypes = [
+    'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm',
+    'video/x-m4v', 'video/x-matroska', 'video/mpeg', 'video/3gpp',
+    'video/x-ms-wmv', 'video/x-flv', 'application/octet-stream'
+  ];
+  const allowedExtensions = ['.mp4', '.mov', '.avi', '.webm', '.m4v', '.mkv', '.mpeg', '.mpg', '.3gp', '.wmv', '.flv'];
   const maxSize = 500 * 1024 * 1024; // 500MB
 
   const handleFileSelect = (file: File) => {
-    if (!allowedTypes.includes(file.type)) {
-      toast.error('Invalid file type. Allowed: MP4, MOV, AVI, WebM');
+    const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+    const isValidType = allowedTypes.includes(file.type) || allowedExtensions.includes(ext);
+
+    if (!isValidType) {
+      toast.error('Invalid file type. Allowed: MP4, MOV, AVI, WebM, MKV, M4V');
       return;
     }
     if (file.size > maxSize) {
@@ -199,7 +208,7 @@ const Upload: React.FC = () => {
           <input
             ref={fileInputRef}
             type="file"
-            accept="video/mp4,video/quicktime,video/x-msvideo,video/webm"
+            accept="video/*,.mp4,.mov,.avi,.webm,.mkv,.m4v,.mpeg,.mpg,.3gp"
             onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
             className="hidden"
           />

@@ -75,11 +75,21 @@ const upload = multer({
   storage,
   limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm'];
-    if (allowedTypes.includes(file.mimetype)) {
+    // Expanded MIME types for better compatibility
+    const allowedTypes = [
+      'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm',
+      'video/x-m4v', 'video/x-matroska', 'video/mpeg', 'video/3gpp',
+      'video/x-ms-wmv', 'video/x-flv', 'application/octet-stream'
+    ];
+    const allowedExtensions = ['.mp4', '.mov', '.avi', '.webm', '.m4v', '.mkv', '.mpeg', '.mpg', '.3gp', '.wmv', '.flv'];
+
+    const ext = path.extname(file.originalname).toLowerCase();
+    const isValidType = allowedTypes.includes(file.mimetype) || allowedExtensions.includes(ext);
+
+    if (isValidType) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Allowed: MP4, MOV, AVI, WebM'));
+      cb(new Error('Invalid file type. Allowed: MP4, MOV, AVI, WebM, MKV, M4V, MPEG'));
     }
   }
 });
