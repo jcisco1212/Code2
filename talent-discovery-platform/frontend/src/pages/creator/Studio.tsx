@@ -244,7 +244,7 @@ const Studio: React.FC = () => {
       {/* Quick Links */}
       <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
         <Link
-          to="/creator/analytics"
+          to="/analytics"
           className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors whitespace-nowrap"
         >
           <ChartBarIcon className="w-5 h-5" />

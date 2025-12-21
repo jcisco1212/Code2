@@ -55,6 +55,7 @@ const Profile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [videosLoading, setVideosLoading] = useState(true);
   const [following, setFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'videos' | 'about'>('videos');
 
   const isOwnProfile = currentUser?.id === profile?.id;
@@ -105,6 +106,9 @@ const Profile: React.FC = () => {
       return;
     }
 
+    if (followLoading) return; // Prevent double-clicks
+
+    setFollowLoading(true);
     try {
       if (following) {
         await socialAPI.unfollow(profile!.id);
@@ -118,7 +122,10 @@ const Profile: React.FC = () => {
         toast.success('Following');
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.error?.message || 'Action failed');
+      console.error('Follow error:', err);
+      toast.error(err.response?.data?.error?.message || err.response?.data?.message || 'Action failed');
+    } finally {
+      setFollowLoading(false);
     }
   };
 
@@ -240,13 +247,14 @@ const Profile: React.FC = () => {
                         <>
                           <button
                             onClick={handleFollow}
-                            className={`px-6 py-2.5 rounded-full font-medium transition-colors ${
+                            disabled={followLoading}
+                            className={`px-6 py-2.5 rounded-full font-medium transition-colors disabled:opacity-50 ${
                               following
                                 ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
                                 : 'bg-indigo-600 text-white hover:bg-indigo-700'
                             }`}
                           >
-                            {following ? 'Following' : 'Follow'}
+                            {followLoading ? 'Loading...' : following ? 'Following' : 'Follow'}
                           </button>
                           <button className="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                             Message
