@@ -49,6 +49,8 @@ import AdminUsers from './pages/admin/Users';
 import AdminVideos from './pages/admin/Videos';
 import AdminReports from './pages/admin/Reports';
 import AdminCategories from './pages/admin/Categories';
+import AdminModeration from './pages/admin/Moderation';
+import AdminComplaints from './pages/admin/Complaints';
 
 function App() {
   return (
@@ -96,6 +98,9 @@ function App() {
               <Route path="admin/videos" element={<AdminRoute><AdminVideos /></AdminRoute>} />
               <Route path="admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
               <Route path="admin/categories" element={<AdminRoute><AdminCategories /></AdminRoute>} />
+              <Route path="admin/moderation" element={<AdminRoute><AdminModeration /></AdminRoute>} />
+              <Route path="admin/complaints" element={<AdminRoute><AdminComplaints /></AdminRoute>} />
+              <Route path="admin/ai-moderation" element={<AdminRoute><AdminModeration /></AdminRoute>} />
 
               {/* 404 */}
               <Route path="*" element={<Navigate to="/" replace />} />

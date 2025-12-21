@@ -22,6 +22,7 @@ import {
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import NotificationDropdown from '../notifications/NotificationDropdown';
+import AIChatbot from '../support/AIChatbot';
 
 const Layout: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -396,6 +397,9 @@ const Layout: React.FC = () => {
           </div>
         </div>
       </footer>
+
+      {/* AI Support Chatbot */}
+      <AIChatbot />
     </div>
   );
 };
