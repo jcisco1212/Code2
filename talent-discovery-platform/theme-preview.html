@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentVault Theme Preview</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #fff; padding: 20px; }
+    h1 { text-align: center; margin-bottom: 30px; font-size: 2rem; }
+    .themes { display: flex; flex-direction: column; gap: 40px; max-width: 1400px; margin: 0 auto; }
+    .theme-section { background: #16213e; border-radius: 16px; padding: 24px; }
+    .theme-title { font-size: 1.5rem; margin-bottom: 8px; }
+    .theme-subtitle { color: #888; margin-bottom: 20px; font-style: italic; }
+    .mode-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .mode-label { font-size: 0.875rem; color: #888; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+
+    .preview { border-radius: 12px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+    .preview-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(128,128,128,0.2); }
+    .preview-logo { font-weight: bold; font-size: 1.25rem; display: flex; align-items: center; gap: 8px; }
+    .preview-logo-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 0.875rem; }
+    .preview-nav { display: flex; gap: 16px; font-size: 0.875rem; }
+    .preview-btn { padding: 8px 16px; border-radius: 8px; font-size: 0.875rem; font-weight: 500; border: none; cursor: pointer; }
+
+    .preview-content { padding: 24px; }
+    .preview-hero { margin-bottom: 20px; }
+    .preview-hero h2 { font-size: 1.5rem; margin-bottom: 8px; }
+    .preview-hero p { font-size: 0.875rem; opacity: 0.7; }
+
+    .preview-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .preview-card { border-radius: 8px; padding: 16px; }
+    .preview-card-title { font-size: 0.875rem; font-weight: 600; margin-bottom: 4px; }
+    .preview-card-text { font-size: 0.75rem; opacity: 0.6; }
+    .preview-card-accent { height: 4px; border-radius: 2px; margin-top: 12px; }
+
+    /* Theme 1: Executive Navy */
+    .theme1-light { background: #FAFBFC; color: #1E293B; }
+    .theme1-light .preview-header { background: #FFFFFF; }
+    .theme1-light .preview-logo-icon { background: linear-gradient(135deg, #1E3A5F, #2d5a8a); }
+    .theme1-light .preview-logo { color: #1E3A5F; }
+    .theme1-light .preview-nav { color: #64748B; }
+    .theme1-light .preview-btn { background: #1E3A5F; color: white; }
+    .theme1-light .preview-card { background: #FFFFFF; border: 1px solid #E2E8F0; }
+    .theme1-light .preview-card-accent { background: linear-gradient(90deg, #1E3A5F, #D4AF37); }
+
+    .theme1-dark { background: #0F172A; color: #F1F5F9; }
+    .theme1-dark .preview-header { background: #1E293B; }
+    .theme1-dark .preview-logo-icon { background: linear-gradient(135deg, #3B82F6, #60A5FA); }
+    .theme1-dark .preview-logo { color: #F1F5F9; }
+    .theme1-dark .preview-nav { color: #94A3B8; }
+    .theme1-dark .preview-btn { background: #3B82F6; color: white; }
+    .theme1-dark .preview-card { background: #1E293B; border: 1px solid #334155; }
+    .theme1-dark .preview-card-accent { background: linear-gradient(90deg, #3B82F6, #F59E0B); }
+
+    /* Theme 2: Minimal Luxe */
+    .theme2-light { background: #FFFFFF; color: #09090B; }
+    .theme2-light .preview-header { background: #F4F4F5; }
+    .theme2-light .preview-logo-icon { background: #18181B; }
+    .theme2-light .preview-logo { color: #18181B; }
+    .theme2-light .preview-nav { color: #71717A; }
+    .theme2-light .preview-btn { background: #18181B; color: white; }
+    .theme2-light .preview-card { background: #F4F4F5; }
+    .theme2-light .preview-card-accent { background: linear-gradient(90deg, #A855F7, #C084FC); }
+
+    .theme2-dark { background: #18181B; color: #FAFAFA; }
+    .theme2-dark .preview-header { background: #27272A; }
+    .theme2-dark .preview-logo-icon { background: #FAFAFA; color: #18181B; }
+    .theme2-dark .preview-logo { color: #FAFAFA; }
+    .theme2-dark .preview-nav { color: #A1A1AA; }
+    .theme2-dark .preview-btn { background: #A855F7; color: white; }
+    .theme2-dark .preview-card { background: #27272A; }
+    .theme2-dark .preview-card-accent { background: linear-gradient(90deg, #A855F7, #C084FC); }
+
+    /* Theme 3: Noir Prestige */
+    .theme3-light { background: #FAF9F7; color: #1C1917; }
+    .theme3-light .preview-header { background: #FFFFFF; }
+    .theme3-light .preview-logo-icon { background: linear-gradient(135deg, #292524, #44403C); }
+    .theme3-light .preview-logo { color: #292524; }
+    .theme3-light .preview-nav { color: #78716C; }
+    .theme3-light .preview-btn { background: #292524; color: #B4936D; }
+    .theme3-light .preview-card { background: #FFFFFF; border: 1px solid #E7E5E4; }
+    .theme3-light .preview-card-accent { background: linear-gradient(90deg, #B4936D, #D4C4A8); }
+
+    .theme3-dark { background: #0C0A09; color: #F5F5F4; }
+    .theme3-dark .preview-header { background: #1C1917; }
+    .theme3-dark .preview-logo-icon { background: linear-gradient(135deg, #D4A574, #B4936D); }
+    .theme3-dark .preview-logo { color: #F5F5F4; }
+    .theme3-dark .preview-nav { color: #A8A29E; }
+    .theme3-dark .preview-btn { background: #D4A574; color: #0C0A09; }
+    .theme3-dark .preview-card { background: #1C1917; border: 1px solid #292524; }
+    .theme3-dark .preview-card-accent { background: linear-gradient(90deg, #D4A574, #E7D4B8); }
+
+    /* Theme 4: Studio Modern */
+    .theme4-light { background: #F8FAFC; color: #1E1B4B; }
+    .theme4-light .preview-header { background: #FFFFFF; }
+    .theme4-light .preview-logo-icon { background: linear-gradient(135deg, #6D28D9, #8B5CF6); }
+    .theme4-light .preview-logo { color: #6D28D9; }
+    .theme4-light .preview-nav { color: #6B7280; }
+    .theme4-light .preview-btn { background: linear-gradient(135deg, #6D28D9, #EC4899); color: white; }
+    .theme4-light .preview-card { background: #FFFFFF; border: 1px solid #E5E7EB; }
+    .theme4-light .preview-card-accent { background: linear-gradient(90deg, #6D28D9, #EC4899); }
+
+    .theme4-dark { background: #0F0D1A; color: #EDE9FE; }
+    .theme4-dark .preview-header { background: #1A1625; }
+    .theme4-dark .preview-logo-icon { background: linear-gradient(135deg, #8B5CF6, #A78BFA); }
+    .theme4-dark .preview-logo { color: #EDE9FE; }
+    .theme4-dark .preview-nav { color: #A78BFA; }
+    .theme4-dark .preview-btn { background: linear-gradient(135deg, #8B5CF6, #F472B6); color: white; }
+    .theme4-dark .preview-card { background: #1A1625; border: 1px solid #2D2640; }
+    .theme4-dark .preview-card-accent { background: linear-gradient(90deg, #8B5CF6, #F472B6); }
+
+    /* Theme 5: Sterling Professional */
+    .theme5-light { background: #F9FAFB; color: #111827; }
+    .theme5-light .preview-header { background: #FFFFFF; }
+    .theme5-light .preview-logo-icon { background: linear-gradient(135deg, #059669, #10B981); }
+    .theme5-light .preview-logo { color: #059669; }
+    .theme5-light .preview-nav { color: #6B7280; }
+    .theme5-light .preview-btn { background: #059669; color: white; }
+    .theme5-light .preview-card { background: #FFFFFF; border: 1px solid #E5E7EB; }
+    .theme5-light .preview-card-accent { background: linear-gradient(90deg, #059669, #0891B2); }
+
+    .theme5-dark { background: #111827; color: #F9FAFB; }
+    .theme5-dark .preview-header { background: #1F2937; }
+    .theme5-dark .preview-logo-icon { background: linear-gradient(135deg, #10B981, #22D3EE); }
+    .theme5-dark .preview-logo { color: #10B981; }
+    .theme5-dark .preview-nav { color: #9CA3AF; }
+    .theme5-dark .preview-btn { background: #10B981; color: #111827; }
+    .theme5-dark .preview-card { background: #1F2937; border: 1px solid #374151; }
+    .theme5-dark .preview-card-accent { background: linear-gradient(90deg, #10B981, #22D3EE); }
+
+    @media (max-width: 768px) {
+      .mode-container { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <h1>TalentVault Theme Preview</h1>
+
+  <div class="themes">
+    <!-- Theme 1 -->
+    <div class="theme-section">
+      <h2 class="theme-title">Theme 1: Executive Navy</h2>
+      <p class="theme-subtitle">Corporate elegance with timeless sophistication</p>
+      <div class="mode-container">
+        <div>
+          <p class="mode-label">Light Mode</p>
+          <div class="preview theme1-light">
+            <div class="preview-header">
+              <div class="preview-logo">
+                <div class="preview-logo-icon">TV</div>
+                TalentVault
+              </div>
+              <div class="preview-nav">
+                <span>Discover</span>
+                <span>Trending</span>
+                <button class="preview-btn">Upload</button>
+              </div>
+            </div>
+            <div class="preview-content">
+              <div class="preview-hero">
+                <h2>Discover Tomorrow's Stars</h2>
+                <p>Connect with emerging talent across music, acting, and more.</p>
+              </div>
+              <div class="preview-cards">
+                <div class="preview-card">
+                  <div class="preview-card-title">Rising Artists</div>
+                  <div class="preview-card-text">Trending creators this week</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">Categories</div>
+                  <div class="preview-card-text">Browse by talent type</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">For Agents</div>
+                  <div class="preview-card-text">Discover new talent</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="mode-label">Dark Mode</p>
+          <div class="preview theme1-dark">
+            <div class="preview-header">
+              <div class="preview-logo">
+                <div class="preview-logo-icon">TV</div>
+                TalentVault
+              </div>
+              <div class="preview-nav">
+                <span>Discover</span>
+                <span>Trending</span>
+                <button class="preview-btn">Upload</button>
+              </div>
+            </div>
+            <div class="preview-content">
+              <div class="preview-hero">
+                <h2>Discover Tomorrow's Stars</h2>
+                <p>Connect with emerging talent across music, acting, and more.</p>
+              </div>
+              <div class="preview-cards">
+                <div class="preview-card">
+                  <div class="preview-card-title">Rising Artists</div>
+                  <div class="preview-card-text">Trending creators this week</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">Categories</div>
+                  <div class="preview-card-text">Browse by talent type</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">For Agents</div>
+                  <div class="preview-card-text">Discover new talent</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Theme 2 -->
+    <div class="theme-section">
+      <h2 class="theme-title">Theme 2: Minimal Luxe</h2>
+      <p class="theme-subtitle">Clean, airy, and sophisticated</p>
+      <div class="mode-container">
+        <div>
+          <p class="mode-label">Light Mode</p>
+          <div class="preview theme2-light">
+            <div class="preview-header">
+              <div class="preview-logo">
+                <div class="preview-logo-icon">TV</div>
+                TalentVault
+              </div>
+              <div class="preview-nav">
+                <span>Discover</span>
+                <span>Trending</span>
+                <button class="preview-btn">Upload</button>
+              </div>
+            </div>
+            <div class="preview-content">
+              <div class="preview-hero">
+                <h2>Discover Tomorrow's Stars</h2>
+                <p>Connect with emerging talent across music, acting, and more.</p>
+              </div>
+              <div class="preview-cards">
+                <div class="preview-card">
+                  <div class="preview-card-title">Rising Artists</div>
+                  <div class="preview-card-text">Trending creators this week</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">Categories</div>
+                  <div class="preview-card-text">Browse by talent type</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">For Agents</div>
+                  <div class="preview-card-text">Discover new talent</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="mode-label">Dark Mode</p>
+          <div class="preview theme2-dark">
+            <div class="preview-header">
+              <div class="preview-logo">
+                <div class="preview-logo-icon">TV</div>
+                TalentVault
+              </div>
+              <div class="preview-nav">
+                <span>Discover</span>
+                <span>Trending</span>
+                <button class="preview-btn">Upload</button>
+              </div>
+            </div>
+            <div class="preview-content">
+              <div class="preview-hero">
+                <h2>Discover Tomorrow's Stars</h2>
+                <p>Connect with emerging talent across music, acting, and more.</p>
+              </div>
+              <div class="preview-cards">
+                <div class="preview-card">
+                  <div class="preview-card-title">Rising Artists</div>
+                  <div class="preview-card-text">Trending creators this week</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">Categories</div>
+                  <div class="preview-card-text">Browse by talent type</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">For Agents</div>
+                  <div class="preview-card-text">Discover new talent</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Theme 3 -->
+    <div class="theme-section">
+      <h2 class="theme-title">Theme 3: Noir Prestige</h2>
+      <p class="theme-subtitle">Rich, luxurious, entertainment-industry feel</p>
+      <div class="mode-container">
+        <div>
+          <p class="mode-label">Light Mode</p>
+          <div class="preview theme3-light">
+            <div class="preview-header">
+              <div class="preview-logo">
+                <div class="preview-logo-icon">TV</div>
+                TalentVault
+              </div>
+              <div class="preview-nav">
+                <span>Discover</span>
+                <span>Trending</span>
+                <button class="preview-btn">Upload</button>
+              </div>
+            </div>
+            <div class="preview-content">
+              <div class="preview-hero">
+                <h2>Discover Tomorrow's Stars</h2>
+                <p>Connect with emerging talent across music, acting, and more.</p>
+              </div>
+              <div class="preview-cards">
+                <div class="preview-card">
+                  <div class="preview-card-title">Rising Artists</div>
+                  <div class="preview-card-text">Trending creators this week</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">Categories</div>
+                  <div class="preview-card-text">Browse by talent type</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">For Agents</div>
+                  <div class="preview-card-text">Discover new talent</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="mode-label">Dark Mode</p>
+          <div class="preview theme3-dark">
+            <div class="preview-header">
+              <div class="preview-logo">
+                <div class="preview-logo-icon">TV</div>
+                TalentVault
+              </div>
+              <div class="preview-nav">
+                <span>Discover</span>
+                <span>Trending</span>
+                <button class="preview-btn">Upload</button>
+              </div>
+            </div>
+            <div class="preview-content">
+              <div class="preview-hero">
+                <h2>Discover Tomorrow's Stars</h2>
+                <p>Connect with emerging talent across music, acting, and more.</p>
+              </div>
+              <div class="preview-cards">
+                <div class="preview-card">
+                  <div class="preview-card-title">Rising Artists</div>
+                  <div class="preview-card-text">Trending creators this week</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">Categories</div>
+                  <div class="preview-card-text">Browse by talent type</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">For Agents</div>
+                  <div class="preview-card-text">Discover new talent</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Theme 4 -->
+    <div class="theme-section">
+      <h2 class="theme-title">Theme 4: Studio Modern</h2>
+      <p class="theme-subtitle">Creative yet refined, entertainment-forward</p>
+      <div class="mode-container">
+        <div>
+          <p class="mode-label">Light Mode</p>
+          <div class="preview theme4-light">
+            <div class="preview-header">
+              <div class="preview-logo">
+                <div class="preview-logo-icon">TV</div>
+                TalentVault
+              </div>
+              <div class="preview-nav">
+                <span>Discover</span>
+                <span>Trending</span>
+                <button class="preview-btn">Upload</button>
+              </div>
+            </div>
+            <div class="preview-content">
+              <div class="preview-hero">
+                <h2>Discover Tomorrow's Stars</h2>
+                <p>Connect with emerging talent across music, acting, and more.</p>
+              </div>
+              <div class="preview-cards">
+                <div class="preview-card">
+                  <div class="preview-card-title">Rising Artists</div>
+                  <div class="preview-card-text">Trending creators this week</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">Categories</div>
+                  <div class="preview-card-text">Browse by talent type</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">For Agents</div>
+                  <div class="preview-card-text">Discover new talent</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="mode-label">Dark Mode</p>
+          <div class="preview theme4-dark">
+            <div class="preview-header">
+              <div class="preview-logo">
+                <div class="preview-logo-icon">TV</div>
+                TalentVault
+              </div>
+              <div class="preview-nav">
+                <span>Discover</span>
+                <span>Trending</span>
+                <button class="preview-btn">Upload</button>
+              </div>
+            </div>
+            <div class="preview-content">
+              <div class="preview-hero">
+                <h2>Discover Tomorrow's Stars</h2>
+                <p>Connect with emerging talent across music, acting, and more.</p>
+              </div>
+              <div class="preview-cards">
+                <div class="preview-card">
+                  <div class="preview-card-title">Rising Artists</div>
+                  <div class="preview-card-text">Trending creators this week</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">Categories</div>
+                  <div class="preview-card-text">Browse by talent type</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">For Agents</div>
+                  <div class="preview-card-text">Discover new talent</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Theme 5 -->
+    <div class="theme-section">
+      <h2 class="theme-title">Theme 5: Sterling Professional</h2>
+      <p class="theme-subtitle">Premium, trustworthy, polished</p>
+      <div class="mode-container">
+        <div>
+          <p class="mode-label">Light Mode</p>
+          <div class="preview theme5-light">
+            <div class="preview-header">
+              <div class="preview-logo">
+                <div class="preview-logo-icon">TV</div>
+                TalentVault
+              </div>
+              <div class="preview-nav">
+                <span>Discover</span>
+                <span>Trending</span>
+                <button class="preview-btn">Upload</button>
+              </div>
+            </div>
+            <div class="preview-content">
+              <div class="preview-hero">
+                <h2>Discover Tomorrow's Stars</h2>
+                <p>Connect with emerging talent across music, acting, and more.</p>
+              </div>
+              <div class="preview-cards">
+                <div class="preview-card">
+                  <div class="preview-card-title">Rising Artists</div>
+                  <div class="preview-card-text">Trending creators this week</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">Categories</div>
+                  <div class="preview-card-text">Browse by talent type</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">For Agents</div>
+                  <div class="preview-card-text">Discover new talent</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="mode-label">Dark Mode</p>
+          <div class="preview theme5-dark">
+            <div class="preview-header">
+              <div class="preview-logo">
+                <div class="preview-logo-icon">TV</div>
+                TalentVault
+              </div>
+              <div class="preview-nav">
+                <span>Discover</span>
+                <span>Trending</span>
+                <button class="preview-btn">Upload</button>
+              </div>
+            </div>
+            <div class="preview-content">
+              <div class="preview-hero">
+                <h2>Discover Tomorrow's Stars</h2>
+                <p>Connect with emerging talent across music, acting, and more.</p>
+              </div>
+              <div class="preview-cards">
+                <div class="preview-card">
+                  <div class="preview-card-title">Rising Artists</div>
+                  <div class="preview-card-text">Trending creators this week</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">Categories</div>
+                  <div class="preview-card-text">Browse by talent type</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">For Agents</div>
+                  <div class="preview-card-text">Discover new talent</div>
+                  <div class="preview-card-accent"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 40px; padding: 20px; color: #888;">
+    <p>Choose your preferred theme and let me know which one to implement!</p>
+  </div>
+</body>
+</html>
