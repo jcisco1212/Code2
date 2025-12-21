@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import {
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
+  ExclamationCircleIcon,
+  CheckIcon,
   XCircleIcon,
   EyeIcon,
   UserIcon,
@@ -12,7 +12,7 @@ import {
   ChatBubbleLeftIcon,
   ClockIcon,
   FlagIcon,
-  ShieldExclamationIcon
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 
 interface Report {
@@ -178,7 +178,7 @@ const Complaints: React.FC = () => {
           ))
         ) : reports.length === 0 ? (
           <div className="text-center py-16 bg-white/60 dark:bg-white/5 rounded-2xl">
-            <ShieldExclamationIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+            <ShieldCheckIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">No reports found</h3>
             <p className="text-gray-500">
               {filter === 'pending' ? 'All reports have been handled' : 'No reports match your filters'}
@@ -264,7 +264,7 @@ const Complaints: React.FC = () => {
                                  text-blue-700 dark:text-blue-400 rounded-lg text-sm font-medium
                                  hover:bg-blue-200 dark:hover:bg-blue-500/30 transition-colors"
                       >
-                        <ExclamationTriangleIcon className="w-4 h-4" />
+                        <ExclamationCircleIcon className="w-4 h-4" />
                         Review
                       </button>
                       <button
@@ -382,7 +382,7 @@ const Complaints: React.FC = () => {
                 className="flex-1 py-2.5 px-4 bg-green-500 text-white rounded-xl font-medium
                          hover:bg-green-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                <CheckCircleIcon className="w-5 h-5" />
+                <CheckIcon className="w-5 h-5" />
                 Resolve
               </button>
             </div>

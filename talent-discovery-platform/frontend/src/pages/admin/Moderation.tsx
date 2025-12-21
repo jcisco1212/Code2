@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../../services/api';
-import { getUploadUrl } from '../../utils/urls';
+import api, { getUploadUrl } from '../../services/api';
 import toast from 'react-hot-toast';
 import {
   ShieldCheckIcon,
   XCircleIcon,
-  CheckCircleIcon,
+  CheckIcon,
   EyeIcon,
-  ExclamationTriangleIcon,
+  ExclamationCircleIcon,
   CpuChipIcon,
   UserIcon,
   PlayIcon,
@@ -337,7 +336,7 @@ const Moderation: React.FC = () => {
                   {/* AI Flags */}
                   {video.aiModerationFlags && video.aiModerationFlags.length > 0 && (
                     <div className="flex items-center gap-2 mt-3">
-                      <ExclamationTriangleIcon className="w-4 h-4 text-orange-500" />
+                      <ExclamationCircleIcon className="w-4 h-4 text-orange-500" />
                       <div className="flex gap-1 flex-wrap">
                         {video.aiModerationFlags.map((flag, i) => (
                           <span key={i} className="px-2 py-0.5 bg-orange-500/20 text-orange-600 dark:text-orange-400 rounded text-xs">
@@ -390,7 +389,7 @@ const Moderation: React.FC = () => {
                                rounded-lg text-sm font-medium hover:bg-green-200 dark:hover:bg-green-500/30 transition-colors
                                disabled:opacity-50"
                     >
-                      <CheckCircleIcon className="w-4 h-4" />
+                      <CheckIcon className="w-4 h-4" />
                       Approve
                     </button>
                     <button

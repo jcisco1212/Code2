@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   ChatBubbleLeftRightIcon,
   XMarkIcon,
-  PaperAirplaneIcon,
+  ArrowRightIcon,
   SparklesIcon,
   UserIcon,
   QuestionMarkCircleIcon
@@ -351,7 +351,7 @@ const AIChatbot: React.FC = () => {
               className="p-2.5 bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-xl
                        hover:shadow-lg transition-all disabled:opacity-50"
             >
-              <PaperAirplaneIcon className="w-5 h-5" />
+              <ArrowRightIcon className="w-5 h-5" />
             </button>
           </div>
         </form>

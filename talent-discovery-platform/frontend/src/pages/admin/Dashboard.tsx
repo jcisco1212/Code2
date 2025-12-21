@@ -5,7 +5,7 @@ import {
   UsersIcon,
   FolderIcon,
   FilmIcon,
-  ExclamationTriangleIcon,
+  ExclamationCircleIcon,
   ChartBarIcon,
   ShieldCheckIcon,
   SparklesIcon,
@@ -65,7 +65,7 @@ const AdminDashboard: React.FC = () => {
     {
       to: '/admin/complaints',
       label: 'Reports & Complaints',
-      icon: ExclamationTriangleIcon,
+      icon: ExclamationCircleIcon,
       description: 'Handle user reports and complaints',
       color: 'from-red-500 to-red-600'
     },
@@ -195,7 +195,7 @@ const AdminDashboard: React.FC = () => {
                    border border-red-500/20 hover:border-red-500/40 transition-colors"
         >
           <div className="w-10 h-10 rounded-lg bg-red-500 flex items-center justify-center">
-            <ExclamationTriangleIcon className="w-5 h-5 text-white" />
+            <ExclamationCircleIcon className="w-5 h-5 text-white" />
           </div>
           <div>
             <div className="font-semibold text-gray-900 dark:text-white">Handle Reports</div>
