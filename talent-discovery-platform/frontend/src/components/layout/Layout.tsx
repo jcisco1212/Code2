@@ -56,23 +56,23 @@ const Layout: React.FC = () => {
     : [];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 shadow-sm">
+    <div className="min-h-screen">
+      {/* Header - Glass Effect */}
+      <header className="fixed top-0 left-0 right-0 z-50 nav-glass">
         <div className="flex items-center justify-between h-16 px-4 lg:px-6">
           {/* Left: Logo & Menu Button */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="lg:hidden p-2 rounded-xl hover:bg-white/50 dark:hover:bg-white/10 transition-colors"
             >
-              <Bars3Icon className="w-6 h-6" />
+              <Bars3Icon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
             </button>
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+            <Link to="/" className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-aurora">
                 <span className="text-white font-bold text-lg">TV</span>
               </div>
-              <span className="hidden sm:block text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="hidden sm:block text-xl font-bold text-gradient">
                 TalentVault
               </span>
             </Link>
@@ -81,62 +81,79 @@ const Layout: React.FC = () => {
           {/* Center: Search */}
           <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-4">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search videos, creators, categories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-12 pr-4 py-2.5 rounded-full
+                         bg-white/60 dark:bg-white/5
+                         border border-white/80 dark:border-white/10
+                         backdrop-blur-sm
+                         text-gray-900 dark:text-white
+                         placeholder:text-gray-500 dark:placeholder:text-gray-400
+                         focus:outline-none focus:ring-2 focus:ring-primary-500/50
+                         transition-all"
               />
             </div>
           </form>
 
           {/* Right: User Menu */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {isAuthenticated ? (
               <>
                 <Link
                   to="/upload"
-                  className="hidden sm:flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  className="hidden sm:flex items-center gap-2 px-5 py-2.5
+                           bg-gradient-primary text-white rounded-full
+                           shadow-aurora hover:shadow-aurora-lg
+                           transition-all duration-300 hover:-translate-y-0.5"
                 >
                   <ArrowUpTrayIcon className="w-5 h-5" />
-                  <span>Upload</span>
+                  <span className="font-medium">Upload</span>
                 </Link>
                 <NotificationDropdown />
                 <Menu as="div" className="relative">
-                  <Menu.Button className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <Menu.Button className="flex items-center gap-2 p-1.5 rounded-full
+                                        hover:bg-white/50 dark:hover:bg-white/10
+                                        border border-transparent hover:border-white/50 dark:hover:border-white/20
+                                        transition-all">
                     {user?.profileImageUrl ? (
                       <img
                         src={user.profileImageUrl}
                         alt={user.username}
-                        className="w-8 h-8 rounded-full object-cover"
+                        className="w-9 h-9 rounded-full object-cover ring-2 ring-primary-400/50"
                       />
                     ) : (
-                      <UserCircleIcon className="w-8 h-8" />
+                      <div className="w-9 h-9 rounded-full bg-gradient-primary flex items-center justify-center">
+                        <span className="text-white font-medium text-sm">
+                          {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+                        </span>
+                      </div>
                     )}
-                    <ChevronDownIcon className="w-4 h-4" />
+                    <ChevronDownIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                   </Menu.Button>
                   <Transition
                     as={Fragment}
-                    enter="transition ease-out duration-100"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
-                    leave="transition ease-in duration-75"
+                    enter="transition ease-out duration-200"
+                    enterFrom="transform opacity-0 scale-95 -translate-y-2"
+                    enterTo="transform opacity-100 scale-100 translate-y-0"
+                    leave="transition ease-in duration-150"
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right rounded-xl bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none divide-y divide-gray-100 dark:divide-gray-700">
-                      <div className="px-4 py-3">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.firstName} {user?.lastName}</p>
+                    <Menu.Items className="absolute right-0 mt-3 w-64 origin-top-right dropdown-glass focus:outline-none divide-y divide-gray-200/50 dark:divide-white/10 overflow-hidden">
+                      <div className="px-4 py-4">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{user?.firstName} {user?.lastName}</p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">@{user?.username}</p>
                       </div>
-                      <div className="py-1">
+                      <div className="py-2">
                         <Menu.Item>
                           {({ active }) => (
                             <Link
                               to={`/profile/${user?.username}`}
-                              className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200`}
+                              className={`${active ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-200'} flex items-center gap-3 px-4 py-2.5 text-sm transition-colors`}
                             >
                               <UserCircleIcon className="w-5 h-5" />
                               Your Profile
@@ -147,7 +164,7 @@ const Layout: React.FC = () => {
                           {({ active }) => (
                             <Link
                               to="/studio"
-                              className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200`}
+                              className={`${active ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-200'} flex items-center gap-3 px-4 py-2.5 text-sm transition-colors`}
                             >
                               <ChartBarIcon className="w-5 h-5" />
                               Creator Studio
@@ -158,7 +175,7 @@ const Layout: React.FC = () => {
                           {({ active }) => (
                             <Link
                               to="/settings"
-                              className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200`}
+                              className={`${active ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-200'} flex items-center gap-3 px-4 py-2.5 text-sm transition-colors`}
                             >
                               <Cog6ToothIcon className="w-5 h-5" />
                               Settings
@@ -170,7 +187,7 @@ const Layout: React.FC = () => {
                             {({ active }) => (
                               <Link
                                 to="/agent"
-                                className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200`}
+                                className={`${active ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-200'} flex items-center gap-3 px-4 py-2.5 text-sm transition-colors`}
                               >
                                 <ChartBarIcon className="w-5 h-5" />
                                 Agent Dashboard
@@ -183,7 +200,7 @@ const Layout: React.FC = () => {
                             {({ active }) => (
                               <Link
                                 to="/admin"
-                                className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200`}
+                                className={`${active ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-200'} flex items-center gap-3 px-4 py-2.5 text-sm transition-colors`}
                               >
                                 <Cog6ToothIcon className="w-5 h-5" />
                                 Admin Panel
@@ -193,52 +210,50 @@ const Layout: React.FC = () => {
                         )}
                       </div>
                       {/* Dark Mode Toggle */}
-                      <div className="py-1">
-                        <div className="px-4 py-2">
-                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Appearance</p>
-                          <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-                            <button
-                              onClick={() => setTheme('light')}
-                              className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                                theme === 'light'
-                                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                              }`}
-                            >
-                              <SunIcon className="w-4 h-4" />
-                              Light
-                            </button>
-                            <button
-                              onClick={() => setTheme('dark')}
-                              className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                                theme === 'dark'
-                                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                              }`}
-                            >
-                              <MoonIcon className="w-4 h-4" />
-                              Dark
-                            </button>
-                            <button
-                              onClick={() => setTheme('system')}
-                              className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                                theme === 'system'
-                                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                              }`}
-                            >
-                              <ComputerDesktopIcon className="w-4 h-4" />
-                              Auto
-                            </button>
-                          </div>
+                      <div className="py-3 px-4">
+                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Appearance</p>
+                        <div className="flex items-center gap-1 bg-gray-100/80 dark:bg-white/10 rounded-xl p-1">
+                          <button
+                            onClick={() => setTheme('light')}
+                            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                              theme === 'light'
+                                ? 'bg-white dark:bg-white/20 text-primary-600 dark:text-primary-400 shadow-sm'
+                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                          >
+                            <SunIcon className="w-4 h-4" />
+                            Light
+                          </button>
+                          <button
+                            onClick={() => setTheme('dark')}
+                            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                              theme === 'dark'
+                                ? 'bg-white dark:bg-white/20 text-primary-600 dark:text-primary-400 shadow-sm'
+                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                          >
+                            <MoonIcon className="w-4 h-4" />
+                            Dark
+                          </button>
+                          <button
+                            onClick={() => setTheme('system')}
+                            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                              theme === 'system'
+                                ? 'bg-white dark:bg-white/20 text-primary-600 dark:text-primary-400 shadow-sm'
+                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                          >
+                            <ComputerDesktopIcon className="w-4 h-4" />
+                            Auto
+                          </button>
                         </div>
                       </div>
-                      <div className="py-1">
+                      <div className="py-2">
                         <Menu.Item>
                           {({ active }) => (
                             <button
                               onClick={handleLogout}
-                              className={`${active ? 'bg-gray-100 dark:bg-gray-700' : ''} flex items-center gap-2 px-4 py-2 text-sm w-full text-red-600 dark:text-red-400`}
+                              className={`${active ? 'bg-red-500/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm w-full text-red-600 dark:text-red-400 transition-colors`}
                             >
                               <ArrowRightOnRectangleIcon className="w-5 h-5" />
                               Sign out
@@ -251,16 +266,20 @@ const Layout: React.FC = () => {
                 </Menu>
               </>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Link
                   to="/login"
-                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  className="px-5 py-2 text-gray-700 dark:text-gray-200
+                           hover:bg-white/50 dark:hover:bg-white/10
+                           rounded-full transition-colors font-medium"
                 >
                   Sign in
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  className="px-5 py-2.5 bg-gradient-primary text-white rounded-full
+                           shadow-aurora hover:shadow-aurora-lg
+                           transition-all duration-300 hover:-translate-y-0.5 font-medium"
                 >
                   Sign up
                 </Link>
@@ -270,14 +289,14 @@ const Layout: React.FC = () => {
         </div>
 
         {/* Secondary nav for pages */}
-        <div className="hidden lg:flex items-center gap-1 px-6 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-          <Link to="/about" className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+        <div className="hidden lg:flex items-center gap-1 px-6 py-2 border-t border-white/50 dark:border-white/5 bg-white/30 dark:bg-white/5">
+          <Link to="/about" className="px-4 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
             About
           </Link>
-          <Link to="/terms" className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+          <Link to="/terms" className="px-4 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
             Terms of Service
           </Link>
-          <Link to="/contact" className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+          <Link to="/contact" className="px-4 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
             Contact
           </Link>
         </div>
@@ -286,12 +305,15 @@ const Layout: React.FC = () => {
       {/* Mobile Sidebar */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
-          <div className="fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-gray-800 shadow-xl">
-            <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
-              <span className="text-xl font-bold">Menu</span>
-              <button onClick={() => setSidebarOpen(false)}>
-                <XMarkIcon className="w-6 h-6" />
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+          <div className="fixed left-0 top-0 bottom-0 w-72 bg-white/95 dark:bg-aurora/95 backdrop-blur-xl shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200/50 dark:border-white/10">
+              <span className="text-xl font-bold text-gradient">Menu</span>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
               </button>
             </div>
             <nav className="p-4 space-y-2">
@@ -300,20 +322,20 @@ const Layout: React.FC = () => {
                   key={item.name}
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-primary-500/10 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                 >
                   <item.icon className="w-5 h-5" />
                   {item.name}
                 </Link>
               ))}
-              <hr className="my-4 dark:border-gray-700" />
-              <Link to="/about" onClick={() => setSidebarOpen(false)} className="block px-3 py-2 text-gray-600 dark:text-gray-400">
+              <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-white/20 to-transparent my-4" />
+              <Link to="/about" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-colors">
                 About
               </Link>
-              <Link to="/terms" onClick={() => setSidebarOpen(false)} className="block px-3 py-2 text-gray-600 dark:text-gray-400">
+              <Link to="/terms" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-colors">
                 Terms of Service
               </Link>
-              <Link to="/contact" onClick={() => setSidebarOpen(false)} className="block px-3 py-2 text-gray-600 dark:text-gray-400">
+              <Link to="/contact" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-colors">
                 Contact
               </Link>
             </nav>
@@ -326,43 +348,51 @@ const Layout: React.FC = () => {
         <Outlet />
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white dark:bg-gray-800 border-t dark:border-gray-700 py-8 mt-12">
-        <div className="max-w-7xl mx-auto px-4 lg:px-6">
+      {/* Footer - Glass Effect */}
+      <footer className="mt-16 border-t border-white/50 dark:border-white/10 bg-white/50 dark:bg-aurora/50 backdrop-blur-lg">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="font-semibold mb-4">TalentVault</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">TV</span>
+                </div>
+                <h3 className="font-bold text-gradient">TalentVault</h3>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                 Discover and showcase your talent with AI-powered insights.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Explore</h3>
-              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li><Link to="/trending" className="hover:text-indigo-600">Trending</Link></li>
-                <li><Link to="/category/singer" className="hover:text-indigo-600">Singers</Link></li>
-                <li><Link to="/category/actor" className="hover:text-indigo-600">Actors</Link></li>
-                <li><Link to="/category/dancer" className="hover:text-indigo-600">Dancers</Link></li>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Explore</h3>
+              <ul className="space-y-2.5 text-sm text-gray-600 dark:text-gray-400">
+                <li><Link to="/trending" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Trending</Link></li>
+                <li><Link to="/category/singer" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Singers</Link></li>
+                <li><Link to="/category/actor" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Actors</Link></li>
+                <li><Link to="/category/dancer" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Dancers</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Company</h3>
-              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li><Link to="/about" className="hover:text-indigo-600">About</Link></li>
-                <li><Link to="/contact" className="hover:text-indigo-600">Contact</Link></li>
-                <li><Link to="/terms" className="hover:text-indigo-600">Terms</Link></li>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Company</h3>
+              <ul className="space-y-2.5 text-sm text-gray-600 dark:text-gray-400">
+                <li><Link to="/about" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">About</Link></li>
+                <li><Link to="/contact" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Contact</Link></li>
+                <li><Link to="/terms" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Terms</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">For Agents</h3>
-              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li><Link to="/register?role=agent" className="hover:text-indigo-600">Join as Agent</Link></li>
-                <li><Link to="/agent" className="hover:text-indigo-600">Agent Dashboard</Link></li>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">For Agents</h3>
+              <ul className="space-y-2.5 text-sm text-gray-600 dark:text-gray-400">
+                <li><Link to="/register?role=agent" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Join as Agent</Link></li>
+                <li><Link to="/agent" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Agent Dashboard</Link></li>
               </ul>
             </div>
           </div>
-          <div className="mt-8 pt-8 border-t dark:border-gray-700 text-center text-sm text-gray-600 dark:text-gray-400">
-            <p>&copy; {new Date().getFullYear()} TalentVault. All rights reserved.</p>
+          <div className="mt-10 pt-8 border-t border-gray-200/50 dark:border-white/10 text-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              &copy; {new Date().getFullYear()} TalentVault. All rights reserved.
+            </p>
+            <div className="mt-2 h-1 w-24 mx-auto bg-gradient-primary rounded-full opacity-50" />
           </div>
         </div>
       </footer>
