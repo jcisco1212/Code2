@@ -54,7 +54,7 @@ const upload = multer({
 // Upload rate limiting
 const uploadLimiter = rateLimit({
   windowMs: parseInt(process.env.UPLOAD_RATE_LIMIT_WINDOW_MS || '3600000'), // 1 hour
-  max: parseInt(process.env.UPLOAD_RATE_LIMIT_MAX_REQUESTS || '10'),
+  max: parseInt(process.env.UPLOAD_RATE_LIMIT_MAX_REQUESTS || '50'),
   message: {
     error: 'Too many uploads, please try again later'
   }
