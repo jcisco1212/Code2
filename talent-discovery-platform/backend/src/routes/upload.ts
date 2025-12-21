@@ -13,8 +13,41 @@ import { NotFoundError, BadRequestError, ForbiddenError } from '../middleware/er
 import { logger } from '../utils/logger';
 import rateLimit from 'express-rate-limit';
 import { cacheDelete } from '../config/redis';
+import ffmpeg from 'fluent-ffmpeg';
 
 const router = Router();
+
+// Transcode video to web-compatible MP4
+function transcodeToWebMP4(inputPath: string, outputPath: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    ffmpeg(inputPath)
+      .outputOptions([
+        '-c:v libx264',        // H.264 video codec
+        '-preset fast',         // Encoding speed
+        '-crf 23',              // Quality level
+        '-c:a aac',             // AAC audio codec
+        '-b:a 128k',            // Audio bitrate
+        '-movflags +faststart', // Enable fast start for web
+        '-vf scale=trunc(iw/2)*2:trunc(ih/2)*2' // Ensure even dimensions
+      ])
+      .output(outputPath)
+      .on('end', () => resolve())
+      .on('error', (err) => reject(err));
+  });
+}
+
+// Get video duration using ffprobe
+function getVideoDuration(filePath: string): Promise<number> {
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(filePath, (err, metadata) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(Math.floor(metadata.format.duration || 0));
+    });
+  });
+}
 
 // Local uploads directory for development
 const UPLOADS_DIR = path.join(__dirname, '../../uploads');
@@ -310,27 +343,65 @@ router.post(
       if (!fs.existsSync(videoDir)) fs.mkdirSync(videoDir, { recursive: true });
 
       const ext = path.extname(req.file.originalname);
-      const newPath = path.join(videoDir, `original${ext}`);
-      fs.renameSync(req.file.path, newPath);
+      const originalPath = path.join(videoDir, `original${ext}`);
+      const transcodedPath = path.join(videoDir, 'video.mp4');
+      fs.renameSync(req.file.path, originalPath);
 
-      // Generate a local URL for the video
-      const localKey = `videos/${req.userId}/${videoId}/original${ext}`;
-      const videoUrl = `/uploads/${localKey}`;
-
-      // Update video record
+      // Set status to processing while we transcode
       await video.update({
-        s3Key: localKey,
+        status: VideoStatus.PROCESSING,
         originalFilename: req.file.originalname,
-        fileSize: req.file.size,
-        status: VideoStatus.READY, // Mark as ready since we're not processing
-        hlsUrl: videoUrl // Use the direct video URL for now
+        fileSize: req.file.size
       });
+
+      logger.info(`Transcoding video ${videoId} to web-compatible format...`);
+
+      try {
+        // Get video duration
+        const duration = await getVideoDuration(originalPath);
+
+        // Transcode to web-compatible MP4
+        await transcodeToWebMP4(originalPath, transcodedPath);
+
+        // Generate a local URL for the transcoded video
+        const localKey = `videos/${req.userId}/${videoId}/video.mp4`;
+        const videoUrl = `/uploads/${localKey}`;
+
+        // Update video record with transcoded file
+        await video.update({
+          s3Key: localKey,
+          status: VideoStatus.READY,
+          hlsUrl: videoUrl,
+          duration
+        });
+
+        // Clean up original file to save space
+        try {
+          fs.unlinkSync(originalPath);
+        } catch (e) {
+          logger.warn(`Failed to delete original file: ${e}`);
+        }
+
+        logger.info(`Video ${videoId} transcoded and ready`);
+      } catch (transcodeError: any) {
+        logger.error(`Transcoding failed for video ${videoId}:`, transcodeError);
+
+        // Fallback: use original file if transcoding fails
+        const localKey = `videos/${req.userId}/${videoId}/original${ext}`;
+        const videoUrl = `/uploads/${localKey}`;
+
+        await video.update({
+          s3Key: localKey,
+          status: VideoStatus.READY,
+          hlsUrl: videoUrl
+        });
+
+        logger.warn(`Using original file for video ${videoId} (transcoding failed)`);
+      }
 
       // Clear trending cache so new videos appear immediately
       await cacheDelete('trending:12');
       await cacheDelete('trending:20');
-
-      logger.info(`Video ${videoId} uploaded directly to local storage`);
 
       res.json({
         message: 'Video uploaded successfully',

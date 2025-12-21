@@ -135,14 +135,19 @@ function generateThumbnail(inputPath: string, outputPath: string, timestamp: str
   });
 }
 
-// Transcode to HLS
+// Transcode to HLS with H.264 re-encoding for browser compatibility
 function transcodeToHLS(inputPath: string, outputDir: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const outputPath = path.join(outputDir, 'playlist.m3u8');
 
     ffmpeg(inputPath)
       .outputOptions([
-        '-codec: copy',
+        '-c:v libx264',      // Re-encode video to H.264
+        '-preset fast',       // Encoding speed
+        '-crf 23',            // Quality (lower = better, 18-28 is good range)
+        '-c:a aac',           // Re-encode audio to AAC
+        '-b:a 128k',          // Audio bitrate
+        '-movflags +faststart', // Enable fast start for web playback
         '-start_number 0',
         '-hls_time 10',
         '-hls_list_size 0',
