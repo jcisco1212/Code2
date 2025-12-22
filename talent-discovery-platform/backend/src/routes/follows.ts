@@ -45,14 +45,21 @@ router.post(
         followingId: userId
       });
 
-      // Create notification
-      await Notification.create({
-        userId,
-        type: NotificationType.NEW_FOLLOWER,
-        title: 'New Follower',
-        message: `${req.user!.username} started following you`,
-        data: { followerId: req.userId }
-      });
+      // Create notification (don't let notification failure break the follow)
+      try {
+        const followerUser = (req as any).user;
+        const followerUsername = followerUser?.username || 'Someone';
+        await Notification.create({
+          userId,
+          type: NotificationType.NEW_FOLLOWER,
+          title: 'New Follower',
+          message: `${followerUsername} started following you`,
+          data: { followerId: req.userId }
+        });
+      } catch (notifError) {
+        // Log but don't fail the follow operation
+        console.error('Failed to create follow notification:', notifError);
+      }
 
       res.json({ following: true });
     } catch (error) {

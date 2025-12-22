@@ -189,7 +189,14 @@ const AdminUsers: React.FC = () => {
       setShowModal(false);
       fetchUsers();
     } catch (err: any) {
-      toast.error(err.response?.data?.error?.message || 'Failed to create user');
+      // Show detailed validation errors if available
+      const errorData = err.response?.data?.error;
+      if (errorData?.details && Array.isArray(errorData.details)) {
+        const firstError = errorData.details[0];
+        toast.error(`${firstError.field}: ${firstError.message}`);
+      } else {
+        toast.error(errorData?.message || 'Failed to create user');
+      }
     }
   };
 
@@ -359,70 +366,70 @@ const AdminUsers: React.FC = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
             {modalAction === 'create' && (
               <>
-                <h2 className="text-xl font-bold mb-4">Create New User</h2>
+                <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Create New User</h2>
                 <form onSubmit={handleCreateUser} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name *</label>
                       <input
                         type="text"
                         value={createForm.firstName}
                         onChange={(e) => setCreateForm({ ...createForm, firstName: e.target.value })}
-                        className="w-full p-2 border rounded-lg"
+                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name *</label>
                       <input
                         type="text"
                         value={createForm.lastName}
                         onChange={(e) => setCreateForm({ ...createForm, lastName: e.target.value })}
-                        className="w-full p-2 border rounded-lg"
+                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                         required
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Username *</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username *</label>
                     <input
                       type="text"
                       value={createForm.username}
                       onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
-                      className="w-full p-2 border rounded-lg"
+                      className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email *</label>
                     <input
                       type="email"
                       value={createForm.email}
                       onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
-                      className="w-full p-2 border rounded-lg"
+                      className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password *</label>
                     <input
                       type="password"
                       value={createForm.password}
                       onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
-                      className="w-full p-2 border rounded-lg"
+                      className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       placeholder="Min 8 characters"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Role *</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role *</label>
                     <select
                       value={createForm.role}
                       onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}
-                      className="w-full p-2 border rounded-lg"
+                      className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
                       <option value="user">User</option>
                       <option value="creator">Creator</option>
@@ -431,18 +438,18 @@ const AdminUsers: React.FC = () => {
                       {isSuperAdmin && <option value="super_admin">Super Admin</option>}
                     </select>
                     {(createForm.role === 'admin' || createForm.role === 'super_admin') && (
-                      <p className="text-xs text-orange-600 mt-1">
+                      <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
                         Warning: This will grant administrative privileges
                       </p>
                     )}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gender</label>
                       <select
                         value={createForm.gender}
                         onChange={(e) => setCreateForm({ ...createForm, gender: e.target.value })}
-                        className="w-full p-2 border rounded-lg"
+                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       >
                         <option value="">Select gender</option>
                         <option value="male">Male</option>
@@ -452,21 +459,21 @@ const AdminUsers: React.FC = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date of Birth</label>
                       <input
                         type="date"
                         value={createForm.dateOfBirth}
                         onChange={(e) => setCreateForm({ ...createForm, dateOfBirth: e.target.value })}
-                        className="w-full p-2 border rounded-lg"
+                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Ethnicity</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ethnicity</label>
                     <select
                       value={createForm.ethnicity}
                       onChange={(e) => setCreateForm({ ...createForm, ethnicity: e.target.value })}
-                      className="w-full p-2 border rounded-lg"
+                      className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
                       <option value="">Select ethnicity</option>
                       {ethnicityOptions.map(opt => (
@@ -475,17 +482,17 @@ const AdminUsers: React.FC = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
                     <input
                       type="text"
                       value={createForm.location}
                       onChange={(e) => setCreateForm({ ...createForm, location: e.target.value })}
-                      className="w-full p-2 border rounded-lg"
+                      className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       placeholder="City, State"
                     />
                   </div>
                   <div className="flex justify-end gap-2 pt-4">
-                    <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 border rounded-lg">
+                    <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
                       Cancel
                     </button>
                     <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
@@ -498,12 +505,12 @@ const AdminUsers: React.FC = () => {
 
             {modalAction === 'edit' && selectedUser && (
               <>
-                <h2 className="text-xl font-bold mb-4">Edit User Role</h2>
-                <p className="text-gray-600 mb-4">User: {selectedUser.email}</p>
+                <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Edit User Role</h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">User: {selectedUser.email}</p>
                 <select
                   value={editRole}
                   onChange={(e) => setEditRole(e.target.value)}
-                  className="w-full p-2 border rounded-lg mb-4"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-4"
                 >
                   <option value="user">User</option>
                   <option value="creator">Creator</option>
@@ -512,40 +519,40 @@ const AdminUsers: React.FC = () => {
                   {isSuperAdmin && <option value="super_admin">Super Admin</option>}
                 </select>
                 {!isSuperAdmin && (editRole === 'admin' || editRole === 'super_admin') && (
-                  <p className="text-xs text-red-600 mb-4">Only Super Admins can assign admin roles</p>
+                  <p className="text-xs text-red-600 dark:text-red-400 mb-4">Only Super Admins can assign admin roles</p>
                 )}
                 <div className="flex justify-end gap-2">
-                  <button onClick={() => setShowModal(false)} className="px-4 py-2 border rounded-lg">Cancel</button>
-                  <button onClick={handleRoleChange} className="px-4 py-2 bg-indigo-600 text-white rounded-lg">Save</button>
+                  <button onClick={() => setShowModal(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                  <button onClick={handleRoleChange} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Save</button>
                 </div>
               </>
             )}
 
             {modalAction === 'resetPassword' && selectedUser && (
               <>
-                <h2 className="text-xl font-bold mb-4">Reset Password</h2>
-                <p className="text-gray-600 mb-4">User: {selectedUser.email}</p>
+                <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Reset Password</h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">User: {selectedUser.email}</p>
                 <input
                   type="password"
                   placeholder="New password (min 8 characters)"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full p-2 border rounded-lg mb-4"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-4"
                 />
                 <div className="flex justify-end gap-2">
-                  <button onClick={() => setShowModal(false)} className="px-4 py-2 border rounded-lg">Cancel</button>
-                  <button onClick={handleResetPassword} className="px-4 py-2 bg-yellow-600 text-white rounded-lg">Reset Password</button>
+                  <button onClick={() => setShowModal(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                  <button onClick={handleResetPassword} className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">Reset Password</button>
                 </div>
               </>
             )}
 
             {modalAction === 'delete' && selectedUser && (
               <>
-                <h2 className="text-xl font-bold mb-4 text-red-600">Delete User</h2>
-                <p className="text-gray-600 mb-4">Are you sure you want to delete <strong>{selectedUser.email}</strong>? This action cannot be undone.</p>
+                <h2 className="text-xl font-bold mb-4 text-red-600 dark:text-red-400">Delete User</h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">Are you sure you want to delete <strong className="text-gray-900 dark:text-white">{selectedUser.email}</strong>? This action cannot be undone.</p>
                 <div className="flex justify-end gap-2">
-                  <button onClick={() => setShowModal(false)} className="px-4 py-2 border rounded-lg">Cancel</button>
-                  <button onClick={handleDeleteUser} className="px-4 py-2 bg-red-600 text-white rounded-lg">Delete User</button>
+                  <button onClick={() => setShowModal(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+                  <button onClick={handleDeleteUser} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Delete User</button>
                 </div>
               </>
             )}

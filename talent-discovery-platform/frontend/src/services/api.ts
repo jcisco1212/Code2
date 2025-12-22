@@ -371,7 +371,11 @@ export const playlistsAPI = {
   getPlaylist: (id: string) =>
     api.get(`/playlists/${id}`),
   createPlaylist: (data: { name: string; description?: string; isPublic?: boolean }) =>
-    api.post('/playlists', data),
+    api.post('/playlists', {
+      title: data.name,
+      description: data.description,
+      visibility: data.isPublic ? 'public' : 'private'
+    }),
   updatePlaylist: (id: string, data: any) =>
     api.put(`/playlists/${id}`, data),
   deletePlaylist: (id: string) =>
