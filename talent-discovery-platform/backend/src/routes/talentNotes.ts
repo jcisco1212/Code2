@@ -81,7 +81,7 @@ router.post('/', authenticate, requireAgent, async (req: Request, res: Response)
     });
 
     // Fetch with talent info
-    const noteWithTalent = await TalentNote.findByPk(note.get('id'), {
+    const noteWithTalent = await TalentNote.findByPk(note.get('id') as string, {
       include: [{
         model: sequelize.models.User,
         as: 'talent',

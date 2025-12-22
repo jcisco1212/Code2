@@ -49,7 +49,7 @@ router.get(
         history: history.map(h => ({
           id: h.id,
           watchedAt: h.createdAt,
-          video: h.video
+          video: (h as any).video
         })),
         pagination: {
           page,
@@ -139,7 +139,7 @@ router.get(
       res.json({
         videos: saved.map(s => ({
           savedAt: s.createdAt,
-          ...s.video?.toJSON()
+          ...((s as any).video?.toJSON() || {})
         })),
         pagination: {
           page,
