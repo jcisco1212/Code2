@@ -7,7 +7,7 @@ import {
   TrashIcon,
   EyeIcon,
   FlagIcon,
-  CheckCircleIcon,
+  CheckIcon,
   XCircleIcon,
   ChevronDownIcon
 } from '@heroicons/react/24/outline';
@@ -314,7 +314,7 @@ const AdminVideos: React.FC = () => {
                     <div className="flex items-center gap-3">
                       <Link to={`/watch/${video.id}`} className="flex-shrink-0">
                         <img
-                          src={video.thumbnailUrl ? getUploadUrl(video.thumbnailUrl) : '/placeholder-video.jpg'}
+                          src={video.thumbnailUrl ? getUploadUrl(video.thumbnailUrl) || '/placeholder-video.jpg' : '/placeholder-video.jpg'}
                           alt={video.title}
                           className="w-20 h-12 object-cover rounded"
                         />
@@ -334,7 +334,7 @@ const AdminVideos: React.FC = () => {
                   <td className="px-4 py-3">
                     <Link to={`/profile/${video.user.username}`} className="flex items-center gap-2">
                       <img
-                        src={video.user.avatarUrl ? getUploadUrl(video.user.avatarUrl) : '/default-avatar.png'}
+                        src={video.user.avatarUrl ? getUploadUrl(video.user.avatarUrl) || '/default-avatar.png' : '/default-avatar.png'}
                         alt={video.user.displayName}
                         className="w-8 h-8 rounded-full object-cover"
                       />
@@ -355,7 +355,7 @@ const AdminVideos: React.FC = () => {
                       </Link>
                       {video.isFlagged ? (
                         <button onClick={() => handleSingleAction(video.id, 'unflag')} className="p-1.5 text-green-600 hover:text-green-700" title="Unflag">
-                          <CheckCircleIcon className="w-5 h-5" />
+                          <CheckIcon className="w-5 h-5" />
                         </button>
                       ) : (
                         <button onClick={() => handleSingleAction(video.id, 'flag')} className="p-1.5 text-yellow-600 hover:text-yellow-700" title="Flag">

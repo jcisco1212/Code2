@@ -115,8 +115,8 @@ const AdminAuditLogs: React.FC = () => {
     return actionLabels[action] || { label: action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), color: 'bg-gray-100 text-gray-700' };
   };
 
-  const uniqueActions = [...new Set(logs.map(l => l.action))];
-  const uniqueTargetTypes = [...new Set(logs.map(l => l.targetType))];
+  const uniqueActions = Array.from(new Set(logs.map(l => l.action)));
+  const uniqueTargetTypes = Array.from(new Set(logs.map(l => l.targetType)));
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -225,7 +225,7 @@ const AdminAuditLogs: React.FC = () => {
                             {log.user ? (
                               <div className="flex items-center gap-2">
                                 <img
-                                  src={log.user.avatarUrl ? getUploadUrl(log.user.avatarUrl) : '/default-avatar.png'}
+                                  src={log.user.avatarUrl ? getUploadUrl(log.user.avatarUrl) || '/default-avatar.png' : '/default-avatar.png'}
                                   alt={log.user.displayName}
                                   className="w-8 h-8 rounded-full object-cover"
                                 />

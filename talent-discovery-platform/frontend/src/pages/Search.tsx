@@ -343,7 +343,7 @@ const Search: React.FC = () => {
                     >
                       <div className="relative aspect-video">
                         <img
-                          src={video.thumbnailUrl ? getUploadUrl(video.thumbnailUrl) : '/placeholder-video.jpg'}
+                          src={video.thumbnailUrl ? getUploadUrl(video.thumbnailUrl) || '/placeholder-video.jpg' : '/placeholder-video.jpg'}
                           alt={video.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                         />
@@ -355,7 +355,7 @@ const Search: React.FC = () => {
                         <div className="flex gap-3">
                           <Link to={`/profile/${video.user.username}`} className="flex-shrink-0">
                             <img
-                              src={video.user.avatarUrl ? getUploadUrl(video.user.avatarUrl) : '/default-avatar.png'}
+                              src={video.user.avatarUrl ? getUploadUrl(video.user.avatarUrl) || '/default-avatar.png' : '/default-avatar.png'}
                               alt={video.user.displayName}
                               className="w-9 h-9 rounded-full object-cover"
                             />
@@ -404,7 +404,7 @@ const Search: React.FC = () => {
                       className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm hover:shadow-lg transition-all flex items-center gap-4"
                     >
                       <img
-                        src={user.avatarUrl ? getUploadUrl(user.avatarUrl) : '/default-avatar.png'}
+                        src={user.avatarUrl ? getUploadUrl(user.avatarUrl) || '/default-avatar.png' : '/default-avatar.png'}
                         alt={user.displayName}
                         className="w-16 h-16 rounded-full object-cover"
                       />

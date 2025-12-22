@@ -94,7 +94,11 @@ const Library: React.FC = () => {
   const handleCreatePlaylist = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await playlistsAPI.createPlaylist(newPlaylist);
+      const response = await playlistsAPI.createPlaylist({
+        name: newPlaylist.title,
+        description: newPlaylist.description || undefined,
+        isPublic: newPlaylist.visibility === 'public'
+      });
       setPlaylists(prev => [response.data.playlist, ...prev]);
       setShowCreatePlaylist(false);
       setNewPlaylist({ title: '', description: '', visibility: 'public' });

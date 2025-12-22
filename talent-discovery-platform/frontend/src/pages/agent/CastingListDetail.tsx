@@ -273,7 +273,7 @@ const CastingListDetail: React.FC = () => {
               <div className="flex items-start gap-4">
                 <Link to={`/profile/${item.talent.username}`}>
                   <img
-                    src={item.talent.avatarUrl ? getUploadUrl(item.talent.avatarUrl) : '/default-avatar.png'}
+                    src={item.talent.avatarUrl ? getUploadUrl(item.talent.avatarUrl) || '/default-avatar.png' : '/default-avatar.png'}
                     alt={item.talent.displayName}
                     className="w-16 h-16 rounded-full object-cover"
                   />

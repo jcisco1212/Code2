@@ -29,16 +29,26 @@ const targetOptions = [
   { value: 'admins', label: 'Admins Only' }
 ];
 
+interface FormData {
+  title: string;
+  content: string;
+  type: 'info' | 'warning' | 'success' | 'error';
+  target: 'all' | 'creators' | 'agents' | 'admins';
+  isPinned: boolean;
+  startsAt: string;
+  expiresAt: string;
+}
+
 const AdminAnnouncements: React.FC = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: '',
     content: '',
-    type: 'info' as const,
-    target: 'all' as const,
+    type: 'info',
+    target: 'all',
     isPinned: false,
     startsAt: '',
     expiresAt: ''

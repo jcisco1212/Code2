@@ -142,7 +142,7 @@ const TalentNotes: React.FC = () => {
           <div className="flex items-center gap-4 mb-6">
             <Link to={`/profile/${selectedTalent.username}`}>
               <img
-                src={selectedTalent.avatarUrl ? getUploadUrl(selectedTalent.avatarUrl) : '/default-avatar.png'}
+                src={selectedTalent.avatarUrl ? getUploadUrl(selectedTalent.avatarUrl) || '/default-avatar.png' : '/default-avatar.png'}
                 alt={selectedTalent.displayName}
                 className="w-16 h-16 rounded-full object-cover"
               />
@@ -305,7 +305,7 @@ const TalentNotes: React.FC = () => {
             >
               <div className="flex items-center gap-3 mb-3">
                 <img
-                  src={data.talent.avatarUrl ? getUploadUrl(data.talent.avatarUrl) : '/default-avatar.png'}
+                  src={data.talent.avatarUrl ? getUploadUrl(data.talent.avatarUrl) || '/default-avatar.png' : '/default-avatar.png'}
                   alt={data.talent.displayName}
                   className="w-12 h-12 rounded-full object-cover"
                 />

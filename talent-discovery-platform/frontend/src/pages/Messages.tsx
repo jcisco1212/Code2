@@ -180,7 +180,7 @@ const Messages: React.FC = () => {
                     }`}
                   >
                     <img
-                      src={conv.participant.avatarUrl ? getUploadUrl(conv.participant.avatarUrl) : '/default-avatar.png'}
+                      src={conv.participant.avatarUrl ? getUploadUrl(conv.participant.avatarUrl) || '/default-avatar.png' : '/default-avatar.png'}
                       alt={conv.participant.displayName}
                       className="w-12 h-12 rounded-full object-cover"
                     />
@@ -228,7 +228,7 @@ const Messages: React.FC = () => {
                   </button>
                   <Link to={`/profile/${selectedConversation.participant.username}`} className="flex items-center gap-3">
                     <img
-                      src={selectedConversation.participant.avatarUrl ? getUploadUrl(selectedConversation.participant.avatarUrl) : '/default-avatar.png'}
+                      src={selectedConversation.participant.avatarUrl ? getUploadUrl(selectedConversation.participant.avatarUrl) || '/default-avatar.png' : '/default-avatar.png'}
                       alt={selectedConversation.participant.displayName}
                       className="w-10 h-10 rounded-full object-cover"
                     />

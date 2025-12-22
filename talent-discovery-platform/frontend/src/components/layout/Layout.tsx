@@ -22,10 +22,10 @@ import {
   ClockIcon,
   EnvelopeIcon,
   FolderIcon,
-  ClipboardDocumentListIcon,
-  PencilSquareIcon,
+  ClipboardDocumentIcon,
+  PencilIcon,
   MegaphoneIcon,
-  DocumentTextIcon
+  DocumentIcon
 } from '@heroicons/react/24/outline';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
@@ -70,8 +70,8 @@ const Layout: React.FC = () => {
     ? [
         { name: 'Agent Dashboard', href: '/agent', icon: ChartBarIcon },
         { name: 'Discover Talent', href: '/agent/discover', icon: MagnifyingGlassIcon },
-        { name: 'Casting Lists', href: '/agent/casting-lists', icon: ClipboardDocumentListIcon },
-        { name: 'Talent Notes', href: '/agent/notes', icon: PencilSquareIcon }
+        { name: 'Casting Lists', href: '/agent/casting-lists', icon: ClipboardDocumentIcon },
+        { name: 'Talent Notes', href: '/agent/notes', icon: PencilIcon }
       ]
     : [];
 
@@ -79,7 +79,7 @@ const Layout: React.FC = () => {
     ? [
         { name: 'Admin Panel', href: '/admin', icon: Cog6ToothIcon },
         { name: 'Announcements', href: '/admin/announcements', icon: MegaphoneIcon },
-        { name: 'Audit Logs', href: '/admin/audit-logs', icon: DocumentTextIcon }
+        { name: 'Audit Logs', href: '/admin/audit-logs', icon: DocumentIcon }
       ]
     : [];
 

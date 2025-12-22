@@ -226,7 +226,7 @@ const PlaylistDetail: React.FC = () => {
               <Link to={`/watch/${item.videoId}`} className="flex-shrink-0">
                 <div className="relative w-40 h-24">
                   <img
-                    src={item.video.thumbnailUrl ? getUploadUrl(item.video.thumbnailUrl) : '/placeholder-video.jpg'}
+                    src={item.video.thumbnailUrl ? getUploadUrl(item.video.thumbnailUrl) || '/placeholder-video.jpg' : '/placeholder-video.jpg'}
                     alt={item.video.title}
                     className="w-full h-full object-cover"
                   />
