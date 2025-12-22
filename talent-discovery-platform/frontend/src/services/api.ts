@@ -428,3 +428,44 @@ export const announcementsAPI = {
   delete: (id: string) =>
     api.delete(`/announcements/${id}`)
 };
+
+export const blocksAPI = {
+  blockUser: (userId: string, reason?: string) =>
+    api.post(`/blocks/block/${userId}`, { reason }),
+  unblockUser: (userId: string) =>
+    api.delete(`/blocks/block/${userId}`),
+  muteUser: (userId: string, reason?: string) =>
+    api.post(`/blocks/mute/${userId}`, { reason }),
+  unmuteUser: (userId: string) =>
+    api.delete(`/blocks/mute/${userId}`),
+  getStatus: (userId: string) =>
+    api.get(`/blocks/status/${userId}`),
+  getBlockedUsers: (params?: { page?: number; limit?: number }) =>
+    api.get('/blocks/blocked', { params }),
+  getMutedUsers: (params?: { page?: number; limit?: number }) =>
+    api.get('/blocks/muted', { params }),
+  getBlockIds: () =>
+    api.get('/blocks/ids')
+};
+
+export const twoFactorAPI = {
+  enable: () =>
+    api.post('/auth/2fa/enable'),
+  confirm: (token: string) =>
+    api.post('/auth/2fa/confirm', { token }),
+  disable: (password: string, token: string) =>
+    api.post('/auth/2fa/disable', { password, token }),
+  verify: (userId: string, token: string) =>
+    api.post('/auth/verify-2fa', { userId, token })
+};
+
+export const thumbnailAPI = {
+  uploadDirect: (videoId: string, file: File) => {
+    const formData = new FormData();
+    formData.append('thumbnail', file);
+    formData.append('videoId', videoId);
+    return api.post('/upload/thumbnail/direct', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  }
+};

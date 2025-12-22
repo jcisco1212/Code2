@@ -549,6 +549,89 @@ router.post(
 );
 
 // ===========================================
+// Direct Thumbnail Upload (for development without S3)
+// ===========================================
+
+// Configure multer for thumbnail uploads
+const thumbnailStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const authReq = req;
+    const thumbnailDir = path.join(UPLOADS_DIR, 'thumbnails', authReq.userId || 'anonymous');
+    if (!fs.existsSync(thumbnailDir)) fs.mkdirSync(thumbnailDir, { recursive: true });
+    cb(null, thumbnailDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${req.body.videoId || uuidv4()}${ext}`);
+  }
+});
+
+const thumbnailUpload = multer({
+  storage: thumbnailStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Allowed: JPG, PNG, WebP'));
+    }
+  }
+});
+
+// Direct thumbnail upload - stores files locally
+router.post(
+  '/thumbnail/direct',
+  authenticate as RequestHandler,
+  thumbnailUpload.single('thumbnail'),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { videoId } = req.body;
+
+      if (!req.file) {
+        throw new BadRequestError('No thumbnail file uploaded');
+      }
+
+      if (!videoId) {
+        fs.unlinkSync(req.file.path);
+        throw new BadRequestError('Video ID required');
+      }
+
+      // Verify video exists and belongs to user
+      const video = await Video.findByPk(videoId);
+      if (!video) {
+        fs.unlinkSync(req.file.path);
+        throw new NotFoundError('Video not found');
+      }
+      if (video.userId !== req.userId) {
+        fs.unlinkSync(req.file.path);
+        throw new ForbiddenError('Not authorized');
+      }
+
+      // Generate a local URL for the thumbnail
+      const localKey = `thumbnails/${req.userId}/${req.file.filename}`;
+      const thumbnailUrl = `/uploads/${localKey}`;
+
+      // Update video with custom thumbnail
+      await video.update({
+        thumbnailUrl,
+        customThumbnailUrl: thumbnailUrl
+      });
+
+      logger.info(`Custom thumbnail uploaded for video ${videoId}`);
+
+      res.json({
+        message: 'Thumbnail uploaded successfully',
+        thumbnailUrl,
+        key: localKey
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// ===========================================
 // Direct Category Image Upload (for admin use)
 // ===========================================
 

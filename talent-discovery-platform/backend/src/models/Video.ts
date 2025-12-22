@@ -64,6 +64,8 @@ interface VideoAttributes {
   moderationStatus: string | null;
   moderationNotes: string | null;
   publishedAt: Date | null;
+  scheduledAt: Date | null;
+  customThumbnailUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -77,7 +79,7 @@ interface VideoCreationAttributes extends Optional<VideoAttributes,
   'aiAnalysisStatus' | 'aiAnalysisError' | 'aiCategoryTags' | 'discoverScore' | 'trendingScore' |
   'engagementScore' | 'watchTimeTotal' | 'watchTimeAverage' | 'tags' | 'isFeatured' |
   'featuredAt' | 'commentsEnabled' | 'moderationStatus' | 'moderationNotes' | 'publishedAt' |
-  'createdAt' | 'updatedAt'
+  'scheduledAt' | 'customThumbnailUrl' | 'createdAt' | 'updatedAt'
 > {}
 
 class Video extends Model<VideoAttributes, VideoCreationAttributes> implements VideoAttributes {
@@ -126,6 +128,8 @@ class Video extends Model<VideoAttributes, VideoCreationAttributes> implements V
   declare moderationStatus: string | null;
   declare moderationNotes: string | null;
   declare publishedAt: Date | null;
+  declare scheduledAt: Date | null;
+  declare customThumbnailUrl: string | null;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 
@@ -416,6 +420,16 @@ Video.init(
       allowNull: true,
       field: 'published_at'
     },
+    scheduledAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'scheduled_at'
+    },
+    customThumbnailUrl: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      field: 'custom_thumbnail_url'
+    },
     createdAt: {
       type: DataTypes.DATE,
       field: 'created_at'
@@ -437,6 +451,7 @@ Video.init(
       { fields: ['discover_score'] },
       { fields: ['trending_score'] },
       { fields: ['created_at'] },
+      { fields: ['scheduled_at'] },
       { fields: ['tags'], using: 'GIN' }
     ]
   }

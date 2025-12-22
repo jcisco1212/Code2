@@ -38,6 +38,7 @@ import castingListRoutes from './routes/castingLists';
 import announcementRoutes from './routes/announcements';
 import talentNotesRoutes from './routes/talentNotes';
 import adminAuditLogsRoutes from './routes/adminAuditLogs';
+import blocksRoutes from './routes/blocks';
 
 dotenv.config();
 
@@ -146,6 +147,7 @@ app.use('/api/v1/casting-lists', castingListRoutes);
 app.use('/api/v1/announcements', announcementRoutes);
 app.use('/api/v1/talent-notes', talentNotesRoutes);
 app.use('/api/v1/admin/audit-logs', adminAuditLogsRoutes);
+app.use('/api/v1/blocks', blocksRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

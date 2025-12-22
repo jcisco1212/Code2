@@ -156,7 +156,19 @@ export const getStreamUrl = async (req: AuthRequest, res: Response, next: NextFu
 // Create video metadata
 export const createVideo = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { title, description, categoryId, tags, visibility, commentsEnabled } = req.body;
+    const { title, description, categoryId, tags, visibility, commentsEnabled, scheduledAt } = req.body;
+
+    // Validate scheduledAt if provided
+    let parsedScheduledAt = null;
+    if (scheduledAt) {
+      parsedScheduledAt = new Date(scheduledAt);
+      if (isNaN(parsedScheduledAt.getTime())) {
+        throw new BadRequestError('Invalid scheduled date');
+      }
+      if (parsedScheduledAt <= new Date()) {
+        throw new BadRequestError('Scheduled date must be in the future');
+      }
+    }
 
     const video = await Video.create({
       userId: req.userId!,
@@ -166,6 +178,7 @@ export const createVideo = async (req: AuthRequest, res: Response, next: NextFun
       tags: tags || [],
       visibility: visibility || VideoVisibility.PUBLIC,
       commentsEnabled: commentsEnabled !== false,
+      scheduledAt: parsedScheduledAt,
       originalKey: '', // Will be updated after upload
       status: VideoStatus.PENDING
     });
@@ -180,7 +193,7 @@ export const createVideo = async (req: AuthRequest, res: Response, next: NextFun
 export const updateVideo = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
-    const { title, description, categoryId, tags, visibility, commentsEnabled, duration } = req.body;
+    const { title, description, categoryId, tags, visibility, commentsEnabled, duration, scheduledAt } = req.body;
 
     const video = await Video.findByPk(id);
     if (!video) {
@@ -191,6 +204,22 @@ export const updateVideo = async (req: AuthRequest, res: Response, next: NextFun
       throw new ForbiddenError('Not authorized to update this video');
     }
 
+    // Validate scheduledAt if provided
+    let parsedScheduledAt = undefined;
+    if (scheduledAt !== undefined) {
+      if (scheduledAt === null) {
+        parsedScheduledAt = null; // Allow clearing scheduled time
+      } else {
+        parsedScheduledAt = new Date(scheduledAt);
+        if (isNaN(parsedScheduledAt.getTime())) {
+          throw new BadRequestError('Invalid scheduled date');
+        }
+        if (parsedScheduledAt <= new Date()) {
+          throw new BadRequestError('Scheduled date must be in the future');
+        }
+      }
+    }
+
     await video.update({
       ...(title && { title }),
       ...(description !== undefined && { description }),
@@ -198,7 +227,8 @@ export const updateVideo = async (req: AuthRequest, res: Response, next: NextFun
       ...(tags && { tags }),
       ...(visibility && { visibility }),
       ...(commentsEnabled !== undefined && { commentsEnabled }),
-      ...(duration !== undefined && { duration })
+      ...(duration !== undefined && { duration }),
+      ...(parsedScheduledAt !== undefined && { scheduledAt: parsedScheduledAt })
     });
 
     // Clear cache

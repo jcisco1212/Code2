@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { profileAPI, uploadAPI } from '../services/api';
+import { profileAPI, uploadAPI, blocksAPI, twoFactorAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import {
   UserCircleIcon,
@@ -10,11 +10,14 @@ import {
   ShieldCheckIcon,
   PaintBrushIcon,
   CameraIcon,
-  LinkIcon
+  LinkIcon,
+  NoSymbolIcon,
+  LockClosedIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { getUploadUrl } from '../services/api';
 
-type SettingsTab = 'profile' | 'account' | 'notifications' | 'privacy' | 'appearance' | 'links';
+type SettingsTab = 'profile' | 'account' | 'notifications' | 'privacy' | 'appearance' | 'links' | 'security' | 'blocked';
 
 // Helper to normalize URLs - adds https:// if missing
 const normalizeUrl = (url: string): string => {
@@ -88,6 +91,18 @@ const Settings: React.FC = () => {
     agency: ''
   });
 
+  // 2FA state
+  const [twoFAEnabled, setTwoFAEnabled] = useState(false);
+  const [twoFASetup, setTwoFASetup] = useState<{ qrCode: string; secret: string } | null>(null);
+  const [twoFAToken, setTwoFAToken] = useState('');
+  const [twoFAPassword, setTwoFAPassword] = useState('');
+  const [settingUp2FA, setSettingUp2FA] = useState(false);
+
+  // Blocked/muted users state
+  const [blockedUsers, setBlockedUsers] = useState<any[]>([]);
+  const [mutedUsers, setMutedUsers] = useState<any[]>([]);
+  const [loadingBlocked, setLoadingBlocked] = useState(false);
+
   useEffect(() => {
     if (user) {
       setProfileForm({
@@ -118,8 +133,108 @@ const Settings: React.FC = () => {
           agency: user.socialLinks.agency || ''
         });
       }
+      // Set 2FA status
+      setTwoFAEnabled(user.twoFactorEnabled || false);
     }
   }, [user]);
+
+  // Load blocked/muted users when tab is active
+  useEffect(() => {
+    if (activeTab === 'blocked') {
+      loadBlockedUsers();
+    }
+  }, [activeTab]);
+
+  const loadBlockedUsers = async () => {
+    setLoadingBlocked(true);
+    try {
+      const [blockedRes, mutedRes] = await Promise.all([
+        blocksAPI.getBlockedUsers(),
+        blocksAPI.getMutedUsers()
+      ]);
+      setBlockedUsers(blockedRes.data.blocked || []);
+      setMutedUsers(mutedRes.data.muted || []);
+    } catch (err) {
+      console.error('Failed to load blocked users');
+    } finally {
+      setLoadingBlocked(false);
+    }
+  };
+
+  const handleUnblock = async (userId: string) => {
+    try {
+      await blocksAPI.unblockUser(userId);
+      setBlockedUsers(prev => prev.filter(b => b.user.id !== userId));
+      toast.success('User unblocked');
+    } catch (err) {
+      toast.error('Failed to unblock user');
+    }
+  };
+
+  const handleUnmute = async (userId: string) => {
+    try {
+      await blocksAPI.unmuteUser(userId);
+      setMutedUsers(prev => prev.filter(m => m.user.id !== userId));
+      toast.success('User unmuted');
+    } catch (err) {
+      toast.error('Failed to unmute user');
+    }
+  };
+
+  const handleEnable2FA = async () => {
+    setSettingUp2FA(true);
+    try {
+      const response = await twoFactorAPI.enable();
+      setTwoFASetup({
+        qrCode: response.data.qrCode,
+        secret: response.data.secret
+      });
+    } catch (err: any) {
+      toast.error(err.response?.data?.error?.message || 'Failed to enable 2FA');
+    } finally {
+      setSettingUp2FA(false);
+    }
+  };
+
+  const handleConfirm2FA = async () => {
+    if (!twoFAToken || twoFAToken.length !== 6) {
+      toast.error('Please enter a 6-digit code');
+      return;
+    }
+    setSaving(true);
+    try {
+      await twoFactorAPI.confirm(twoFAToken);
+      setTwoFAEnabled(true);
+      setTwoFASetup(null);
+      setTwoFAToken('');
+      toast.success('2FA enabled successfully');
+      if (refreshUser) await refreshUser();
+    } catch (err: any) {
+      toast.error(err.response?.data?.error?.message || 'Invalid code');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDisable2FA = async () => {
+    if (!twoFAPassword || !twoFAToken || twoFAToken.length !== 6) {
+      toast.error('Please enter your password and 6-digit code');
+      return;
+    }
+    setSaving(true);
+    try {
+      await twoFactorAPI.disable(twoFAPassword, twoFAToken);
+      setTwoFAEnabled(false);
+      setTwoFAPassword('');
+      setTwoFAToken('');
+      toast.success('2FA disabled');
+      if (refreshUser) await refreshUser();
+    } catch (err: any) {
+      toast.error(err.response?.data?.error?.message || 'Failed to disable 2FA');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -263,8 +378,10 @@ const Settings: React.FC = () => {
     { id: 'profile' as SettingsTab, name: 'Profile', icon: UserCircleIcon },
     { id: 'links' as SettingsTab, name: 'Social Links', icon: LinkIcon },
     { id: 'account' as SettingsTab, name: 'Account', icon: KeyIcon },
+    { id: 'security' as SettingsTab, name: 'Security', icon: LockClosedIcon },
     { id: 'notifications' as SettingsTab, name: 'Notifications', icon: BellIcon },
     { id: 'privacy' as SettingsTab, name: 'Privacy', icon: ShieldCheckIcon },
+    { id: 'blocked' as SettingsTab, name: 'Blocked Users', icon: NoSymbolIcon },
     { id: 'appearance' as SettingsTab, name: 'Appearance', icon: PaintBrushIcon }
   ];
 
@@ -838,6 +955,235 @@ const Settings: React.FC = () => {
                 >
                   {saving ? 'Saving...' : 'Save Social Links'}
                 </button>
+              </div>
+            )}
+
+            {/* Security Tab - 2FA */}
+            {activeTab === 'security' && (
+              <div className="space-y-6">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Two-Factor Authentication</h2>
+
+                {!twoFAEnabled && !twoFASetup && (
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                        <LockClosedIcon className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900 dark:text-white mb-1">Add Extra Security</h3>
+                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                          Two-factor authentication adds an extra layer of security to your account.
+                          You'll need to enter a code from your authenticator app when signing in.
+                        </p>
+                        <button
+                          onClick={handleEnable2FA}
+                          disabled={settingUp2FA}
+                          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                        >
+                          {settingUp2FA ? 'Setting up...' : 'Enable 2FA'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {twoFASetup && (
+                  <div className="space-y-6">
+                    <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                      <p className="text-blue-800 dark:text-blue-200 text-sm">
+                        Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.),
+                        then enter the 6-digit code to confirm.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="p-4 bg-white rounded-xl shadow-sm">
+                        <img src={twoFASetup.qrCode} alt="2FA QR Code" className="w-48 h-48" />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Or enter this code manually:</p>
+                        <code className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded font-mono text-sm">
+                          {twoFASetup.secret}
+                        </code>
+                      </div>
+                    </div>
+
+                    <div className="max-w-xs mx-auto">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Enter 6-digit code
+                      </label>
+                      <input
+                        type="text"
+                        value={twoFAToken}
+                        onChange={e => setTwoFAToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        placeholder="000000"
+                        maxLength={6}
+                        className="w-full p-3 text-center text-2xl tracking-widest border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                      />
+                      <div className="flex gap-2 mt-4">
+                        <button
+                          onClick={() => { setTwoFASetup(null); setTwoFAToken(''); }}
+                          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleConfirm2FA}
+                          disabled={saving || twoFAToken.length !== 6}
+                          className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                        >
+                          {saving ? 'Verifying...' : 'Confirm'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {twoFAEnabled && !twoFASetup && (
+                  <div className="space-y-6">
+                    <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl p-4">
+                      <div className="flex items-center gap-2">
+                        <ShieldCheckIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
+                        <span className="text-green-800 dark:text-green-200 font-medium">2FA is enabled</span>
+                      </div>
+                      <p className="text-green-700 dark:text-green-300 text-sm mt-1">
+                        Your account is protected with two-factor authentication.
+                      </p>
+                    </div>
+
+                    <div className="border-t dark:border-gray-700 pt-6">
+                      <h3 className="font-medium text-gray-900 dark:text-white mb-4">Disable Two-Factor Authentication</h3>
+                      <div className="max-w-md space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Current Password
+                          </label>
+                          <input
+                            type="password"
+                            value={twoFAPassword}
+                            onChange={e => setTwoFAPassword(e.target.value)}
+                            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Authenticator Code
+                          </label>
+                          <input
+                            type="text"
+                            value={twoFAToken}
+                            onChange={e => setTwoFAToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                            placeholder="000000"
+                            maxLength={6}
+                            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          />
+                        </div>
+                        <button
+                          onClick={handleDisable2FA}
+                          disabled={saving}
+                          className="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                        >
+                          {saving ? 'Disabling...' : 'Disable 2FA'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Blocked Users Tab */}
+            {activeTab === 'blocked' && (
+              <div className="space-y-6">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Blocked & Muted Users</h2>
+
+                {loadingBlocked ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-600"></div>
+                  </div>
+                ) : (
+                  <>
+                    {/* Blocked Users */}
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-white mb-3">
+                        Blocked Users ({blockedUsers.length})
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                        Blocked users cannot see your profile, videos, or send you messages.
+                      </p>
+                      {blockedUsers.length === 0 ? (
+                        <div className="text-center py-8 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                          <NoSymbolIcon className="w-10 h-10 mx-auto text-gray-400 mb-2" />
+                          <p className="text-gray-500 dark:text-gray-400">No blocked users</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {blockedUsers.map(block => (
+                            <div key={block.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <img
+                                  src={block.user?.avatarUrl ? getUploadUrl(block.user.avatarUrl) || '/default-avatar.png' : '/default-avatar.png'}
+                                  alt={block.user?.displayName || 'User'}
+                                  className="w-10 h-10 rounded-full object-cover"
+                                />
+                                <div>
+                                  <p className="font-medium text-gray-900 dark:text-white">{block.user?.displayName || 'Unknown'}</p>
+                                  <p className="text-sm text-gray-500">@{block.user?.username || 'unknown'}</p>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => handleUnblock(block.user?.id)}
+                                className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                              >
+                                Unblock
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Muted Users */}
+                    <div className="border-t dark:border-gray-700 pt-6">
+                      <h3 className="font-medium text-gray-900 dark:text-white mb-3">
+                        Muted Users ({mutedUsers.length})
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                        Muted users' content is hidden from your feed, but they can still see your profile.
+                      </p>
+                      {mutedUsers.length === 0 ? (
+                        <div className="text-center py-8 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                          <NoSymbolIcon className="w-10 h-10 mx-auto text-gray-400 mb-2" />
+                          <p className="text-gray-500 dark:text-gray-400">No muted users</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {mutedUsers.map(mute => (
+                            <div key={mute.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <img
+                                  src={mute.user?.avatarUrl ? getUploadUrl(mute.user.avatarUrl) || '/default-avatar.png' : '/default-avatar.png'}
+                                  alt={mute.user?.displayName || 'User'}
+                                  className="w-10 h-10 rounded-full object-cover"
+                                />
+                                <div>
+                                  <p className="font-medium text-gray-900 dark:text-white">{mute.user?.displayName || 'Unknown'}</p>
+                                  <p className="text-sm text-gray-500">@{mute.user?.username || 'unknown'}</p>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => handleUnmute(mute.user?.id)}
+                                className="px-3 py-1.5 text-sm text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                              >
+                                Unmute
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
