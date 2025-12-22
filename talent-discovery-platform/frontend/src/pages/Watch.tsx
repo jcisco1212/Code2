@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { videosAPI, savedVideosAPI, getUploadUrl } from '../services/api';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { videosAPI, savedVideosAPI, socialAPI, getUploadUrl } from '../services/api';
 import { EyeIcon, HeartIcon, ShareIcon, BookmarkIcon, EnvelopeIcon, ChatBubbleLeftIcon, LinkIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
@@ -64,12 +64,15 @@ const generateSessionId = () => Math.random().toString(36).substring(2) + Date.n
 
 const Watch: React.FC = () => {
   const { videoId } = useParams<{ videoId: string }>();
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const navigate = useNavigate();
+  const { isAuthenticated, user: currentUser } = useSelector((state: RootState) => state.auth);
   const [video, setVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [following, setFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
   const [relatedVideos, setRelatedVideos] = useState<RelatedVideo[]>([]);
   const [showShareModal, setShowShareModal] = useState(false);
   const [viewRecorded, setViewRecorded] = useState(false);
@@ -85,13 +88,23 @@ const Watch: React.FC = () => {
         setVideo(response.data.video);
         setLiked(response.data.userLiked === true);
 
-        // Check if video is saved (only if authenticated)
+        // Check if video is saved and if following creator (only if authenticated)
         if (isAuthenticated) {
           try {
             const savedResponse = await savedVideosAPI.checkSaved(videoId);
             setSaved(savedResponse.data.saved);
           } catch {
             // Ignore error if not authenticated
+          }
+
+          // Check follow status for creator
+          if (response.data.video.user?.id && response.data.video.user.id !== currentUser?.id) {
+            try {
+              const followResponse = await socialAPI.checkFollowing(response.data.video.user.id);
+              setFollowing(followResponse.data.following);
+            } catch {
+              // Ignore error
+            }
           }
         }
 
@@ -175,6 +188,35 @@ const Watch: React.FC = () => {
       }
     } catch (err: any) {
       toast.error(err.response?.data?.error?.message || 'Failed to save video');
+    }
+  };
+
+  const handleFollow = async () => {
+    if (!video?.user?.id) return;
+
+    if (!isAuthenticated) {
+      toast.error('Please log in to follow');
+      navigate('/login');
+      return;
+    }
+
+    if (followLoading) return;
+
+    setFollowLoading(true);
+    try {
+      if (following) {
+        await socialAPI.unfollow(video.user.id);
+        setFollowing(false);
+        toast.success('Unfollowed');
+      } else {
+        await socialAPI.follow(video.user.id);
+        setFollowing(true);
+        toast.success('Following');
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.error?.message || 'Action failed');
+    } finally {
+      setFollowLoading(false);
     }
   };
 
@@ -365,9 +407,19 @@ const Watch: React.FC = () => {
                 </Link>
                 <p className="text-sm text-gray-500 dark:text-gray-400">@{video.user.username}</p>
               </div>
-              <button className="px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors">
-                Follow
-              </button>
+              {video.user.id !== currentUser?.id && (
+                <button
+                  onClick={handleFollow}
+                  disabled={followLoading}
+                  className={`px-4 py-2 rounded-full transition-colors disabled:opacity-50 ${
+                    following
+                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                  }`}
+                >
+                  {followLoading ? 'Loading...' : following ? 'Following' : 'Follow'}
+                </button>
+              )}
             </div>
           )}
 

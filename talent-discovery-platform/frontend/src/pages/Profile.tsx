@@ -256,7 +256,10 @@ const Profile: React.FC = () => {
                           >
                             {followLoading ? 'Loading...' : following ? 'Following' : 'Follow'}
                           </button>
-                          <button className="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                          <button
+                            onClick={() => navigate(`/messages?user=${profile.id}`)}
+                            className="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                          >
                             Message
                           </button>
                         </>
@@ -573,7 +576,10 @@ const Profile: React.FC = () => {
                     <p className="text-gray-600 dark:text-gray-300 mb-4">
                       Reach out to {profile.displayName || profile.username} for collaboration opportunities.
                     </p>
-                    <button className="px-6 py-2.5 bg-indigo-600 text-white rounded-full font-medium hover:bg-indigo-700 transition-colors">
+                    <button
+                      onClick={() => navigate(`/messages?user=${profile.id}`)}
+                      className="px-6 py-2.5 bg-indigo-600 text-white rounded-full font-medium hover:bg-indigo-700 transition-colors"
+                    >
                       Send Message
                     </button>
                   </div>
