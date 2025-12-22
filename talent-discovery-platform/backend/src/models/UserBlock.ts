@@ -31,11 +31,13 @@ export const initUserBlock = (sequelize: Sequelize) => {
       blockerId: {
         type: DataTypes.UUID,
         allowNull: false,
+        field: 'blocker_id',
         references: { model: 'users', key: 'id' }
       },
       blockedId: {
         type: DataTypes.UUID,
         allowNull: false,
+        field: 'blocked_id',
         references: { model: 'users', key: 'id' }
       },
       type: {
@@ -53,8 +55,8 @@ export const initUserBlock = (sequelize: Sequelize) => {
       tableName: 'user_blocks',
       updatedAt: false,
       indexes: [
-        { fields: ['blockerId', 'blockedId', 'type'], unique: true },
-        { fields: ['blockedId'] },
+        { fields: ['blocker_id', 'blocked_id', 'type'], unique: true },
+        { fields: ['blocked_id'] },
         { fields: ['type'] }
       ]
     }
