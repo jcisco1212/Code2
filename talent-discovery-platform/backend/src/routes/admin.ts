@@ -334,12 +334,13 @@ router.post(
     body('slug').trim().notEmpty().withMessage('Slug is required'),
     body('description').optional().trim(),
     body('icon').optional().trim(),
+    body('iconUrl').optional().trim(),
     body('sortOrder').optional().isInt().withMessage('Sort order must be an integer'),
     body('isActive').optional().isBoolean()
   ]),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { name, slug, description, icon, sortOrder, isActive } = req.body;
+      const { name, slug, description, icon, iconUrl, sortOrder, isActive } = req.body;
 
       // Check if slug already exists
       const existing = await Category.findOne({ where: { slug } });
@@ -353,6 +354,7 @@ router.post(
         slug,
         description,
         icon,
+        iconUrl,
         sortOrder: sortOrder || 0,
         isActive: isActive !== false
       });

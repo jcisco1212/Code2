@@ -219,6 +219,49 @@ router.delete(
   }
 );
 
+// Mark conversation as read
+router.put(
+  '/conversation/:conversationId/read',
+  authenticate as RequestHandler,
+  validate([param('conversationId').isUUID().withMessage('Valid conversation ID required')]),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { conversationId } = req.params;
+
+      // Verify user is part of conversation
+      const message = await Message.findOne({
+        where: {
+          conversationId,
+          [Op.or]: [
+            { senderId: req.userId },
+            { receiverId: req.userId }
+          ]
+        }
+      });
+
+      if (!message) {
+        throw new ForbiddenError('Access denied');
+      }
+
+      // Mark all messages in conversation as read
+      await Message.update(
+        { status: MessageStatus.READ, readAt: new Date() },
+        {
+          where: {
+            conversationId,
+            receiverId: req.userId,
+            status: { [Op.ne]: MessageStatus.READ }
+          }
+        }
+      );
+
+      res.json({ message: 'Conversation marked as read' });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 // Get unread count
 router.get('/unread-count', authenticate as RequestHandler, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
