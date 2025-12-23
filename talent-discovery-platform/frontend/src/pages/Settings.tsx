@@ -13,11 +13,14 @@ import {
   LinkIcon,
   NoSymbolIcon,
   LockClosedIcon,
-  XMarkIcon
+  XMarkIcon,
+  PhotoIcon,
+  TrashIcon,
+  PlusIcon
 } from '@heroicons/react/24/outline';
 import { getUploadUrl } from '../services/api';
 
-type SettingsTab = 'profile' | 'account' | 'notifications' | 'privacy' | 'appearance' | 'links' | 'security' | 'blocked';
+type SettingsTab = 'profile' | 'photos' | 'account' | 'notifications' | 'privacy' | 'appearance' | 'links' | 'security' | 'blocked';
 
 // Helper to normalize URLs - adds https:// if missing
 const normalizeUrl = (url: string): string => {
@@ -103,6 +106,11 @@ const Settings: React.FC = () => {
   const [mutedUsers, setMutedUsers] = useState<any[]>([]);
   const [loadingBlocked, setLoadingBlocked] = useState(false);
 
+  // Photo gallery state (up to 4 headshots)
+  const [photoGallery, setPhotoGallery] = useState<string[]>([]);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     if (user) {
       setProfileForm({
@@ -135,6 +143,8 @@ const Settings: React.FC = () => {
       }
       // Set 2FA status
       setTwoFAEnabled(user.twoFactorEnabled || false);
+      // Initialize photo gallery
+      setPhotoGallery(user.photoGallery || []);
     }
   }, [user]);
 
@@ -374,8 +384,65 @@ const Settings: React.FC = () => {
     }
   };
 
+  // Photo gallery functions
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (photoGallery.length >= 4) {
+      toast.error('Maximum 4 photos allowed');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Photo must be less than 5MB');
+      return;
+    }
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      toast.error('Only JPG, PNG, or WebP images allowed');
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('type', 'gallery');
+
+      const uploadResponse = await uploadAPI.directProfileImageUpload(file);
+      const imageUrl = uploadResponse.data.url;
+
+      const newGallery = [...photoGallery, imageUrl];
+      await profileAPI.updateProfile({ photoGallery: newGallery });
+      setPhotoGallery(newGallery);
+      toast.success('Photo added to gallery');
+      refreshUser();
+    } catch (err: any) {
+      toast.error(err.response?.data?.error?.message || 'Failed to upload photo');
+    } finally {
+      setUploadingPhoto(false);
+      if (photoInputRef.current) {
+        photoInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemovePhoto = async (index: number) => {
+    try {
+      const newGallery = photoGallery.filter((_, i) => i !== index);
+      await profileAPI.updateProfile({ photoGallery: newGallery });
+      setPhotoGallery(newGallery);
+      toast.success('Photo removed');
+      refreshUser();
+    } catch (err) {
+      toast.error('Failed to remove photo');
+    }
+  };
+
   const tabs = [
     { id: 'profile' as SettingsTab, name: 'Profile', icon: UserCircleIcon },
+    { id: 'photos' as SettingsTab, name: 'Photo Gallery', icon: PhotoIcon },
     { id: 'links' as SettingsTab, name: 'Social Links', icon: LinkIcon },
     { id: 'account' as SettingsTab, name: 'Account', icon: KeyIcon },
     { id: 'security' as SettingsTab, name: 'Security', icon: LockClosedIcon },
@@ -559,6 +626,87 @@ const Settings: React.FC = () => {
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
               </form>
+            )}
+
+            {/* Photo Gallery Tab */}
+            {activeTab === 'photos' && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Photo Gallery</h2>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
+                    Add up to 4 professional headshots or photos to showcase on your profile. These help agents and collaborators see your range.
+                  </p>
+                </div>
+
+                {/* Photo Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {photoGallery.map((photo, index) => (
+                    <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 group">
+                      <img
+                        src={getUploadUrl(photo) || ''}
+                        alt={`Gallery photo ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        onClick={() => handleRemovePhoto(index)}
+                        className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                        title="Remove photo"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                      </button>
+                      <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/50 text-white text-xs rounded">
+                        Photo {index + 1}
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Add Photo Button */}
+                  {photoGallery.length < 4 && (
+                    <button
+                      onClick={() => photoInputRef.current?.click()}
+                      disabled={uploadingPhoto}
+                      className="aspect-square rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-indigo-500 dark:hover:border-indigo-400 flex flex-col items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                    >
+                      {uploadingPhoto ? (
+                        <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-600 border-t-transparent"></div>
+                      ) : (
+                        <>
+                          <PlusIcon className="w-8 h-8 text-gray-400" />
+                          <span className="text-sm text-gray-500 dark:text-gray-400">Add Photo</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Empty Placeholders */}
+                  {Array.from({ length: Math.max(0, 3 - photoGallery.length) }).map((_, i) => (
+                    <div
+                      key={`empty-${i}`}
+                      className="aspect-square rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center"
+                    >
+                      <PhotoIcon className="w-8 h-8 text-gray-300 dark:text-gray-600" />
+                    </div>
+                  ))}
+                </div>
+
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
+
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                  <h3 className="font-medium text-gray-900 dark:text-white mb-2">Photo Guidelines</h3>
+                  <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                    <li>• Use high-quality professional headshots</li>
+                    <li>• Show different looks, expressions, or styles</li>
+                    <li>• JPG, PNG, or WebP format (max 5MB each)</li>
+                    <li>• Square or portrait orientation works best</li>
+                  </ul>
+                </div>
+              </div>
             )}
 
             {/* Account Tab */}

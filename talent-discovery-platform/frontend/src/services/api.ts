@@ -316,10 +316,8 @@ export const messagesAPI = {
     api.get('/messages/conversations'),
   getMessages: (conversationId: string, params?: any) =>
     api.get(`/messages/conversation/${conversationId}`, { params }),
-  sendMessage: (conversationId: string, content: string) =>
-    api.post(`/messages/conversation/${conversationId}`, { content }),
-  startConversation: (userId: string, content: string) =>
-    api.post('/messages/start', { userId, content }),
+  sendMessage: (receiverId: string, content: string) =>
+    api.post('/messages', { receiverId, content }),
   markAsRead: (conversationId: string) =>
     api.put(`/messages/conversation/${conversationId}/read`),
   getUnreadCount: () =>

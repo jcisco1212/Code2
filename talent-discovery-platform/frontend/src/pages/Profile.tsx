@@ -33,6 +33,7 @@ interface UserProfile {
   createdAt: string;
   location?: string;
   socialLinks?: SocialLinks;
+  photoGallery?: string[];
 }
 
 interface Video {
@@ -408,6 +409,25 @@ const Profile: React.FC = () => {
                     {profile.bio || 'No bio yet.'}
                   </p>
                 </div>
+
+                {/* Photo Gallery */}
+                {profile.photoGallery && profile.photoGallery.length > 0 && (
+                  <div className="mb-8">
+                    <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Photo Gallery</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {profile.photoGallery.map((photo: string, index: number) => (
+                        <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
+                          <img
+                            src={getUploadUrl(photo) || ''}
+                            alt={`${profile.displayName || profile.username} photo ${index + 1}`}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
+                            onClick={() => window.open(getUploadUrl(photo) || '', '_blank')}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Details Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

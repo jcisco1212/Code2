@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { messagesAPI, getUploadUrl } from '../services/api';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { messagesAPI, usersAPI, getUploadUrl } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -8,6 +8,8 @@ interface User {
   id: string;
   username: string;
   displayName: string;
+  firstName?: string;
+  lastName?: string;
   avatarUrl: string | null;
 }
 
@@ -21,21 +23,22 @@ interface Message {
 }
 
 interface Conversation {
-  id: string;
-  participant: User;
+  conversationId: string;
+  otherUser: User;
   lastMessage: {
     content: string;
     createdAt: string;
-    senderId: string;
   } | null;
   unreadCount: number;
-  updatedAt: string;
 }
 
 const Messages: React.FC = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
+  const [searchParams] = useSearchParams();
+  const newUserId = searchParams.get('user');
   const navigate = useNavigate();
   const { user } = useAuth();
+
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,14 +46,53 @@ const Messages: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [newChatUser, setNewChatUser] = useState<User | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchConversations();
   }, []);
 
+  // Handle new user from query param
+  useEffect(() => {
+    const loadNewUser = async () => {
+      if (newUserId && newUserId !== user?.id) {
+        try {
+          // Check if conversation already exists
+          const existingConv = conversations.find(c => c.otherUser.id === newUserId);
+          if (existingConv) {
+            navigate(`/messages/${existingConv.conversationId}`, { replace: true });
+            return;
+          }
+
+          // Fetch user info
+          const response = await usersAPI.getUser(newUserId);
+          const userData = response.data.user;
+          setNewChatUser({
+            id: userData.id,
+            username: userData.username,
+            displayName: userData.displayName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || userData.username,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            avatarUrl: userData.avatarUrl
+          });
+          setSelectedConversation(null);
+          setMessages([]);
+        } catch (err) {
+          toast.error('User not found');
+          navigate('/messages', { replace: true });
+        }
+      }
+    };
+
+    if (!loading) {
+      loadNewUser();
+    }
+  }, [newUserId, conversations, loading, user?.id, navigate]);
+
   useEffect(() => {
     if (conversationId) {
+      setNewChatUser(null);
       fetchMessages(conversationId);
     }
   }, [conversationId]);
@@ -62,10 +104,23 @@ const Messages: React.FC = () => {
   const fetchConversations = async () => {
     try {
       const response = await messagesAPI.getConversations();
-      setConversations(response.data.conversations || []);
+      const convs = (response.data.conversations || []).map((c: any) => ({
+        conversationId: c.conversationId,
+        otherUser: {
+          id: c.otherUser.id,
+          username: c.otherUser.username,
+          displayName: c.otherUser.firstName && c.otherUser.lastName
+            ? `${c.otherUser.firstName} ${c.otherUser.lastName}`
+            : c.otherUser.username,
+          avatarUrl: c.otherUser.avatarUrl
+        },
+        lastMessage: c.lastMessage,
+        unreadCount: c.unreadCount
+      }));
+      setConversations(convs);
 
       if (conversationId) {
-        const conv = response.data.conversations?.find((c: Conversation) => c.id === conversationId);
+        const conv = convs.find((c: Conversation) => c.conversationId === conversationId);
         if (conv) setSelectedConversation(conv);
       }
     } catch (err) {
@@ -82,11 +137,15 @@ const Messages: React.FC = () => {
       setMessages(response.data.messages || []);
 
       // Mark as read
-      await messagesAPI.markAsRead(convId);
+      try {
+        await messagesAPI.markAsRead(convId);
+      } catch (e) {
+        // Ignore mark as read errors
+      }
 
       // Update unread count in conversations list
       setConversations(prev => prev.map(c =>
-        c.id === convId ? { ...c, unreadCount: 0 } : c
+        c.conversationId === convId ? { ...c, unreadCount: 0 } : c
       ));
     } catch (err) {
       toast.error('Failed to load messages');
@@ -97,28 +156,39 @@ const Messages: React.FC = () => {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !conversationId || sending) return;
+    if (!newMessage.trim() || sending) return;
+
+    const receiverId = newChatUser?.id || selectedConversation?.otherUser.id;
+    if (!receiverId) return;
 
     setSending(true);
     try {
-      const response = await messagesAPI.sendMessage(conversationId, newMessage.trim());
-      setMessages(prev => [...prev, response.data.message]);
+      const response = await messagesAPI.sendMessage(receiverId, newMessage.trim());
+      const sentMessage = response.data.message;
+
+      setMessages(prev => [...prev, sentMessage]);
       setNewMessage('');
 
-      // Update last message in conversations
-      setConversations(prev => prev.map(c =>
-        c.id === conversationId ? {
-          ...c,
-          lastMessage: {
-            content: newMessage.trim(),
-            createdAt: new Date().toISOString(),
-            senderId: user?.id || ''
-          },
-          updatedAt: new Date().toISOString()
-        } : c
-      ));
-    } catch (err) {
-      toast.error('Failed to send message');
+      // If this was a new chat, refresh conversations and navigate
+      if (newChatUser) {
+        await fetchConversations();
+        const newConvId = sentMessage.conversationId;
+        navigate(`/messages/${newConvId}`, { replace: true });
+        setNewChatUser(null);
+      } else if (selectedConversation) {
+        // Update last message in conversations
+        setConversations(prev => prev.map(c =>
+          c.conversationId === selectedConversation.conversationId ? {
+            ...c,
+            lastMessage: {
+              content: newMessage.trim(),
+              createdAt: new Date().toISOString()
+            }
+          } : c
+        ));
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.error?.message || 'Failed to send message');
     } finally {
       setSending(false);
     }
@@ -126,7 +196,8 @@ const Messages: React.FC = () => {
 
   const selectConversation = (conv: Conversation) => {
     setSelectedConversation(conv);
-    navigate(`/messages/${conv.id}`);
+    setNewChatUser(null);
+    navigate(`/messages/${conv.conversationId}`);
   };
 
   const formatTime = (dateStr: string) => {
@@ -146,6 +217,9 @@ const Messages: React.FC = () => {
     }
   };
 
+  const currentChatUser = newChatUser || selectedConversation?.otherUser;
+  const showMessageArea = conversationId || newChatUser;
+
   if (loading) {
     return (
       <div className="flex justify-center py-12">
@@ -161,33 +235,39 @@ const Messages: React.FC = () => {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden" style={{ height: '70vh' }}>
         <div className="flex h-full">
           {/* Conversations List */}
-          <div className={`w-full md:w-1/3 border-r border-gray-200 dark:border-gray-700 ${conversationId ? 'hidden md:block' : ''}`}>
+          <div className={`w-full md:w-1/3 border-r border-gray-200 dark:border-gray-700 ${showMessageArea ? 'hidden md:block' : ''}`}>
             <div className="p-4 border-b border-gray-200 dark:border-gray-700">
               <h2 className="font-semibold text-gray-900 dark:text-white">Conversations</h2>
             </div>
             <div className="overflow-y-auto" style={{ height: 'calc(100% - 57px)' }}>
-              {conversations.length === 0 ? (
-                <div className="p-4 text-center text-gray-500">
+              {conversations.length === 0 && !newChatUser ? (
+                <div className="p-4 text-center text-gray-500 dark:text-gray-400">
                   No conversations yet
                 </div>
               ) : (
                 conversations.map(conv => (
                   <button
-                    key={conv.id}
+                    key={conv.conversationId}
                     onClick={() => selectConversation(conv)}
                     className={`w-full p-4 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors text-left ${
-                      conversationId === conv.id ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
+                      conversationId === conv.conversationId ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
                     }`}
                   >
-                    <img
-                      src={conv.participant.avatarUrl ? getUploadUrl(conv.participant.avatarUrl) || '/default-avatar.png' : '/default-avatar.png'}
-                      alt={conv.participant.displayName}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
+                    {conv.otherUser.avatarUrl ? (
+                      <img
+                        src={getUploadUrl(conv.otherUser.avatarUrl) || '/default-avatar.png'}
+                        alt={conv.otherUser.displayName}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-medium">
+                        {conv.otherUser.displayName?.charAt(0) || '?'}
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-gray-900 dark:text-white truncate">
-                          {conv.participant.displayName}
+                          {conv.otherUser.displayName}
                         </span>
                         {conv.lastMessage && (
                           <span className="text-xs text-gray-500">
@@ -213,29 +293,43 @@ const Messages: React.FC = () => {
           </div>
 
           {/* Messages Area */}
-          <div className={`flex-1 flex flex-col ${!conversationId ? 'hidden md:flex' : ''}`}>
-            {conversationId && selectedConversation ? (
+          <div className={`flex-1 flex flex-col ${!showMessageArea ? 'hidden md:flex' : ''}`}>
+            {currentChatUser ? (
               <>
                 {/* Header */}
                 <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
                   <button
-                    onClick={() => navigate('/messages')}
+                    onClick={() => {
+                      navigate('/messages');
+                      setNewChatUser(null);
+                    }}
                     className="md:hidden p-2 text-gray-500 hover:text-gray-700"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
-                  <Link to={`/profile/${selectedConversation.participant.username}`} className="flex items-center gap-3">
-                    <img
-                      src={selectedConversation.participant.avatarUrl ? getUploadUrl(selectedConversation.participant.avatarUrl) || '/default-avatar.png' : '/default-avatar.png'}
-                      alt={selectedConversation.participant.displayName}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
+                  <Link to={`/profile/${currentChatUser.username}`} className="flex items-center gap-3">
+                    {currentChatUser.avatarUrl ? (
+                      <img
+                        src={getUploadUrl(currentChatUser.avatarUrl) || '/default-avatar.png'}
+                        alt={currentChatUser.displayName}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-medium">
+                        {currentChatUser.displayName?.charAt(0) || '?'}
+                      </div>
+                    )}
                     <span className="font-medium text-gray-900 dark:text-white">
-                      {selectedConversation.participant.displayName}
+                      {currentChatUser.displayName}
                     </span>
                   </Link>
+                  {newChatUser && (
+                    <span className="ml-2 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded-full">
+                      New conversation
+                    </span>
+                  )}
                 </div>
 
                 {/* Messages */}
@@ -245,8 +339,10 @@ const Messages: React.FC = () => {
                       <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-indigo-600"></div>
                     </div>
                   ) : messages.length === 0 ? (
-                    <div className="text-center text-gray-500 py-8">
-                      No messages yet. Start the conversation!
+                    <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                      {newChatUser
+                        ? `Start a conversation with ${newChatUser.displayName}!`
+                        : 'No messages yet. Start the conversation!'}
                     </div>
                   ) : (
                     messages.map(msg => (
@@ -293,7 +389,7 @@ const Messages: React.FC = () => {
                 </form>
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center text-gray-500">
+              <div className="flex-1 flex items-center justify-center text-gray-500 dark:text-gray-400">
                 Select a conversation to start messaging
               </div>
             )}
