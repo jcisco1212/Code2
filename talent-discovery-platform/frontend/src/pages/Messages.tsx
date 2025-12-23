@@ -50,45 +50,49 @@ const Messages: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetchConversations();
-  }, []);
+    const init = async () => {
+      // First fetch conversations
+      await fetchConversations();
 
-  // Handle new user from query param
-  useEffect(() => {
-    const loadNewUser = async () => {
+      // Then handle new user from query param
       if (newUserId && newUserId !== user?.id) {
         try {
-          // Check if conversation already exists
-          const existingConv = conversations.find(c => c.otherUser.id === newUserId);
-          if (existingConv) {
-            navigate(`/messages/${existingConv.conversationId}`, { replace: true });
-            return;
-          }
-
-          // Fetch user info
+          // Fetch user info first (we'll check for existing conversation after)
           const response = await usersAPI.getUser(newUserId);
-          const userData = response.data.user;
-          setNewChatUser({
-            id: userData.id,
-            username: userData.username,
-            displayName: userData.displayName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || userData.username,
-            firstName: userData.firstName,
-            lastName: userData.lastName,
-            avatarUrl: userData.avatarUrl
-          });
-          setSelectedConversation(null);
-          setMessages([]);
+          const userData = response.data.user || response.data;
+
+          if (userData) {
+            setNewChatUser({
+              id: userData.id,
+              username: userData.username,
+              displayName: userData.displayName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || userData.username,
+              firstName: userData.firstName,
+              lastName: userData.lastName,
+              avatarUrl: userData.avatarUrl
+            });
+            setSelectedConversation(null);
+            setMessages([]);
+          }
         } catch (err) {
+          console.error('Failed to load user:', err);
           toast.error('User not found');
-          navigate('/messages', { replace: true });
         }
       }
     };
 
-    if (!loading) {
-      loadNewUser();
+    init();
+  }, [newUserId, user?.id]);
+
+  // Check for existing conversation when conversations update
+  useEffect(() => {
+    if (newUserId && conversations.length > 0 && newChatUser) {
+      const existingConv = conversations.find(c => c.otherUser.id === newUserId);
+      if (existingConv) {
+        setNewChatUser(null);
+        navigate(`/messages/${existingConv.conversationId}`, { replace: true });
+      }
     }
-  }, [newUserId, conversations, loading, user?.id, navigate]);
+  }, [conversations, newUserId, newChatUser, navigate]);
 
   useEffect(() => {
     if (conversationId) {

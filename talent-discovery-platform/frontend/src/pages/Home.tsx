@@ -5,7 +5,7 @@ import { RootState, AppDispatch } from '../store';
 import { fetchTrendingVideos, fetchFeaturedVideos } from '../store/slices/videosSlice';
 import VideoCard from '../components/video/VideoCard';
 import { FireIcon, SparklesIcon, ArrowRightIcon, PlayIcon } from '@heroicons/react/24/outline';
-import { categoriesAPI } from '../services/api';
+import { categoriesAPI, getUploadUrl } from '../services/api';
 
 interface Category {
   id: string;
@@ -224,8 +224,8 @@ const Home: React.FC = () => {
 
                 {category.iconUrl ? (
                   <img
-                    src={category.iconUrl}
-                    alt={category.name}
+                    src={getUploadUrl(category.iconUrl) || ''}
+                    alt=""
                     className="w-12 h-12 object-cover rounded-lg mb-3"
                   />
                 ) : (
