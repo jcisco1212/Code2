@@ -308,7 +308,9 @@ export const notificationsAPI = {
   markAllAsRead: () =>
     api.put('/notifications/read-all'),
   getUnreadCount: () =>
-    api.get('/notifications/unread-count')
+    api.get('/notifications/unread-count'),
+  deleteNotification: (id: string) =>
+    api.delete(`/notifications/${id}`)
 };
 
 export const messagesAPI = {

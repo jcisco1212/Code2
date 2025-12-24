@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { messagesAPI } from '../../services/api';
 import {
   HomeIcon,
   MagnifyingGlassIcon,
@@ -38,6 +39,26 @@ const Layout: React.FC = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  // Fetch unread message count
+  useEffect(() => {
+    if (isAuthenticated) {
+      const fetchUnreadMessages = async () => {
+        try {
+          const response = await messagesAPI.getUnreadCount();
+          setUnreadMessages(response.data.count || 0);
+        } catch (err) {
+          // Silently fail
+        }
+      };
+
+      fetchUnreadMessages();
+      // Poll every 30 seconds
+      const interval = setInterval(fetchUnreadMessages, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,6 +161,19 @@ const Layout: React.FC = () => {
                 >
                   <ArrowUpTrayIcon className="w-5 h-5" />
                   <span className="font-medium">Upload</span>
+                </Link>
+                {/* Messages indicator */}
+                <Link
+                  to="/messages"
+                  className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  aria-label="Messages"
+                >
+                  <EnvelopeIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+                  {unreadMessages > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center px-1 text-xs font-bold text-white bg-red-500 rounded-full">
+                      {unreadMessages > 99 ? '99+' : unreadMessages}
+                    </span>
+                  )}
                 </Link>
                 <NotificationDropdown />
                 <Menu as="div" className="relative">

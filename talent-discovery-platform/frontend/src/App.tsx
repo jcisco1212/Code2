@@ -40,6 +40,7 @@ import Settings from './pages/Settings';
 import Library from './pages/Library';
 import PlaylistDetail from './pages/PlaylistDetail';
 import Messages from './pages/Messages';
+import Notifications from './pages/Notifications';
 
 // Agent Pages
 import AgentDashboard from './pages/agent/Dashboard';
@@ -102,6 +103,7 @@ function App() {
               <Route path="playlist/:playlistId" element={<ProtectedRoute><PlaylistDetail /></ProtectedRoute>} />
               <Route path="messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
               <Route path="messages/:conversationId" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+              <Route path="notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
 
               {/* Agent Routes */}
               <Route path="agent" element={<AgentRoute><AgentDashboard /></AgentRoute>} />

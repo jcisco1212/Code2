@@ -214,27 +214,38 @@ const Home: React.FC = () => {
               <Link
                 key={category.id}
                 to={`/category/${category.slug}`}
-                className={`group relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br ${getCategoryColor(category, index)}
+                className={`group relative overflow-hidden rounded-2xl h-32 ${!category.iconUrl ? `bg-gradient-to-br ${getCategoryColor(category, index)}` : ''}
                            text-white shadow-lg hover:shadow-xl
                            hover:scale-105 hover:-translate-y-1
                            transition-all duration-300`}
               >
-                {/* Glow effect on hover */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/10" />
-
-                {category.iconUrl ? (
+                {/* Background image if exists */}
+                {category.iconUrl && (
                   <img
                     src={getUploadUrl(category.iconUrl) || ''}
                     alt=""
-                    className="w-12 h-12 object-cover rounded-lg mb-3"
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
-                ) : (
-                  <div className="text-4xl mb-3">{getCategoryIcon(category)}</div>
                 )}
-                <div className="font-semibold relative z-10">{category.name}</div>
+
+                {/* Gradient overlay for text readability */}
+                <div className={`absolute inset-0 ${category.iconUrl ? 'bg-gradient-to-t from-black/70 via-black/20 to-transparent' : ''}`} />
+
+                {/* Glow effect on hover */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/10" />
+
+                {/* Content */}
+                <div className="absolute inset-0 p-4 flex flex-col justify-end">
+                  {!category.iconUrl && (
+                    <div className="text-3xl mb-2">{getCategoryIcon(category)}</div>
+                  )}
+                  <div className="font-semibold relative z-10 text-shadow">{category.name}</div>
+                </div>
 
                 {/* Decorative gradient overlay */}
-                <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+                {!category.iconUrl && (
+                  <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+                )}
               </Link>
             ))}
           </div>
