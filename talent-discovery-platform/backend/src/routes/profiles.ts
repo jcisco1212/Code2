@@ -60,12 +60,15 @@ router.put(
     body('location').optional().trim().isLength({ max: 255 }).withMessage('Location must be max 255 chars'),
     body('website').optional({ checkFalsy: true }).trim().isURL().withMessage('Invalid website URL'),
     body('dateOfBirth').optional().isISO8601().withMessage('Invalid date format'),
-    body('talentCategories').optional().isArray().withMessage('Talent categories must be an array')
+    body('talentCategories').optional().isArray().withMessage('Talent categories must be an array'),
+    body('photoGallery').optional().isArray({ max: 4 }).withMessage('Photo gallery must be an array with max 4 items'),
+    body('ethnicity').optional().trim().isLength({ max: 100 }).withMessage('Ethnicity must be max 100 chars'),
+    body('gender').optional().isIn(['male', 'female', 'other', 'prefer_not_to_say']).withMessage('Invalid gender value')
   ]),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = req.user!;
-      const { firstName, lastName, displayName, bio, location, website, dateOfBirth, talentCategories } = req.body;
+      const { firstName, lastName, displayName, bio, location, website, dateOfBirth, talentCategories, photoGallery, ethnicity, gender } = req.body;
 
       await user.update({
         ...(firstName && { firstName }),
@@ -75,7 +78,10 @@ router.put(
         ...(location !== undefined && { location }),
         ...(website !== undefined && { website }),
         ...(dateOfBirth && { dateOfBirth }),
-        ...(talentCategories && { talentCategories })
+        ...(talentCategories && { talentCategories }),
+        ...(photoGallery !== undefined && { photoGallery }),
+        ...(ethnicity !== undefined && { ethnicity }),
+        ...(gender !== undefined && { gender })
       });
 
       // Clear cache
@@ -324,12 +330,35 @@ router.put(
   authenticate as RequestHandler,
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      const user = req.user!;
       const { settings } = req.body;
-      // TODO: Save privacy settings to database
-      // For now, just return success
+
+      // Merge with existing privacy settings
+      const currentPrivacy = user.privacySettings || {
+        showAge: true,
+        showDateOfBirth: false,
+        showEthnicity: true,
+        showLocation: true,
+        showGender: true
+      };
+
+      const updatedPrivacy = {
+        ...currentPrivacy,
+        ...(settings.showAge !== undefined && { showAge: Boolean(settings.showAge) }),
+        ...(settings.showDateOfBirth !== undefined && { showDateOfBirth: Boolean(settings.showDateOfBirth) }),
+        ...(settings.showEthnicity !== undefined && { showEthnicity: Boolean(settings.showEthnicity) }),
+        ...(settings.showLocation !== undefined && { showLocation: Boolean(settings.showLocation) }),
+        ...(settings.showGender !== undefined && { showGender: Boolean(settings.showGender) })
+      };
+
+      await user.update({ privacySettings: updatedPrivacy });
+
+      // Clear cache
+      await cacheDelete(`user:${user.id}`);
+
       res.json({
         message: 'Privacy settings updated',
-        settings
+        settings: updatedPrivacy
       });
     } catch (error) {
       next(error);

@@ -49,7 +49,10 @@ const Settings: React.FC = () => {
     displayName: '',
     bio: '',
     location: '',
-    website: ''
+    website: '',
+    dateOfBirth: '',
+    gender: '',
+    ethnicity: ''
   });
 
   // Account form state
@@ -77,7 +80,13 @@ const Settings: React.FC = () => {
     profilePublic: true,
     showEmail: false,
     allowMessages: true,
-    showActivity: true
+    showActivity: true,
+    // Personal info visibility
+    showAge: true,
+    showDateOfBirth: false,
+    showEthnicity: true,
+    showLocation: true,
+    showGender: true
   });
 
   // Social links
@@ -120,7 +129,10 @@ const Settings: React.FC = () => {
         displayName: user.displayName || '',
         bio: user.bio || '',
         location: user.location || '',
-        website: user.website || ''
+        website: user.website || '',
+        dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : '',
+        gender: user.gender || '',
+        ethnicity: user.ethnicity || ''
       });
       setAccountForm(prev => ({
         ...prev,
@@ -145,6 +157,17 @@ const Settings: React.FC = () => {
       setTwoFAEnabled(user.twoFactorEnabled || false);
       // Initialize photo gallery
       setPhotoGallery(user.photoGallery || []);
+      // Initialize privacy settings
+      if (user.privacySettings) {
+        setPrivacy(prev => ({
+          ...prev,
+          showAge: user.privacySettings?.showAge ?? true,
+          showDateOfBirth: user.privacySettings?.showDateOfBirth ?? false,
+          showEthnicity: user.privacySettings?.showEthnicity ?? true,
+          showLocation: user.privacySettings?.showLocation ?? true,
+          showGender: user.privacySettings?.showGender ?? true
+        }));
+      }
     }
   }, [user]);
 
@@ -291,13 +314,17 @@ const Settings: React.FC = () => {
     try {
       // Don't send username in profile update - it has its own endpoint
       const { username, ...profileData } = profileForm;
-      // Normalize website URL
+      // Normalize website URL and prepare data
       const dataToSend = {
         ...profileData,
-        website: normalizeUrl(profileData.website)
+        website: normalizeUrl(profileData.website),
+        dateOfBirth: profileData.dateOfBirth || undefined,
+        gender: profileData.gender || undefined,
+        ethnicity: profileData.ethnicity || undefined
       };
       await profileAPI.updateProfile(dataToSend);
       toast.success('Profile updated successfully');
+      if (refreshUser) await refreshUser();
     } catch (err: any) {
       toast.error(err.response?.data?.error?.message || 'Failed to update profile');
     } finally {
@@ -618,6 +645,55 @@ const Settings: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Personal Information Section */}
+                <div className="border-t dark:border-gray-700 pt-6">
+                  <h3 className="text-md font-medium text-gray-900 dark:text-white mb-4">Personal Information</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    This information helps agents and casting directors find you. You can control visibility in Privacy settings.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Date of Birth
+                      </label>
+                      <input
+                        type="date"
+                        value={profileForm.dateOfBirth}
+                        onChange={e => setProfileForm(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                        className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Gender
+                      </label>
+                      <select
+                        value={profileForm.gender}
+                        onChange={e => setProfileForm(prev => ({ ...prev, gender: e.target.value }))}
+                        className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                      >
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                        <option value="prefer_not_to_say">Prefer not to say</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Ethnicity
+                      </label>
+                      <input
+                        type="text"
+                        value={profileForm.ethnicity}
+                        onChange={e => setProfileForm(prev => ({ ...prev, ethnicity: e.target.value }))}
+                        placeholder="e.g., Caucasian, African American, Asian"
+                        className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <button
                   type="submit"
                   disabled={saving}
@@ -869,6 +945,36 @@ const Settings: React.FC = () => {
                       />
                     </div>
                   ))}
+                </div>
+
+                {/* Personal Info Visibility Section */}
+                <div className="border-t dark:border-gray-700 pt-6">
+                  <h3 className="font-medium text-gray-900 dark:text-white mb-2">Personal Information Visibility</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Control what personal information is visible to others on your profile
+                  </p>
+                  <div className="space-y-4">
+                    {[
+                      { key: 'showAge', label: 'Show Age', description: 'Display your age on your profile (calculated from date of birth)' },
+                      { key: 'showDateOfBirth', label: 'Show Date of Birth', description: 'Display your full date of birth on your profile' },
+                      { key: 'showGender', label: 'Show Gender', description: 'Display your gender on your profile' },
+                      { key: 'showEthnicity', label: 'Show Ethnicity', description: 'Display your ethnicity on your profile' },
+                      { key: 'showLocation', label: 'Show Location', description: 'Display your location on your profile' }
+                    ].map(item => (
+                      <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">{item.label}</h4>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{item.description}</p>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={privacy[item.key as keyof typeof privacy]}
+                          onChange={e => setPrivacy(prev => ({ ...prev, [item.key]: e.target.checked }))}
+                          className="h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <button

@@ -34,6 +34,11 @@ interface UserProfile {
   location?: string;
   socialLinks?: SocialLinks;
   photoGallery?: string[];
+  age?: number | null;
+  dateOfBirth?: string | null;
+  gender?: string | null;
+  ethnicity?: string | null;
+  isOwnProfile?: boolean;
 }
 
 interface Video {
@@ -290,6 +295,68 @@ const Profile: React.FC = () => {
               {profile.bio && (
                 <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
                   <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{profile.bio}</p>
+                </div>
+              )}
+
+              {/* Photo Gallery */}
+              {profile.photoGallery && profile.photoGallery.length > 0 && (
+                <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Photos & Headshots</h3>
+                  <div className="grid grid-cols-4 gap-2">
+                    {profile.photoGallery.map((photo: string, index: number) => (
+                      <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 cursor-pointer hover:opacity-90 transition-opacity">
+                        <img
+                          src={getUploadUrl(photo) || ''}
+                          alt={`${profile.displayName || profile.username} photo ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          onClick={() => window.open(getUploadUrl(photo) || '', '_blank')}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Personal Information */}
+              {(profile.age || profile.dateOfBirth || profile.gender || profile.ethnicity || profile.location) && (
+                <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Personal Info</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {profile.age && (
+                      <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div className="text-xl font-bold text-gray-900 dark:text-white">{profile.age}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Age</div>
+                      </div>
+                    )}
+                    {profile.dateOfBirth && (
+                      <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                          {new Date(profile.dateOfBirth).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Birthday</div>
+                      </div>
+                    )}
+                    {profile.gender && (
+                      <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white capitalize">
+                          {profile.gender.replace(/_/g, ' ')}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Gender</div>
+                      </div>
+                    )}
+                    {profile.ethnicity && (
+                      <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">{profile.ethnicity}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Ethnicity</div>
+                      </div>
+                    )}
+                    {profile.location && (
+                      <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg col-span-2 md:col-span-1">
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">{profile.location}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Location</div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 

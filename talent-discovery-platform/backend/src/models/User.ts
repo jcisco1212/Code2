@@ -35,6 +35,14 @@ export interface SocialLinks {
   agency?: string;
 }
 
+export interface PrivacySettings {
+  showAge: boolean;
+  showDateOfBirth: boolean;
+  showEthnicity: boolean;
+  showLocation: boolean;
+  showGender: boolean;
+}
+
 interface UserAttributes {
   id: string;
   email: string;
@@ -67,6 +75,7 @@ interface UserAttributes {
   artistType: ArtistType | null;
   genre: string | null;
   talentCategories: string[] | null;
+  privacySettings: PrivacySettings | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -76,7 +85,7 @@ interface UserCreationAttributes extends Optional<UserAttributes,
   'location' | 'socialLinks' | 'agencyName' | 'role' | 'isVerified' | 'isActive' | 'twoFactorEnabled' |
   'twoFactorSecret' | 'emailVerified' | 'emailVerificationToken' | 'passwordResetToken' |
   'passwordResetExpires' | 'lastLogin' | 'gender' | 'dateOfBirth' | 'ethnicity' | 'photoGallery' |
-  'artistType' | 'genre' | 'talentCategories' | 'createdAt' | 'updatedAt'
+  'artistType' | 'genre' | 'talentCategories' | 'privacySettings' | 'createdAt' | 'updatedAt'
 > {}
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
@@ -111,6 +120,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   declare artistType: ArtistType | null;
   declare genre: string | null;
   declare talentCategories: string[] | null;
+  declare privacySettings: PrivacySettings | null;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 
@@ -132,7 +142,15 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
     return bcrypt.compare(candidatePassword, this.passwordHash);
   }
 
-  public toPublicJSON(): Partial<UserAttributes> & { age?: number | null } {
+  public toPublicJSON(): Partial<UserAttributes> & { age?: number | null; dateOfBirth?: Date | null } {
+    const privacy = this.privacySettings || {
+      showAge: true,
+      showDateOfBirth: false,
+      showEthnicity: true,
+      showLocation: true,
+      showGender: true
+    };
+
     return {
       id: this.id,
       username: this.username,
@@ -143,12 +161,13 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       avatarUrl: this.avatarUrl,
       bannerUrl: this.bannerUrl,
       bio: this.bio,
-      location: this.location,
+      location: privacy.showLocation ? this.location : null,
       socialLinks: this.socialLinks,
       isVerified: this.isVerified,
-      gender: this.gender,
-      age: this.age,
-      ethnicity: this.ethnicity,
+      gender: privacy.showGender ? this.gender : null,
+      age: privacy.showAge ? this.age : null,
+      dateOfBirth: privacy.showDateOfBirth ? this.dateOfBirth : null,
+      ethnicity: privacy.showEthnicity ? this.ethnicity : null,
       photoGallery: this.photoGallery,
       artistType: this.artistType,
       genre: this.genre,
@@ -183,6 +202,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       artistType: this.artistType,
       genre: this.genre,
       talentCategories: this.talentCategories,
+      privacySettings: this.privacySettings,
       createdAt: this.createdAt
     };
   }
@@ -344,6 +364,18 @@ User.init(
       allowNull: true,
       defaultValue: [],
       field: 'talent_categories'
+    },
+    privacySettings: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: {
+        showAge: true,
+        showDateOfBirth: false,
+        showEthnicity: true,
+        showLocation: true,
+        showGender: true
+      },
+      field: 'privacy_settings'
     },
     createdAt: {
       type: DataTypes.DATE,

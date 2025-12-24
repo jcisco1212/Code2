@@ -36,6 +36,7 @@ router.get(
 
       // Check if current user follows this user
       let isFollowing = false;
+      const isOwnProfile = req.userId === user.id;
       if (req.userId && req.userId !== user.id) {
         const follow = await Follow.findOne({
           where: { followerId: req.userId, followingId: user.id }
@@ -52,13 +53,17 @@ router.get(
         }
       });
 
+      // Return full data for own profile, privacy-filtered for others
+      const userData = isOwnProfile ? user.toAuthJSON() : user.toPublicJSON();
+
       res.json({
         user: {
-          ...user.toPublicJSON(),
+          ...userData,
           followersCount,
           followingCount,
           videoCount,
-          isFollowing
+          isFollowing,
+          isOwnProfile
         }
       });
     } catch (error) {
