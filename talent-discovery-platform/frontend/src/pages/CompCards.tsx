@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { compCardsAPI, getUploadUrl } from '../services/api';
 import {
   PlusIcon,
-  IdentificationIcon,
+  UserCircleIcon,
   EyeIcon,
   ShareIcon,
   TrashIcon,
@@ -103,7 +103,7 @@ const CompCards: React.FC = () => {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-            <IdentificationIcon className="w-8 h-8 text-primary-500" />
+            <UserCircleIcon className="w-8 h-8 text-primary-500" />
             My Comp Cards
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
@@ -138,7 +138,7 @@ const CompCards: React.FC = () => {
       {/* Cards Grid */}
       {compCards.length === 0 ? (
         <div className="text-center py-16">
-          <IdentificationIcon className="w-20 h-20 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+          <UserCircleIcon className="w-20 h-20 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             No Comp Cards Yet
           </h2>

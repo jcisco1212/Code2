@@ -17,7 +17,7 @@ import {
   FilmIcon,
   AcademicCapIcon,
   BriefcaseIcon,
-  IdentificationIcon,
+  UserCircleIcon,
   SparklesIcon,
   EyeIcon
 } from '@heroicons/react/24/outline';
@@ -145,7 +145,7 @@ const CompCard: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <IdentificationIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+          <UserCircleIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             {error || 'Comp Card Not Found'}
           </h2>
@@ -223,7 +223,7 @@ const CompCard: React.FC = () => {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-white/50">
-                    <IdentificationIcon className="w-20 h-20" />
+                    <UserCircleIcon className="w-20 h-20" />
                   </div>
                 )}
               </div>
