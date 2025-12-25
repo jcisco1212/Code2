@@ -9,7 +9,7 @@ import {
   PlusIcon,
   XMarkIcon,
   Cog6ToothIcon,
-  UserPlusIcon,
+  PlusCircleIcon,
   ArrowRightOnRectangleIcon,
   LinkIcon,
   CheckIcon
@@ -511,7 +511,7 @@ const Messages: React.FC = () => {
                       onClick={() => setShowJoinRoom(true)}
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm text-gray-700 dark:text-gray-300"
                     >
-                      <UserPlusIcon className="w-4 h-4" />
+                      <PlusCircleIcon className="w-4 h-4" />
                       Join
                     </button>
                   </div>
