@@ -8,7 +8,7 @@ import {
   PencilIcon,
   PlusIcon,
   TrashIcon,
-  ClipboardIcon,
+  ClipboardDocumentIcon,
   CheckIcon,
   PlayIcon,
   MapPinIcon,

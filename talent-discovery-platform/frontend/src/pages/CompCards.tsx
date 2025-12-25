@@ -10,7 +10,7 @@ import {
   TrashIcon,
   PencilIcon,
   SparklesIcon,
-  ClipboardIcon,
+  ClipboardDocumentIcon,
   CheckIcon
 } from '@heroicons/react/24/outline';
 
