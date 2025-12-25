@@ -52,7 +52,7 @@ router.get(
         include: [
           {
             model: User,
-            as: 'creator',
+            as: 'user',
             attributes: ['id', 'username', 'displayName', 'avatarUrl', 'isVerified']
           }
         ],
@@ -64,7 +64,7 @@ router.get(
       res.json({
         clips: rows.map(v => ({
           ...v.toPublicJSON(),
-          creator: (v as any).creator
+          creator: (v as any).user
         })),
         pagination: {
           page: Number(page),
@@ -99,7 +99,7 @@ router.get(
         include: [
           {
             model: User,
-            as: 'creator',
+            as: 'user',
             attributes: ['id', 'username', 'displayName', 'avatarUrl', 'isVerified']
           }
         ],
@@ -110,7 +110,7 @@ router.get(
       res.json({
         clips: clips.map(v => ({
           ...v.toPublicJSON(),
-          creator: (v as any).creator
+          creator: (v as any).user
         }))
       });
     } catch (error) {
@@ -151,7 +151,7 @@ router.get(
         include: [
           {
             model: User,
-            as: 'creator',
+            as: 'user',
             attributes: ['id', 'username', 'displayName', 'avatarUrl', 'isVerified']
           }
         ],
@@ -163,7 +163,7 @@ router.get(
       res.json({
         clips: rows.map(v => ({
           ...v.toPublicJSON(),
-          creator: (v as any).creator
+          creator: (v as any).user
         })),
         pagination: {
           page: Number(page),
