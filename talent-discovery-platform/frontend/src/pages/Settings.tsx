@@ -168,6 +168,19 @@ const Settings: React.FC = () => {
           showGender: user.privacySettings?.showGender ?? true
         }));
       }
+      // Initialize notification settings
+      if (user.notificationSettings) {
+        setNotifications({
+          emailNewFollower: user.notificationSettings.emailNewFollower ?? true,
+          emailComments: user.notificationSettings.emailComments ?? true,
+          emailLikes: user.notificationSettings.emailLikes ?? false,
+          emailMessages: user.notificationSettings.emailMessages ?? true,
+          pushNewFollower: user.notificationSettings.pushNewFollower ?? true,
+          pushComments: user.notificationSettings.pushComments ?? true,
+          pushLikes: user.notificationSettings.pushLikes ?? true,
+          pushMessages: user.notificationSettings.pushMessages ?? true
+        });
+      }
     }
   }, [user]);
 

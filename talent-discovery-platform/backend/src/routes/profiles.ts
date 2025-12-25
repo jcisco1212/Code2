@@ -311,12 +311,41 @@ router.put(
   authenticate as RequestHandler,
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      const user = req.user!;
       const { settings } = req.body;
-      // TODO: Save notification settings to database
-      // For now, just return success
+
+      // Merge with existing notification settings
+      const currentNotifications = user.notificationSettings || {
+        emailNewFollower: true,
+        emailComments: true,
+        emailLikes: false,
+        emailMessages: true,
+        pushNewFollower: true,
+        pushComments: true,
+        pushLikes: true,
+        pushMessages: true
+      };
+
+      const updatedNotifications = {
+        ...currentNotifications,
+        ...(settings.emailNewFollower !== undefined && { emailNewFollower: Boolean(settings.emailNewFollower) }),
+        ...(settings.emailComments !== undefined && { emailComments: Boolean(settings.emailComments) }),
+        ...(settings.emailLikes !== undefined && { emailLikes: Boolean(settings.emailLikes) }),
+        ...(settings.emailMessages !== undefined && { emailMessages: Boolean(settings.emailMessages) }),
+        ...(settings.pushNewFollower !== undefined && { pushNewFollower: Boolean(settings.pushNewFollower) }),
+        ...(settings.pushComments !== undefined && { pushComments: Boolean(settings.pushComments) }),
+        ...(settings.pushLikes !== undefined && { pushLikes: Boolean(settings.pushLikes) }),
+        ...(settings.pushMessages !== undefined && { pushMessages: Boolean(settings.pushMessages) })
+      };
+
+      await user.update({ notificationSettings: updatedNotifications });
+
+      // Clear cache
+      await cacheDelete(`user:${user.id}`);
+
       res.json({
         message: 'Notification settings updated',
-        settings
+        settings: updatedNotifications
       });
     } catch (error) {
       next(error);

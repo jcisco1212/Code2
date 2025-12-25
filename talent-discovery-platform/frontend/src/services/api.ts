@@ -241,9 +241,9 @@ export const profileAPI = {
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     api.put('/auth/change-password', data),
   updateNotificationSettings: (settings: any) =>
-    api.put('/profiles/me/notifications', settings),
+    api.put('/profiles/me/notifications', { settings }),
   updatePrivacySettings: (settings: any) =>
-    api.put('/profiles/me/privacy', settings),
+    api.put('/profiles/me/privacy', { settings }),
   updateSocialLinks: (socialLinks: any) =>
     api.put('/profiles/me/social-links', { socialLinks })
 };

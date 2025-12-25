@@ -43,6 +43,17 @@ export interface PrivacySettings {
   showGender: boolean;
 }
 
+export interface NotificationSettings {
+  emailNewFollower: boolean;
+  emailComments: boolean;
+  emailLikes: boolean;
+  emailMessages: boolean;
+  pushNewFollower: boolean;
+  pushComments: boolean;
+  pushLikes: boolean;
+  pushMessages: boolean;
+}
+
 interface UserAttributes {
   id: string;
   email: string;
@@ -76,6 +87,7 @@ interface UserAttributes {
   genre: string | null;
   talentCategories: string[] | null;
   privacySettings: PrivacySettings | null;
+  notificationSettings: NotificationSettings | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -85,7 +97,7 @@ interface UserCreationAttributes extends Optional<UserAttributes,
   'location' | 'socialLinks' | 'agencyName' | 'role' | 'isVerified' | 'isActive' | 'twoFactorEnabled' |
   'twoFactorSecret' | 'emailVerified' | 'emailVerificationToken' | 'passwordResetToken' |
   'passwordResetExpires' | 'lastLogin' | 'gender' | 'dateOfBirth' | 'ethnicity' | 'photoGallery' |
-  'artistType' | 'genre' | 'talentCategories' | 'privacySettings' | 'createdAt' | 'updatedAt'
+  'artistType' | 'genre' | 'talentCategories' | 'privacySettings' | 'notificationSettings' | 'createdAt' | 'updatedAt'
 > {}
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
@@ -121,6 +133,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   declare genre: string | null;
   declare talentCategories: string[] | null;
   declare privacySettings: PrivacySettings | null;
+  declare notificationSettings: NotificationSettings | null;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 
@@ -203,6 +216,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       genre: this.genre,
       talentCategories: this.talentCategories,
       privacySettings: this.privacySettings,
+      notificationSettings: this.notificationSettings,
       createdAt: this.createdAt
     };
   }
@@ -376,6 +390,21 @@ User.init(
         showGender: true
       },
       field: 'privacy_settings'
+    },
+    notificationSettings: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: {
+        emailNewFollower: true,
+        emailComments: true,
+        emailLikes: false,
+        emailMessages: true,
+        pushNewFollower: true,
+        pushComments: true,
+        pushLikes: true,
+        pushMessages: true
+      },
+      field: 'notification_settings'
     },
     createdAt: {
       type: DataTypes.DATE,
