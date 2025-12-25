@@ -314,6 +314,12 @@ router.put(
       const user = req.user!;
       const { settings } = req.body;
 
+      // Validate settings exists
+      if (!settings || typeof settings !== 'object') {
+        res.status(400).json({ error: 'Invalid settings data' });
+        return;
+      }
+
       // Merge with existing notification settings
       const currentNotifications = user.notificationSettings || {
         emailNewFollower: true,
@@ -361,6 +367,12 @@ router.put(
     try {
       const user = req.user!;
       const { settings } = req.body;
+
+      // Validate settings exists
+      if (!settings || typeof settings !== 'object') {
+        res.status(400).json({ error: 'Invalid settings data' });
+        return;
+      }
 
       // Merge with existing privacy settings
       const currentPrivacy = user.privacySettings || {

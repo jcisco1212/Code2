@@ -80,13 +80,31 @@ function getVideoDuration(filePath: string): Promise<number> {
   });
 }
 
+// Generate thumbnail from video at specified time
+function generateThumbnail(videoPath: string, outputPath: string, timeSeconds: number = 1): Promise<void> {
+  if (!ffmpeg) return Promise.reject(new Error('FFmpeg not available'));
+  return new Promise((resolve, reject) => {
+    ffmpeg(videoPath)
+      .screenshots({
+        timestamps: [timeSeconds],
+        filename: path.basename(outputPath),
+        folder: path.dirname(outputPath),
+        size: '1280x720'
+      })
+      .on('end', () => resolve())
+      .on('error', (err: Error) => reject(err));
+  });
+}
+
 // Local uploads directory for development
 const UPLOADS_DIR = path.join(__dirname, '../../uploads');
 const VIDEOS_DIR = path.join(UPLOADS_DIR, 'videos');
+const THUMBNAILS_DIR = path.join(UPLOADS_DIR, 'thumbnails');
 
 // Ensure upload directories exist
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 if (!fs.existsSync(VIDEOS_DIR)) fs.mkdirSync(VIDEOS_DIR, { recursive: true });
+if (!fs.existsSync(THUMBNAILS_DIR)) fs.mkdirSync(THUMBNAILS_DIR, { recursive: true });
 
 // Multer configuration for local uploads
 const storage = multer.diskStorage({
@@ -439,12 +457,30 @@ router.post(
           // Transcode to web-compatible MP4
           await transcodeToWebMP4(originalPath, transcodedPath);
 
-          // Update video record with transcoded file
+          // Generate thumbnail from transcoded video
+          let thumbnailUrl: string | null = null;
+          try {
+            const thumbnailDir = path.join(THUMBNAILS_DIR, userId!, videoId);
+            if (!fs.existsSync(thumbnailDir)) fs.mkdirSync(thumbnailDir, { recursive: true });
+            const thumbnailPath = path.join(thumbnailDir, 'thumbnail.jpg');
+
+            // Extract frame at 1 second or 25% of video duration (whichever is greater)
+            const thumbnailTime = Math.max(1, Math.floor((duration || 4) * 0.25));
+            await generateThumbnail(transcodedPath, thumbnailPath, thumbnailTime);
+
+            thumbnailUrl = `/uploads/thumbnails/${userId}/${videoId}/thumbnail.jpg`;
+            logger.info(`Thumbnail generated for video ${videoId}`);
+          } catch (thumbError) {
+            logger.warn(`Failed to generate thumbnail for video ${videoId}:`, thumbError);
+          }
+
+          // Update video record with transcoded file and thumbnail
           await video.update({
             s3Key: localKey,
             status: VideoStatus.READY,
             hlsUrl: videoUrl,
-            duration
+            duration,
+            ...(thumbnailUrl && { thumbnailUrl })
           });
 
           // Clean up original file to save space
@@ -462,10 +498,24 @@ router.post(
           const fallbackKey = `videos/${userId}/${videoId}/original${ext}`;
           const fallbackUrl = `/uploads/${fallbackKey}`;
 
+          // Try to generate thumbnail from original file
+          let thumbnailUrl: string | null = null;
+          try {
+            const thumbnailDir = path.join(THUMBNAILS_DIR, userId!, videoId);
+            if (!fs.existsSync(thumbnailDir)) fs.mkdirSync(thumbnailDir, { recursive: true });
+            const thumbnailPath = path.join(thumbnailDir, 'thumbnail.jpg');
+            await generateThumbnail(originalPath, thumbnailPath, 1);
+            thumbnailUrl = `/uploads/thumbnails/${userId}/${videoId}/thumbnail.jpg`;
+            logger.info(`Thumbnail generated from original file for video ${videoId}`);
+          } catch (thumbError) {
+            logger.warn(`Failed to generate thumbnail for video ${videoId}:`, thumbError);
+          }
+
           await video.update({
             s3Key: fallbackKey,
             status: VideoStatus.READY,
-            hlsUrl: fallbackUrl
+            hlsUrl: fallbackUrl,
+            ...(thumbnailUrl && { thumbnailUrl })
           });
 
           logger.warn(`Using original file for video ${videoId} (transcoding failed)`);
