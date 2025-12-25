@@ -64,7 +64,7 @@ router.get(
 router.put(
   '/users/:id/status',
   authenticate as RequestHandler,
-  requireRole(UserRole.ADMIN) as RequestHandler,
+  requireRole(UserRole.ADMIN, UserRole.SUPER_ADMIN) as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid user ID required'),
     body('isActive').isBoolean().withMessage('isActive must be a boolean')
@@ -98,7 +98,7 @@ router.put(
 router.put(
   '/users/:id/role',
   authenticate as RequestHandler,
-  requireRole(UserRole.ADMIN) as RequestHandler,
+  requireRole(UserRole.ADMIN, UserRole.SUPER_ADMIN) as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid user ID required'),
     body('role').isIn(Object.values(UserRole)).withMessage('Invalid role')
@@ -131,7 +131,7 @@ router.put(
 router.post(
   '/users/:id/verify-agent',
   authenticate as RequestHandler,
-  requireRole(UserRole.ADMIN) as RequestHandler,
+  requireRole(UserRole.ADMIN, UserRole.SUPER_ADMIN) as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid user ID required')
   ]),
@@ -164,7 +164,7 @@ router.post(
 router.put(
   '/users/:id/reset-password',
   authenticate as RequestHandler,
-  requireRole(UserRole.ADMIN) as RequestHandler,
+  requireRole(UserRole.ADMIN, UserRole.SUPER_ADMIN) as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid user ID required'),
     body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
@@ -198,7 +198,7 @@ router.put(
 router.delete(
   '/users/:id',
   authenticate as RequestHandler,
-  requireRole(UserRole.ADMIN) as RequestHandler,
+  requireRole(UserRole.ADMIN, UserRole.SUPER_ADMIN) as RequestHandler,
   validate([
     param('id').isUUID().withMessage('Valid user ID required')
   ]),
@@ -328,7 +328,7 @@ router.post(
 router.post(
   '/categories',
   authenticate as RequestHandler,
-  requireRole(UserRole.ADMIN) as RequestHandler,
+  requireRole(UserRole.ADMIN, UserRole.SUPER_ADMIN) as RequestHandler,
   validate([
     body('name').trim().notEmpty().withMessage('Name is required'),
     body('slug').trim().notEmpty().withMessage('Slug is required'),

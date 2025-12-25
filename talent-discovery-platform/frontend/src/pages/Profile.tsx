@@ -440,7 +440,7 @@ const Profile: React.FC = () => {
                         <div className="aspect-video bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden relative">
                           {video.thumbnailUrl ? (
                             <img
-                              src={video.thumbnailUrl}
+                              src={getUploadUrl(video.thumbnailUrl) || ''}
                               alt={video.title}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
