@@ -62,7 +62,8 @@ function transcodeToWebMP4(inputPath: string, outputPath: string): Promise<void>
       ])
       .output(outputPath)
       .on('end', () => resolve())
-      .on('error', (err: Error) => reject(err));
+      .on('error', (err: Error) => reject(err))
+      .run();
   });
 }
 
@@ -85,14 +86,14 @@ function generateThumbnail(videoPath: string, outputPath: string, timeSeconds: n
   if (!ffmpeg) return Promise.reject(new Error('FFmpeg not available'));
   return new Promise((resolve, reject) => {
     ffmpeg(videoPath)
+      .on('end', () => resolve())
+      .on('error', (err: Error) => reject(err))
       .screenshots({
         timestamps: [timeSeconds],
         filename: path.basename(outputPath),
         folder: path.dirname(outputPath),
         size: '1280x720'
-      })
-      .on('end', () => resolve())
-      .on('error', (err: Error) => reject(err));
+      });
   });
 }
 
