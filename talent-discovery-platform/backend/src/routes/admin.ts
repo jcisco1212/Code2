@@ -5,7 +5,7 @@ import { authenticate, requireRole, requireModeratorOrAdmin, requireSuperAdmin, 
 import { User, UserRole, Video, VideoStatus, Comment, CommentStatus, Report, ReportStatus, Category } from '../models';
 import { NotFoundError, ForbiddenError } from '../middleware/errorHandler';
 import { Op, fn, col, literal } from 'sequelize';
-import { cacheDelete } from '../config/redis';
+import { cacheDelete, cacheDeletePattern } from '../config/redis';
 import { logAudit } from '../utils/logger';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
@@ -359,6 +359,9 @@ router.post(
         isActive: isActive !== false
       });
 
+      // Clear category cache
+      await cacheDeletePattern('categories:*');
+
       logAudit('CATEGORY_CREATED', req.userId!, { categoryId: category.id, name });
 
       res.status(201).json({ category });
@@ -412,6 +415,9 @@ router.put(
         ...(isActive !== undefined && { isActive })
       });
 
+      // Clear category cache
+      await cacheDeletePattern('categories:*');
+
       logAudit('CATEGORY_UPDATED', req.userId!, { categoryId: id });
 
       res.json({ category });
@@ -448,6 +454,9 @@ router.delete(
       }
 
       await category.destroy();
+
+      // Clear category cache
+      await cacheDeletePattern('categories:*');
 
       logAudit('CATEGORY_DELETED', req.userId!, { categoryId: id, categoryName: category.name });
 

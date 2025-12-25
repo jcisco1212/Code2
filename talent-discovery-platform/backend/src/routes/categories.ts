@@ -4,7 +4,7 @@ import { validate } from '../middleware/validate';
 import { authenticate, requireModeratorOrAdmin } from '../middleware/auth';
 import { Category } from '../models';
 import { NotFoundError, ConflictError } from '../middleware/errorHandler';
-import { cacheGet, cacheSet, cacheDelete } from '../config/redis';
+import { cacheGet, cacheSet, cacheDeletePattern } from '../config/redis';
 
 const router = Router();
 
@@ -147,7 +147,7 @@ router.post(
       });
 
       // Clear cache
-      await cacheDelete('categories:*');
+      await cacheDeletePattern('categories:*');
 
       res.status(201).json({ category });
     } catch (error) {
@@ -205,7 +205,7 @@ router.put(
       });
 
       // Clear cache
-      await cacheDelete('categories:*');
+      await cacheDeletePattern('categories:*');
 
       res.json({ category });
     } catch (error) {
@@ -242,7 +242,7 @@ router.delete(
       await category.update({ isActive: false });
 
       // Clear cache
-      await cacheDelete('categories:*');
+      await cacheDeletePattern('categories:*');
 
       res.json({ message: 'Category deleted' });
     } catch (error) {
