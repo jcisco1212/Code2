@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { compCardsAPI, getUploadUrl } from '../services/api';
 import {
-  DocumentArrowDownIcon,
+  ArrowDownTrayIcon,
   ShareIcon,
   PencilIcon,
   PlusIcon,
@@ -186,7 +186,7 @@ const CompCard: React.FC = () => {
             className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary-600 text-white hover:bg-primary-700 transition-colors"
             onClick={() => window.print()}
           >
-            <DocumentArrowDownIcon className="w-5 h-5" />
+            <ArrowDownTrayIcon className="w-5 h-5" />
             <span>Export PDF</span>
           </button>
           {isOwner && (
