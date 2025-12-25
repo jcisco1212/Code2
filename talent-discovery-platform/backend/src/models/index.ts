@@ -10,6 +10,10 @@ import AgentBookmark from './AgentBookmark';
 import Report, { ReportType, ReportStatus, ReportTarget } from './Report';
 import VideoView from './VideoView';
 import SavedVideo from './SavedVideo';
+import CompCard from './CompCard';
+import ChatRoom, { ChatRoomType } from './ChatRoom';
+import ChatRoomMember, { MemberRole } from './ChatRoomMember';
+import ChatRoomMessage, { ChatMessageType } from './ChatRoomMessage';
 
 // User associations
 User.hasMany(Video, { foreignKey: 'userId', as: 'videos' });
@@ -90,6 +94,27 @@ SavedVideo.belongsTo(Video, { foreignKey: 'videoId', as: 'video' });
 User.hasMany(SavedVideo, { foreignKey: 'userId', as: 'savedVideos' });
 Video.hasMany(SavedVideo, { foreignKey: 'videoId', as: 'saves' });
 
+// CompCard associations
+CompCard.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+User.hasMany(CompCard, { foreignKey: 'userId', as: 'compCards' });
+
+// ChatRoom associations
+ChatRoom.belongsTo(User, { foreignKey: 'creatorId', as: 'creator' });
+User.hasMany(ChatRoom, { foreignKey: 'creatorId', as: 'createdChatRooms' });
+
+// ChatRoomMember associations
+ChatRoomMember.belongsTo(ChatRoom, { foreignKey: 'chatRoomId', as: 'chatRoom' });
+ChatRoomMember.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+ChatRoom.hasMany(ChatRoomMember, { foreignKey: 'chatRoomId', as: 'members' });
+User.hasMany(ChatRoomMember, { foreignKey: 'userId', as: 'chatRoomMemberships' });
+
+// ChatRoomMessage associations
+ChatRoomMessage.belongsTo(ChatRoom, { foreignKey: 'chatRoomId', as: 'chatRoom' });
+ChatRoomMessage.belongsTo(User, { foreignKey: 'senderId', as: 'sender' });
+ChatRoomMessage.belongsTo(ChatRoomMessage, { foreignKey: 'replyToId', as: 'replyTo' });
+ChatRoom.hasMany(ChatRoomMessage, { foreignKey: 'chatRoomId', as: 'messages' });
+User.hasMany(ChatRoomMessage, { foreignKey: 'senderId', as: 'chatMessages' });
+
 export {
   User,
   UserRole,
@@ -113,7 +138,14 @@ export {
   ReportStatus,
   ReportTarget,
   VideoView,
-  SavedVideo
+  SavedVideo,
+  CompCard,
+  ChatRoom,
+  ChatRoomType,
+  ChatRoomMember,
+  MemberRole,
+  ChatRoomMessage,
+  ChatMessageType
 };
 
 export default {
@@ -128,5 +160,9 @@ export default {
   AgentBookmark,
   Report,
   VideoView,
-  SavedVideo
+  SavedVideo,
+  CompCard,
+  ChatRoom,
+  ChatRoomMember,
+  ChatRoomMessage
 };

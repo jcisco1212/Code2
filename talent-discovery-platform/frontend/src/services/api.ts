@@ -482,3 +482,47 @@ export const thumbnailAPI = {
     });
   }
 };
+
+export const compCardsAPI = {
+  getMyCards: () =>
+    api.get('/comp-cards/me'),
+  getCard: (id: string) =>
+    api.get(`/comp-cards/${id}`),
+  getCardByToken: (token: string) =>
+    api.get(`/comp-cards/share/${token}`),
+  createCard: (data: any) =>
+    api.post('/comp-cards', data),
+  updateCard: (id: string, data: any) =>
+    api.put(`/comp-cards/${id}`, data),
+  deleteCard: (id: string) =>
+    api.delete(`/comp-cards/${id}`),
+  regenerateToken: (id: string) =>
+    api.post(`/comp-cards/${id}/regenerate-token`),
+  generateFromProfile: (template?: string, colorScheme?: string) =>
+    api.post('/comp-cards/generate-from-profile', { template, colorScheme })
+};
+
+export const chatRoomsAPI = {
+  getRooms: () =>
+    api.get('/chat-rooms'),
+  getRoom: (id: string) =>
+    api.get(`/chat-rooms/${id}`),
+  createRoom: (data: { name: string; description?: string; type?: string; isPublic?: boolean; memberIds?: string[] }) =>
+    api.post('/chat-rooms', data),
+  updateRoom: (id: string, data: any) =>
+    api.put(`/chat-rooms/${id}`, data),
+  deleteRoom: (id: string) =>
+    api.delete(`/chat-rooms/${id}`),
+  getMessages: (roomId: string, params?: { limit?: number; before?: string }) =>
+    api.get(`/chat-rooms/${roomId}/messages`, { params }),
+  sendMessage: (roomId: string, content: string, messageType?: string) =>
+    api.post(`/chat-rooms/${roomId}/messages`, { content, messageType }),
+  addMember: (roomId: string, memberId: string) =>
+    api.post(`/chat-rooms/${roomId}/members`, { memberId }),
+  removeMember: (roomId: string, memberId: string) =>
+    api.delete(`/chat-rooms/${roomId}/members/${memberId}`),
+  joinByInvite: (inviteCode: string) =>
+    api.post(`/chat-rooms/join/${inviteCode}`),
+  discoverPublic: (params?: { type?: string; search?: string; limit?: number; offset?: number }) =>
+    api.get('/chat-rooms/discover/public', { params })
+};

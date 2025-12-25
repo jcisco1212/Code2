@@ -40,6 +40,8 @@ import talentNotesRoutes from './routes/talentNotes';
 import adminAuditLogsRoutes from './routes/adminAuditLogs';
 import blocksRoutes from './routes/blocks';
 import clipsRoutes from './routes/clips';
+import compCardsRoutes from './routes/compCards';
+import chatRoomsRoutes from './routes/chatRooms';
 
 dotenv.config();
 
@@ -150,6 +152,8 @@ app.use('/api/v1/talent-notes', talentNotesRoutes);
 app.use('/api/v1/admin/audit-logs', adminAuditLogsRoutes);
 app.use('/api/v1/blocks', blocksRoutes);
 app.use('/api/v1/clips', clipsRoutes);
+app.use('/api/v1/comp-cards', compCardsRoutes);
+app.use('/api/v1/chat-rooms', chatRoomsRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

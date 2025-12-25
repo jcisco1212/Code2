@@ -42,6 +42,8 @@ import Library from './pages/Library';
 import PlaylistDetail from './pages/PlaylistDetail';
 import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
+import CompCard from './pages/CompCard';
+import CompCards from './pages/CompCards';
 
 // Agent Pages
 import AgentDashboard from './pages/agent/Dashboard';
@@ -106,6 +108,11 @@ function App() {
               <Route path="messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
               <Route path="messages/:conversationId" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
               <Route path="notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+
+              {/* Comp Card Routes */}
+              <Route path="comp-cards" element={<ProtectedRoute><CompCards /></ProtectedRoute>} />
+              <Route path="comp-card/:id" element={<CompCard />} />
+              <Route path="comp-card/share/:token" element={<CompCard />} />
 
               {/* Agent Routes */}
               <Route path="agent" element={<AgentRoute><AgentDashboard /></AgentRoute>} />
