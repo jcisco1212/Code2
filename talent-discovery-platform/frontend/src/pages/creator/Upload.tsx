@@ -28,7 +28,8 @@ const Upload: React.FC = () => {
     categoryId: '',
     visibility: 'public',
     tags: '',
-    commentsEnabled: true
+    commentsEnabled: true,
+    isClip: false
   });
 
   useEffect(() => {
@@ -136,7 +137,8 @@ const Upload: React.FC = () => {
         ...(formData.categoryId && { categoryId: formData.categoryId }),
         visibility: formData.visibility,
         tags: tagsArray,
-        commentsEnabled: formData.commentsEnabled
+        commentsEnabled: formData.commentsEnabled,
+        isClip: formData.isClip
       });
 
       const videoId = createResponse.data.video.id;
@@ -339,6 +341,34 @@ const Upload: React.FC = () => {
             <label htmlFor="commentsEnabled" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
               Allow comments on this video
             </label>
+          </div>
+
+          {/* Clip Toggle */}
+          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-pink-500/10 to-violet-500/10 rounded-lg border border-pink-500/20">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-violet-500 flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900 dark:text-white">Upload as Clip</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Short-form video (recommended under 60 seconds)</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, isClip: !prev.isClip }))}
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 ${
+                formData.isClip ? 'bg-gradient-to-r from-pink-500 to-violet-500' : 'bg-gray-300 dark:bg-gray-600'
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  formData.isClip ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
         </div>
 

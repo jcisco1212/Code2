@@ -205,110 +205,121 @@ const Home: React.FC = () => {
         </section>
       )}
 
-      {/* Clips Section - Short Form Videos */}
-      {clips.length > 0 && (
-        <section className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-gradient-to-r from-pink-500 to-violet-500 text-white">
-                <PlayIconSolid className="w-6 h-6" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Clips</h2>
-              <span className="px-2 py-0.5 text-xs font-medium bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-full">
-                Short Videos
-              </span>
+      {/* Clips Section - Short Form Videos - Always Show */}
+      <section className="mb-16">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-gradient-to-r from-pink-500 to-violet-500 text-white">
+              <PlayIconSolid className="w-6 h-6" />
             </div>
-            <Link
-              to="/clips"
-              className="flex items-center gap-2 px-4 py-2 rounded-full
-                       text-primary-600 dark:text-primary-400
-                       hover:bg-primary-500/10 transition-colors font-medium"
-            >
-              See all <ArrowRightIcon className="w-4 h-4" />
-            </Link>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Clips</h2>
+            <span className="px-2 py-0.5 text-xs font-medium bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-full">
+              Short Videos
+            </span>
           </div>
-          {clipsLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="bg-gray-200/50 dark:bg-white/10 rounded-2xl aspect-[9/16] mb-2 backdrop-blur-sm" />
-                  <div className="h-3 bg-gray-200/50 dark:bg-white/10 rounded-full mb-1" />
-                  <div className="h-2 bg-gray-200/50 dark:bg-white/10 rounded-full w-2/3" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
-              {clips.map((clip) => (
-                <Link
-                  key={clip.id}
-                  to={`/watch/${clip.id}`}
-                  className="group relative"
-                >
-                  {/* Thumbnail */}
-                  <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-gray-900 shadow-lg
-                                group-hover:shadow-xl group-hover:scale-[1.02] transition-all duration-300">
-                    {clip.thumbnailUrl ? (
-                      <img
-                        src={getUploadUrl(clip.thumbnailUrl) || ''}
-                        alt={clip.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-pink-500 to-violet-600 flex items-center justify-center">
-                        <PlayIconSolid className="w-10 h-10 text-white/80" />
-                      </div>
-                    )}
-
-                    {/* Overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                    {/* Duration badge */}
-                    {clip.duration && (
-                      <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/70 rounded text-[10px] text-white font-medium">
-                        {formatDuration(clip.duration)}
-                      </div>
-                    )}
-
-                    {/* Stats overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="flex items-center gap-2 text-white text-xs">
-                        <span className="flex items-center gap-0.5">
-                          <EyeIcon className="w-3 h-3" />
-                          {formatCount(clip.viewsCount)}
-                        </span>
-                        <span className="flex items-center gap-0.5">
-                          <HeartIcon className="w-3 h-3" />
-                          {formatCount(clip.likesCount)}
-                        </span>
-                      </div>
+          <Link
+            to="/clips"
+            className="flex items-center gap-2 px-4 py-2 rounded-full
+                     text-primary-600 dark:text-primary-400
+                     hover:bg-primary-500/10 transition-colors font-medium"
+          >
+            See all <ArrowRightIcon className="w-4 h-4" />
+          </Link>
+        </div>
+        {clipsLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="bg-gray-200/50 dark:bg-white/10 rounded-2xl aspect-[9/16] mb-2 backdrop-blur-sm" />
+                <div className="h-3 bg-gray-200/50 dark:bg-white/10 rounded-full mb-1" />
+                <div className="h-2 bg-gray-200/50 dark:bg-white/10 rounded-full w-2/3" />
+              </div>
+            ))}
+          </div>
+        ) : clips.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
+            {clips.map((clip) => (
+              <Link
+                key={clip.id}
+                to={`/watch/${clip.id}`}
+                className="group relative"
+              >
+                {/* Thumbnail */}
+                <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-gray-900 shadow-lg
+                              group-hover:shadow-xl group-hover:scale-[1.02] transition-all duration-300">
+                  {clip.thumbnailUrl ? (
+                    <img
+                      src={getUploadUrl(clip.thumbnailUrl) || ''}
+                      alt={clip.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-pink-500 to-violet-600 flex items-center justify-center">
+                      <PlayIconSolid className="w-10 h-10 text-white/80" />
                     </div>
+                  )}
 
-                    {/* Play button on hover */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                        <PlayIconSolid className="w-6 h-6 text-white" />
-                      </div>
+                  {/* Overlay gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                  {/* Duration badge */}
+                  {clip.duration && (
+                    <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/70 rounded text-[10px] text-white font-medium">
+                      {formatDuration(clip.duration)}
+                    </div>
+                  )}
+
+                  {/* Stats overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-2 text-white text-xs">
+                      <span className="flex items-center gap-0.5">
+                        <EyeIcon className="w-3 h-3" />
+                        {formatCount(clip.viewsCount)}
+                      </span>
+                      <span className="flex items-center gap-0.5">
+                        <HeartIcon className="w-3 h-3" />
+                        {formatCount(clip.likesCount)}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Title */}
-                  <h3 className="mt-2 text-xs font-medium text-gray-900 dark:text-white line-clamp-2">
-                    {clip.title}
-                  </h3>
+                  {/* Play button on hover */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <PlayIconSolid className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                </div>
 
-                  {/* Creator */}
-                  {clip.creator && (
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
-                      {clip.creator.displayName || clip.creator.username}
-                    </p>
-                  )}
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
-      )}
+                {/* Title */}
+                <h3 className="mt-2 text-xs font-medium text-gray-900 dark:text-white line-clamp-2">
+                  {clip.title}
+                </h3>
+
+                {/* Creator */}
+                {clip.creator && (
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
+                    {clip.creator.displayName || clip.creator.username}
+                  </p>
+                )}
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-gradient-to-r from-pink-500/5 to-violet-500/5 rounded-2xl border border-pink-500/20">
+            <PlayIconSolid className="w-16 h-16 mx-auto text-pink-500/50 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Clips Yet</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">Be the first to share a short video clip!</p>
+            <Link
+              to="/upload"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-violet-500 text-white rounded-full hover:opacity-90 transition-opacity font-medium"
+            >
+              <PlayIconSolid className="w-5 h-5" />
+              Upload a Clip
+            </Link>
+          </div>
+        )}
+      </section>
 
       {/* Trending Videos */}
       <section className="mb-16">
