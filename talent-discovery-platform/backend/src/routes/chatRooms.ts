@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { authenticate } from '../middleware/auth';
-import { User, ChatRoom, ChatRoomMember, ChatRoomMessage } from '../models';
+import { User, ChatRoom, ChatRoomMember, ChatRoomMessage, ChatMessageType } from '../models';
 import { MemberRole } from '../models/ChatRoomMember';
 import { ChatRoomType } from '../models/ChatRoom';
 import { Op } from 'sequelize';
@@ -419,7 +419,7 @@ router.post('/:id/members', authenticate, async (req: Request, res: Response, ne
       chatRoomId: id,
       senderId: userId,
       content: `${newMember.displayName || newMember.username} was added to the group`,
-      messageType: 'system'
+      messageType: ChatMessageType.SYSTEM
     });
 
     res.status(201).json({ message: 'Member added successfully' });
