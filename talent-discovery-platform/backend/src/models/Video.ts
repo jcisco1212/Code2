@@ -66,6 +66,7 @@ interface VideoAttributes {
   publishedAt: Date | null;
   scheduledAt: Date | null;
   customThumbnailUrl: string | null;
+  isClip: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -79,7 +80,7 @@ interface VideoCreationAttributes extends Optional<VideoAttributes,
   'aiAnalysisStatus' | 'aiAnalysisError' | 'aiCategoryTags' | 'discoverScore' | 'trendingScore' |
   'engagementScore' | 'watchTimeTotal' | 'watchTimeAverage' | 'tags' | 'isFeatured' |
   'featuredAt' | 'commentsEnabled' | 'moderationStatus' | 'moderationNotes' | 'publishedAt' |
-  'scheduledAt' | 'customThumbnailUrl' | 'createdAt' | 'updatedAt'
+  'scheduledAt' | 'customThumbnailUrl' | 'isClip' | 'createdAt' | 'updatedAt'
 > {}
 
 class Video extends Model<VideoAttributes, VideoCreationAttributes> implements VideoAttributes {
@@ -130,6 +131,7 @@ class Video extends Model<VideoAttributes, VideoCreationAttributes> implements V
   declare publishedAt: Date | null;
   declare scheduledAt: Date | null;
   declare customThumbnailUrl: string | null;
+  declare isClip: boolean;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 
@@ -185,6 +187,7 @@ class Video extends Model<VideoAttributes, VideoCreationAttributes> implements V
       aiPerformanceScore: this.aiPerformanceScore,
       tags: this.tags,
       isFeatured: this.isFeatured,
+      isClip: this.isClip,
       commentsEnabled: this.commentsEnabled,
       publishedAt: this.publishedAt,
       createdAt: this.createdAt,
@@ -430,6 +433,11 @@ Video.init(
       allowNull: true,
       field: 'custom_thumbnail_url'
     },
+    isClip: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      field: 'is_clip'
+    },
     createdAt: {
       type: DataTypes.DATE,
       field: 'created_at'
@@ -452,6 +460,7 @@ Video.init(
       { fields: ['trending_score'] },
       { fields: ['created_at'] },
       { fields: ['scheduled_at'] },
+      { fields: ['is_clip'] },
       { fields: ['tags'], using: 'GIN' }
     ]
   }

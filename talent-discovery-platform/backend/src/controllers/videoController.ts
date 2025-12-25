@@ -156,7 +156,7 @@ export const getStreamUrl = async (req: AuthRequest, res: Response, next: NextFu
 // Create video metadata
 export const createVideo = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { title, description, categoryId, tags, visibility, commentsEnabled, scheduledAt } = req.body;
+    const { title, description, categoryId, tags, visibility, commentsEnabled, scheduledAt, isClip } = req.body;
 
     // Validate scheduledAt if provided
     let parsedScheduledAt = null;
@@ -179,6 +179,7 @@ export const createVideo = async (req: AuthRequest, res: Response, next: NextFun
       visibility: visibility || VideoVisibility.PUBLIC,
       commentsEnabled: commentsEnabled !== false,
       scheduledAt: parsedScheduledAt,
+      isClip: isClip === true,
       originalKey: '', // Will be updated after upload
       status: VideoStatus.PENDING
     });
@@ -193,7 +194,7 @@ export const createVideo = async (req: AuthRequest, res: Response, next: NextFun
 export const updateVideo = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
-    const { title, description, categoryId, tags, visibility, commentsEnabled, duration, scheduledAt } = req.body;
+    const { title, description, categoryId, tags, visibility, commentsEnabled, duration, scheduledAt, isClip } = req.body;
 
     const video = await Video.findByPk(id);
     if (!video) {
@@ -228,7 +229,8 @@ export const updateVideo = async (req: AuthRequest, res: Response, next: NextFun
       ...(visibility && { visibility }),
       ...(commentsEnabled !== undefined && { commentsEnabled }),
       ...(duration !== undefined && { duration }),
-      ...(parsedScheduledAt !== undefined && { scheduledAt: parsedScheduledAt })
+      ...(parsedScheduledAt !== undefined && { scheduledAt: parsedScheduledAt }),
+      ...(isClip !== undefined && { isClip })
     });
 
     // Clear cache

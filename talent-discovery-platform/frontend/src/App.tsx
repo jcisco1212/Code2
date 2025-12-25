@@ -19,6 +19,7 @@ import Search from './pages/Search';
 import Profile from './pages/Profile';
 import Category from './pages/Category';
 import Trending from './pages/Trending';
+import Clips from './pages/Clips';
 import About from './pages/About';
 import Terms from './pages/Terms';
 import Contact from './pages/Contact';
@@ -80,6 +81,7 @@ function App() {
               <Route path="profile/:username" element={<Profile />} />
               <Route path="category/:categorySlug" element={<Category />} />
               <Route path="trending" element={<Trending />} />
+              <Route path="clips" element={<Clips />} />
               <Route path="about" element={<About />} />
               <Route path="terms" element={<Terms />} />
               <Route path="contact" element={<Contact />} />

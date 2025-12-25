@@ -26,7 +26,8 @@ import {
   ClipboardDocumentIcon,
   PencilIcon,
   MegaphoneIcon,
-  DocumentIcon
+  DocumentIcon,
+  FilmIcon
 } from '@heroicons/react/24/outline';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
@@ -74,7 +75,8 @@ const Layout: React.FC = () => {
 
   const navigation = [
     { name: 'Home', href: '/', icon: HomeIcon },
-    { name: 'Trending', href: '/trending', icon: FireIcon }
+    { name: 'Trending', href: '/trending', icon: FireIcon },
+    { name: 'Clips', href: '/clips', icon: FilmIcon }
   ];
 
   const userNavigation = isAuthenticated
@@ -502,6 +504,7 @@ const Layout: React.FC = () => {
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Explore</h3>
               <ul className="space-y-2.5 text-sm text-gray-600 dark:text-gray-400">
                 <li><Link to="/trending" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Trending</Link></li>
+                <li><Link to="/clips" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Clips</Link></li>
                 <li><Link to="/category/singer" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Singers</Link></li>
                 <li><Link to="/category/actor" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Actors</Link></li>
                 <li><Link to="/category/dancer" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Dancers</Link></li>

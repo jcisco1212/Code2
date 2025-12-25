@@ -165,6 +165,15 @@ export const videosAPI = {
     api.post(`/likes/video/${id}`, { type: 'like' })
 };
 
+export const clipsAPI = {
+  getClips: (params?: any) =>
+    api.get('/clips', { params }),
+  getTrending: (limit?: number) =>
+    api.get('/clips/trending', { params: { limit } }),
+  getByUser: (userId: string, params?: any) =>
+    api.get(`/clips/user/${userId}`, { params })
+};
+
 export const uploadAPI = {
   getVideoPresignedUrl: (videoId: string, contentType: string, fileSize: number) =>
     api.post('/upload/video/presign', { videoId, contentType, fileSize }),

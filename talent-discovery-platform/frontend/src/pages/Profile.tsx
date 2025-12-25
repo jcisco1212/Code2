@@ -307,9 +307,14 @@ const Profile: React.FC = () => {
                       <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 cursor-pointer hover:opacity-90 transition-opacity">
                         <img
                           src={getUploadUrl(photo) || ''}
-                          alt={`${profile.displayName || profile.username} photo ${index + 1}`}
+                          alt=""
                           className="w-full h-full object-cover"
                           onClick={() => window.open(getUploadUrl(photo) || '', '_blank')}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            target.parentElement!.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-400 to-purple-500 text-white text-2xl font-bold">${index + 1}</div>`;
+                          }}
                         />
                       </div>
                     ))}

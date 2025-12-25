@@ -5,7 +5,8 @@ import { RootState, AppDispatch } from '../store';
 import { fetchTrendingVideos, fetchFeaturedVideos } from '../store/slices/videosSlice';
 import VideoCard from '../components/video/VideoCard';
 import { FireIcon, SparklesIcon, ArrowRightIcon, PlayIcon } from '@heroicons/react/24/outline';
-import { categoriesAPI, getUploadUrl } from '../services/api';
+import { PlayIcon as PlayIconSolid, EyeIcon, HeartIcon } from '@heroicons/react/24/solid';
+import { categoriesAPI, clipsAPI, getUploadUrl } from '../services/api';
 
 interface Category {
   id: string;
@@ -17,6 +18,35 @@ interface Category {
   color: string | null;
   isActive: boolean;
 }
+
+interface Clip {
+  id: string;
+  title: string;
+  thumbnailUrl: string | null;
+  duration: number | null;
+  viewsCount: number;
+  likesCount: number;
+  creator?: {
+    id: string;
+    username: string;
+    displayName: string | null;
+    avatarUrl: string | null;
+    isVerified: boolean;
+  };
+}
+
+const formatDuration = (seconds: number | null): string => {
+  if (!seconds) return '0:00';
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
+const formatCount = (count: number): string => {
+  if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+  return count.toString();
+};
 
 // Default gradient colors for categories without a color set
 const defaultColors = [
@@ -55,6 +85,8 @@ const Home: React.FC = () => {
   );
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [clips, setClips] = useState<Clip[]>([]);
+  const [clipsLoading, setClipsLoading] = useState(true);
 
   useEffect(() => {
     dispatch(fetchTrendingVideos(12));
@@ -72,7 +104,20 @@ const Home: React.FC = () => {
       }
     };
 
+    // Fetch trending clips
+    const fetchClips = async () => {
+      try {
+        const response = await clipsAPI.getTrending(8);
+        setClips(response.data.clips || []);
+      } catch (err) {
+        console.error('Failed to fetch clips:', err);
+      } finally {
+        setClipsLoading(false);
+      }
+    };
+
     fetchCategories();
+    fetchClips();
   }, [dispatch]);
 
   // Get color for category (use stored color or default based on index)
@@ -157,6 +202,111 @@ const Home: React.FC = () => {
               <VideoCard key={video.id} video={video} featured />
             ))}
           </div>
+        </section>
+      )}
+
+      {/* Clips Section - Short Form Videos */}
+      {clips.length > 0 && (
+        <section className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-gradient-to-r from-pink-500 to-violet-500 text-white">
+                <PlayIconSolid className="w-6 h-6" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Clips</h2>
+              <span className="px-2 py-0.5 text-xs font-medium bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-full">
+                Short Videos
+              </span>
+            </div>
+            <Link
+              to="/clips"
+              className="flex items-center gap-2 px-4 py-2 rounded-full
+                       text-primary-600 dark:text-primary-400
+                       hover:bg-primary-500/10 transition-colors font-medium"
+            >
+              See all <ArrowRightIcon className="w-4 h-4" />
+            </Link>
+          </div>
+          {clipsLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="bg-gray-200/50 dark:bg-white/10 rounded-2xl aspect-[9/16] mb-2 backdrop-blur-sm" />
+                  <div className="h-3 bg-gray-200/50 dark:bg-white/10 rounded-full mb-1" />
+                  <div className="h-2 bg-gray-200/50 dark:bg-white/10 rounded-full w-2/3" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
+              {clips.map((clip) => (
+                <Link
+                  key={clip.id}
+                  to={`/watch/${clip.id}`}
+                  className="group relative"
+                >
+                  {/* Thumbnail */}
+                  <div className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-gray-900 shadow-lg
+                                group-hover:shadow-xl group-hover:scale-[1.02] transition-all duration-300">
+                    {clip.thumbnailUrl ? (
+                      <img
+                        src={getUploadUrl(clip.thumbnailUrl) || ''}
+                        alt={clip.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-pink-500 to-violet-600 flex items-center justify-center">
+                        <PlayIconSolid className="w-10 h-10 text-white/80" />
+                      </div>
+                    )}
+
+                    {/* Overlay gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                    {/* Duration badge */}
+                    {clip.duration && (
+                      <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/70 rounded text-[10px] text-white font-medium">
+                        {formatDuration(clip.duration)}
+                      </div>
+                    )}
+
+                    {/* Stats overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-2 text-white text-xs">
+                        <span className="flex items-center gap-0.5">
+                          <EyeIcon className="w-3 h-3" />
+                          {formatCount(clip.viewsCount)}
+                        </span>
+                        <span className="flex items-center gap-0.5">
+                          <HeartIcon className="w-3 h-3" />
+                          {formatCount(clip.likesCount)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Play button on hover */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                        <PlayIconSolid className="w-6 h-6 text-white" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="mt-2 text-xs font-medium text-gray-900 dark:text-white line-clamp-2">
+                    {clip.title}
+                  </h3>
+
+                  {/* Creator */}
+                  {clip.creator && (
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
+                      {clip.creator.displayName || clip.creator.username}
+                    </p>
+                  )}
+                </Link>
+              ))}
+            </div>
+          )}
         </section>
       )}
 
