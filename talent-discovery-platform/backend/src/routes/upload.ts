@@ -632,6 +632,65 @@ router.post(
 );
 
 // ===========================================
+// Direct Gallery Image Upload (for photo gallery)
+// ===========================================
+
+// Configure multer for gallery image uploads
+const galleryImageStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const authReq = req;
+    const userDir = path.join(UPLOADS_DIR, 'gallery', authReq.userId || 'anonymous');
+    if (!fs.existsSync(userDir)) fs.mkdirSync(userDir, { recursive: true });
+    cb(null, userDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${uuidv4()}${ext}`);
+  }
+});
+
+const galleryImageUpload = multer({
+  storage: galleryImageStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Allowed: JPG, PNG, WebP'));
+    }
+  }
+});
+
+// Direct gallery image upload - stores files locally (does NOT update avatar)
+router.post(
+  '/gallery-image/direct',
+  authenticate as RequestHandler,
+  galleryImageUpload.single('image'),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.file) {
+        throw new BadRequestError('No image file uploaded');
+      }
+
+      // Generate a local URL for the image (unique filename)
+      const localKey = `gallery/${req.userId}/${req.file.filename}`;
+      const imageUrl = `/uploads/${localKey}`;
+
+      logger.info(`Gallery image uploaded for user ${req.userId}: ${imageUrl}`);
+
+      res.json({
+        message: 'Gallery image uploaded successfully',
+        url: imageUrl,
+        key: localKey
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// ===========================================
 // Direct Category Image Upload (for admin use)
 // ===========================================
 

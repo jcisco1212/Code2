@@ -205,6 +205,14 @@ export const uploadAPI = {
     return api.post('/upload/profile-image/direct', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
+  },
+  // Direct gallery image upload - does NOT update avatar
+  directGalleryImageUpload: (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    return api.post('/upload/gallery-image/direct', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
   }
 };
 

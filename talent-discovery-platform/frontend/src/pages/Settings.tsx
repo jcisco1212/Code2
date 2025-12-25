@@ -433,11 +433,8 @@ const Settings: React.FC = () => {
 
     setUploadingPhoto(true);
     try {
-      const formData = new FormData();
-      formData.append('image', file);
-      formData.append('type', 'gallery');
-
-      const uploadResponse = await uploadAPI.directProfileImageUpload(file);
+      // Use gallery-specific upload that does NOT update avatar
+      const uploadResponse = await uploadAPI.directGalleryImageUpload(file);
       const imageUrl = uploadResponse.data.url;
 
       const newGallery = [...photoGallery, imageUrl];
