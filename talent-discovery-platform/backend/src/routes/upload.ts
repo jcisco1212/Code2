@@ -475,12 +475,16 @@ router.post(
             logger.warn(`Failed to generate thumbnail for video ${videoId}:`, thumbError);
           }
 
+          // Auto-detect if video is a clip (under 60 seconds)
+          const isClip = duration > 0 && duration <= 60;
+
           // Update video record with transcoded file and thumbnail
           await video.update({
             s3Key: localKey,
             status: VideoStatus.READY,
             hlsUrl: videoUrl,
             duration,
+            isClip,
             ...(thumbnailUrl && { thumbnailUrl })
           });
 
@@ -499,6 +503,14 @@ router.post(
           const fallbackKey = `videos/${userId}/${videoId}/original${ext}`;
           const fallbackUrl = `/uploads/${fallbackKey}`;
 
+          // Try to get duration from original file
+          let fallbackDuration = 0;
+          try {
+            fallbackDuration = await getVideoDuration(originalPath);
+          } catch (durationError) {
+            logger.warn(`Failed to get duration for video ${videoId}:`, durationError);
+          }
+
           // Try to generate thumbnail from original file
           let thumbnailUrl: string | null = null;
           try {
@@ -512,10 +524,15 @@ router.post(
             logger.warn(`Failed to generate thumbnail for video ${videoId}:`, thumbError);
           }
 
+          // Auto-detect if video is a clip (under 60 seconds)
+          const fallbackIsClip = fallbackDuration > 0 && fallbackDuration <= 60;
+
           await video.update({
             s3Key: fallbackKey,
             status: VideoStatus.READY,
             hlsUrl: fallbackUrl,
+            duration: fallbackDuration,
+            isClip: fallbackIsClip,
             ...(thumbnailUrl && { thumbnailUrl })
           });
 

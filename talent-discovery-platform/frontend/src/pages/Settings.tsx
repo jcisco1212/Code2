@@ -454,7 +454,6 @@ const Settings: React.FC = () => {
       await profileAPI.updateProfile({ photoGallery: newGallery });
       setPhotoGallery(newGallery);
       toast.success('Photo added to gallery');
-      refreshUser();
     } catch (err: any) {
       toast.error(err.response?.data?.error?.message || 'Failed to upload photo');
     } finally {
@@ -471,7 +470,6 @@ const Settings: React.FC = () => {
       await profileAPI.updateProfile({ photoGallery: newGallery });
       setPhotoGallery(newGallery);
       toast.success('Photo removed');
-      refreshUser();
     } catch (err) {
       toast.error('Failed to remove photo');
     }
