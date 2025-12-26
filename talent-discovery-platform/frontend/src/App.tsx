@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 import { store } from './store';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { initializeCapacitor } from './utils/capacitor';
 
 // Layout
 import Layout from './components/layout/Layout';
@@ -68,6 +69,11 @@ import AdminAnnouncements from './pages/admin/Announcements';
 import AdminAuditLogs from './pages/admin/AuditLogs';
 
 function App() {
+  // Initialize Capacitor for native platforms
+  useEffect(() => {
+    initializeCapacitor();
+  }, []);
+
   return (
     <Provider store={store}>
       <ThemeProvider>
