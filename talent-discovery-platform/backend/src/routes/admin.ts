@@ -356,7 +356,8 @@ router.post(
         icon,
         iconUrl,
         sortOrder: sortOrder || 0,
-        isActive: isActive !== false
+        isActive: isActive !== false,
+        createdAt: new Date()
       });
 
       // Clear category cache
