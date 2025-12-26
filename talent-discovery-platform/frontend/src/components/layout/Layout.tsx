@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { messagesAPI } from '../../services/api';
+import { messagesAPI, getUploadUrl } from '../../services/api';
 import {
   HomeIcon,
   MagnifyingGlassIcon,
@@ -183,9 +183,9 @@ const Layout: React.FC = () => {
                                         hover:bg-white/50 dark:hover:bg-white/10
                                         border border-transparent hover:border-white/50 dark:hover:border-white/20
                                         transition-all">
-                    {user?.profileImageUrl ? (
+                    {(user?.profileImageUrl || user?.avatarUrl) ? (
                       <img
-                        src={user.profileImageUrl}
+                        src={getUploadUrl(user.profileImageUrl || user.avatarUrl) || ''}
                         alt={user.username}
                         className="w-9 h-9 rounded-full object-cover ring-2 ring-primary-400/50"
                       />

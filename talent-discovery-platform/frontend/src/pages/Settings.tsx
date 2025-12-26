@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { profileAPI, uploadAPI, blocksAPI, twoFactorAPI } from '../services/api';
@@ -16,7 +17,8 @@ import {
   XMarkIcon,
   PhotoIcon,
   TrashIcon,
-  PlusIcon
+  PlusIcon,
+  HomeIcon
 } from '@heroicons/react/24/outline';
 import { getUploadUrl } from '../services/api';
 
@@ -32,14 +34,36 @@ const normalizeUrl = (url: string): string => {
   return `https://${trimmed}`;
 };
 
+const validTabs: SettingsTab[] = ['profile', 'photos', 'account', 'notifications', 'privacy', 'appearance', 'links', 'security', 'blocked'];
+
 const Settings: React.FC = () => {
   const { user, refreshUser } = useAuth();
   const { theme, setTheme } = useTheme();
-  const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Get tab from URL or default to 'profile'
+  const tabFromUrl = searchParams.get('tab') as SettingsTab | null;
+  const initialTab = tabFromUrl && validTabs.includes(tabFromUrl) ? tabFromUrl : 'profile';
+  const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
+
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
+
+  // Update URL when tab changes
+  const handleTabChange = (tab: SettingsTab) => {
+    setActiveTab(tab);
+    setSearchParams({ tab });
+  };
+
+  // Keep tab state in sync with URL (e.g., when navigating back/forward)
+  useEffect(() => {
+    const tabParam = searchParams.get('tab') as SettingsTab | null;
+    if (tabParam && validTabs.includes(tabParam) && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   // Profile form state
   const [profileForm, setProfileForm] = useState({
@@ -489,7 +513,17 @@ const Settings: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Settings</h1>
+      {/* Header with title and back link */}
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
+        <Link
+          to="/"
+          className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+        >
+          <HomeIcon className="w-5 h-5" />
+          <span>Back to Homepage</span>
+        </Link>
+      </div>
 
       <div className="flex flex-col md:flex-row gap-8">
         {/* Sidebar */}
@@ -498,7 +532,7 @@ const Settings: React.FC = () => {
             {tabs.map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
                   activeTab === tab.id
                     ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'
