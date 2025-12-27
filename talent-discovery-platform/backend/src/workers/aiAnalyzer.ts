@@ -20,6 +20,7 @@ interface VideoAnalysisResult {
   timingScore: number | null;
   qualityScore: number;
   categoryTags: string[];
+  feedback?: string;
 }
 
 interface CommentAnalysisResult {
@@ -51,7 +52,8 @@ export async function analyzeVideo(data: AnalyzeVideoData): Promise<void> {
         videoId,
         videoUrl: video.hlsKey,
         duration: video.duration,
-        categoryId: video.categoryId
+        categoryId: video.categoryId,
+        thumbnailUrl: video.thumbnailUrl || null
       }, {
         timeout: 300000 // 5 minutes timeout
       });

@@ -40,6 +40,7 @@ class VideoAnalysisRequest(BaseModel):
     videoUrl: str
     duration: Optional[int] = None
     categoryId: Optional[str] = None
+    thumbnailUrl: Optional[str] = None
 
 
 class VideoAnalysisResponse(BaseModel):
@@ -50,6 +51,7 @@ class VideoAnalysisResponse(BaseModel):
     timingScore: Optional[float] = None
     qualityScore: float
     categoryTags: List[str]
+    feedback: Optional[str] = None
 
 
 class CommentAnalysisRequest(BaseModel):
@@ -75,12 +77,18 @@ class TalentClassificationResponse(BaseModel):
 # Health check
 @app.get("/health")
 async def health_check():
+    openai_enabled = bool(os.getenv("OPENAI_API_KEY"))
     return {
         "status": "healthy",
         "services": {
-            "video_analyzer": "ready",
+            "video_analyzer": "ready" + (" (OpenAI enabled)" if openai_enabled else " (fallback mode)"),
             "comment_analyzer": "ready",
             "talent_classifier": "ready"
+        },
+        "ai_features": {
+            "openai_vision": openai_enabled,
+            "vader_sentiment": True,
+            "toxicity_detection": True
         }
     }
 
@@ -106,7 +114,8 @@ async def analyze_video(request: VideoAnalysisRequest):
         result = await video_analyzer.analyze(
             video_url=request.videoUrl,
             duration=request.duration,
-            category_id=request.categoryId
+            category_id=request.categoryId,
+            thumbnail_url=request.thumbnailUrl
         )
 
         return VideoAnalysisResponse(**result)
