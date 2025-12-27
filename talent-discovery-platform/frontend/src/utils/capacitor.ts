@@ -1,27 +1,47 @@
 /**
  * Capacitor Utilities
  * Handles platform detection and native plugin initialization
+ *
+ * Note: This module gracefully handles the case where Capacitor is not installed,
+ * making it safe to use in web-only deployments.
  */
 
-import { Capacitor } from '@capacitor/core';
-import { App } from '@capacitor/app';
-import { StatusBar, Style } from '@capacitor/status-bar';
-import { SplashScreen } from '@capacitor/splash-screen';
-import { Keyboard } from '@capacitor/keyboard';
+// Check if Capacitor is available at runtime (loaded via native shell)
+const getCapacitor = (): any => {
+  return (window as any).Capacitor;
+};
 
 // Check if running on native platform
 export const isNativePlatform = (): boolean => {
-  return Capacitor.isNativePlatform();
+  const Capacitor = getCapacitor();
+  if (!Capacitor) return false;
+  try {
+    return Capacitor.isNativePlatform();
+  } catch {
+    return false;
+  }
 };
 
 // Get current platform
 export const getPlatform = (): 'ios' | 'android' | 'web' => {
-  return Capacitor.getPlatform() as 'ios' | 'android' | 'web';
+  const Capacitor = getCapacitor();
+  if (!Capacitor) return 'web';
+  try {
+    return Capacitor.getPlatform() as 'ios' | 'android' | 'web';
+  } catch {
+    return 'web';
+  }
 };
 
 // Check if a plugin is available
 export const isPluginAvailable = (pluginName: string): boolean => {
-  return Capacitor.isPluginAvailable(pluginName);
+  const Capacitor = getCapacitor();
+  if (!Capacitor) return false;
+  try {
+    return Capacitor.isPluginAvailable(pluginName);
+  } catch {
+    return false;
+  }
 };
 
 // Initialize Capacitor plugins for native platforms
@@ -31,46 +51,52 @@ export const initializeCapacitor = async (): Promise<void> => {
   }
 
   try {
-    // Hide splash screen after app is ready
-    await SplashScreen.hide();
+    const Capacitor = getCapacitor();
+    const Plugins = Capacitor?.Plugins;
+
+    if (!Plugins) return;
+
+    // Hide splash screen
+    if (Plugins.SplashScreen) {
+      await Plugins.SplashScreen.hide();
+    }
 
     // Set status bar style
-    if (isPluginAvailable('StatusBar')) {
-      await StatusBar.setStyle({ style: Style.Light });
+    if (Plugins.StatusBar) {
+      await Plugins.StatusBar.setStyle({ style: 'LIGHT' });
       if (getPlatform() === 'android') {
-        await StatusBar.setBackgroundColor({ color: '#667eea' });
+        await Plugins.StatusBar.setBackgroundColor({ color: '#667eea' });
       }
     }
 
     // Handle keyboard events on iOS
-    if (getPlatform() === 'ios' && isPluginAvailable('Keyboard')) {
-      Keyboard.addListener('keyboardWillShow', () => {
+    if (getPlatform() === 'ios' && Plugins.Keyboard) {
+      Plugins.Keyboard.addListener('keyboardWillShow', () => {
         document.body.classList.add('keyboard-visible');
       });
-      Keyboard.addListener('keyboardWillHide', () => {
+      Plugins.Keyboard.addListener('keyboardWillHide', () => {
         document.body.classList.remove('keyboard-visible');
       });
     }
 
     // Handle app state changes
-    if (isPluginAvailable('App')) {
-      App.addListener('appStateChange', ({ isActive }) => {
+    if (Plugins.App) {
+      Plugins.App.addListener('appStateChange', ({ isActive }: { isActive: boolean }) => {
         console.log('App state changed. Is active?', isActive);
       });
 
       // Handle back button on Android
-      App.addListener('backButton', ({ canGoBack }) => {
+      Plugins.App.addListener('backButton', ({ canGoBack }: { canGoBack: boolean }) => {
         if (canGoBack) {
           window.history.back();
         } else {
-          App.exitApp();
+          Plugins.App.exitApp();
         }
       });
 
       // Handle deep links
-      App.addListener('appUrlOpen', ({ url }) => {
+      Plugins.App.addListener('appUrlOpen', ({ url }: { url: string }) => {
         console.log('Deep link opened:', url);
-        // Handle deep link navigation here
         const path = new URL(url).pathname;
         if (path) {
           window.location.href = path;
@@ -88,18 +114,25 @@ export const shareContent = async (options: {
   text?: string;
   url?: string;
 }): Promise<void> => {
-  if (isPluginAvailable('Share')) {
-    const { Share } = await import('@capacitor/share');
-    await Share.share(options);
-  } else {
-    // Fallback to Web Share API
-    if (navigator.share) {
-      await navigator.share(options);
-    } else {
-      // Copy to clipboard as final fallback
-      const text = options.url || options.text || '';
-      await navigator.clipboard.writeText(text);
+  const Capacitor = getCapacitor();
+  const Plugins = Capacitor?.Plugins;
+
+  if (Plugins?.Share) {
+    try {
+      await Plugins.Share.share(options);
+      return;
+    } catch {
+      // Fall through to web fallback
     }
+  }
+
+  // Fallback to Web Share API
+  if (navigator.share) {
+    await navigator.share(options);
+  } else {
+    // Copy to clipboard as final fallback
+    const text = options.url || options.text || '';
+    await navigator.clipboard.writeText(text);
   }
 };
 
@@ -107,13 +140,21 @@ export const shareContent = async (options: {
 export const triggerHaptic = async (
   type: 'light' | 'medium' | 'heavy' = 'medium'
 ): Promise<void> => {
-  if (isPluginAvailable('Haptics')) {
-    const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
+  const Capacitor = getCapacitor();
+  const Plugins = Capacitor?.Plugins;
+
+  if (!Plugins?.Haptics) {
+    return;
+  }
+
+  try {
     const styleMap = {
-      light: ImpactStyle.Light,
-      medium: ImpactStyle.Medium,
-      heavy: ImpactStyle.Heavy
+      light: 'LIGHT',
+      medium: 'MEDIUM',
+      heavy: 'HEAVY'
     };
-    await Haptics.impact({ style: styleMap[type] });
+    await Plugins.Haptics.impact({ style: styleMap[type] });
+  } catch {
+    // Haptics not available
   }
 };
