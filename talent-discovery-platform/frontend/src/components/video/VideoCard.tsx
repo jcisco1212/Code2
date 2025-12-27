@@ -86,6 +86,9 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, featured, size = 'medium' 
             src={getUploadUrl(video.thumbnailUrl) || ''}
             alt={video.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            decoding="async"
+            style={{ imageRendering: 'auto' }}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">

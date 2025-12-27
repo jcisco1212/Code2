@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
+import sharp from 'sharp';
 import { Video, VideoStatus } from '../models';
 import { generatePresignedPost, generateUploadUrl, buckets } from '../config/s3';
 import { videoQueue } from '../jobs/videoQueue';
@@ -81,18 +82,43 @@ function getVideoDuration(filePath: string): Promise<number> {
   });
 }
 
-// Generate thumbnail from video at specified time
+// Generate thumbnail from video at specified time with high quality
 function generateThumbnail(videoPath: string, outputPath: string, timeSeconds: number = 1): Promise<void> {
   if (!ffmpeg) return Promise.reject(new Error('FFmpeg not available'));
   return new Promise((resolve, reject) => {
+    const tempPath = outputPath.replace('.jpg', '_temp.jpg');
+
     ffmpeg(videoPath)
-      .on('end', () => resolve())
+      .on('end', async () => {
+        try {
+          // Post-process with sharp for better quality and proper sizing
+          await sharp(tempPath)
+            .resize(1280, 720, {
+              fit: 'cover',
+              position: 'center'
+            })
+            .jpeg({ quality: 90, progressive: true })
+            .toFile(outputPath);
+
+          // Remove temp file
+          if (fs.existsSync(tempPath)) {
+            fs.unlinkSync(tempPath);
+          }
+          resolve();
+        } catch (sharpError) {
+          // If sharp fails, just rename the temp file
+          if (fs.existsSync(tempPath)) {
+            fs.renameSync(tempPath, outputPath);
+          }
+          resolve();
+        }
+      })
       .on('error', (err: Error) => reject(err))
       .screenshots({
         timestamps: [timeSeconds],
-        filename: path.basename(outputPath),
-        folder: path.dirname(outputPath),
-        size: '1280x720'
+        filename: path.basename(tempPath),
+        folder: path.dirname(tempPath),
+        size: '1920x1080' // Capture at higher resolution for better quality
       });
   });
 }
@@ -788,7 +814,7 @@ const categoryImageUpload = multer({
   }
 });
 
-// Direct category image upload - stores files locally
+// Direct category image upload - stores files locally with automatic resize/crop
 router.post(
   '/category-image/direct',
   authenticate as RequestHandler,
@@ -799,11 +825,30 @@ router.post(
         throw new BadRequestError('No image file uploaded');
       }
 
-      // Generate a local URL for the image
-      const localKey = `categories/${req.file.filename}`;
+      const originalPath = req.file.path;
+      const ext = path.extname(req.file.filename);
+      const baseName = path.basename(req.file.filename, ext);
+      const optimizedFilename = `${baseName}_optimized.jpg`;
+      const optimizedPath = path.join(path.dirname(originalPath), optimizedFilename);
+
+      // Resize and crop image to fit category tile dimensions (400x240 for 5:3 aspect ratio)
+      // Using 'cover' to fill the area while maintaining aspect ratio (crops excess)
+      await sharp(originalPath)
+        .resize(400, 240, {
+          fit: 'cover',
+          position: 'center'
+        })
+        .jpeg({ quality: 85, progressive: true })
+        .toFile(optimizedPath);
+
+      // Remove original file to save space
+      fs.unlinkSync(originalPath);
+
+      // Generate a local URL for the optimized image
+      const localKey = `categories/${optimizedFilename}`;
       const imageUrl = `/uploads/${localKey}`;
 
-      logger.info(`Category image uploaded: ${imageUrl}`);
+      logger.info(`Category image uploaded and optimized: ${imageUrl}`);
 
       res.json({
         message: 'Category image uploaded successfully',

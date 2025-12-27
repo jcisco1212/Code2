@@ -252,6 +252,8 @@ const Home: React.FC = () => {
                       src={getUploadUrl(clip.thumbnailUrl) || ''}
                       alt={clip.title}
                       className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-pink-500 to-violet-600 flex items-center justify-center">
@@ -384,8 +386,10 @@ const Home: React.FC = () => {
                 {category.iconUrl && (
                   <img
                     src={getUploadUrl(category.iconUrl) || ''}
-                    alt=""
+                    alt={category.name}
                     className="absolute inset-0 w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                   />
                 )}
 
