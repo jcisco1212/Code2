@@ -3,90 +3,43 @@
 @tailwind utilities;
 
 /* ============================================
-   AURORA THEME - Get-Noticed
-   Vibrant gradients with ethereal aesthetics
+   YOUTUBE-STYLE THEME - Get-Noticed
+   Dark background with red accents
    ============================================ */
 
 :root {
-  /* Aurora Color Palette */
-  --color-primary: #6366f1;
-  --color-primary-light: #818cf8;
-  --color-secondary: #8b5cf6;
-  --color-accent: #ec4899;
-  --color-accent-light: #f472b6;
-  --color-cyan: #22d3ee;
+  /* YouTube Color Palette */
+  --color-primary: #FF0000;
+  --color-primary-hover: #cc0000;
+  --color-bg: #0f0f0f;
+  --color-bg-secondary: #181818;
+  --color-bg-elevated: #212121;
+  --color-bg-hover: #272727;
+  --color-border: #303030;
+  --color-text: #f1f1f1;
+  --color-text-secondary: #aaaaaa;
 
-  /* Light Mode Backgrounds */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f0f9ff;
-  --bg-tertiary: #fdf4ff;
-
-  /* Text Colors */
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
-}
-
-.dark {
-  /* Dark Mode Backgrounds */
-  --bg-primary: #0F0F23;
-  --bg-secondary: #1a1a2e;
-  --bg-tertiary: #16213e;
-
-  /* Dark Text Colors */
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  /* Light Mode - White cards/menus */
+  --bg-primary: #0f0f0f;
+  --bg-secondary: #181818;
+  --bg-tertiary: #212121;
+  --bg-card: #ffffff;
+  --text-primary: #f1f1f1;
+  --text-secondary: #aaaaaa;
 }
 
 /* ============================================
-   BASE STYLES
+   BASE STYLES - Always Dark Theme
    ============================================ */
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Roboto', 'Inter', system-ui, -apple-system, sans-serif;
+  background: #0f0f0f;
+  color: #f1f1f1;
+  min-height: 100vh;
   @apply antialiased;
 }
 
-/* Light mode base */
-body {
-  background: linear-gradient(135deg, #fff 0%, #f0f9ff 50%, #fdf4ff 100%);
-  color: var(--text-primary);
-  min-height: 100vh;
-  position: relative;
-}
-
-/* Aurora mesh overlay for light mode */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background:
-    radial-gradient(circle at 30% 20%, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
-    radial-gradient(circle at 70% 80%, rgba(236, 72, 153, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 30%, rgba(34, 211, 238, 0.08) 0%, transparent 40%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Dark mode base */
-.dark body {
-  background: #0F0F23;
-  color: var(--text-primary);
-}
-
-/* Aurora mesh overlay for dark mode */
-.dark body::before {
-  background:
-    radial-gradient(circle at 30% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 70% 80%, rgba(236, 72, 153, 0.12) 0%, transparent 40%),
-    radial-gradient(circle at 80% 30%, rgba(34, 211, 238, 0.1) 0%, transparent 30%);
-}
-
-/* Ensure content is above the mesh overlay */
 #root {
   position: relative;
   z-index: 1;
@@ -102,17 +55,16 @@ body::before {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(99, 102, 241, 0.1);
-  border-radius: 4px;
+  background: #181818;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #6366f1, #ec4899);
+  background: #404040;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #4f46e5, #db2777);
+  background: #555555;
 }
 
 /* ============================================
@@ -120,77 +72,44 @@ body::before {
    ============================================ */
 
 .bg-gradient-primary {
-  background: linear-gradient(135deg, #6366F1, #8B5CF6, #EC4899);
+  background: linear-gradient(135deg, #FF0000, #cc0000);
 }
 
 .bg-gradient-primary-soft {
-  background: linear-gradient(135deg, #818CF8, #A78BFA, #F472B6);
-}
-
-.bg-gradient-accent {
-  background: linear-gradient(90deg, #6366F1, #EC4899);
+  background: linear-gradient(135deg, #ff4444, #FF0000);
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #6366F1, #EC4899);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-gradient-light {
-  background: linear-gradient(135deg, #1E293B 0%, #6366F1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.dark .text-gradient-light {
-  background: linear-gradient(135deg, #F1F5F9 0%, #818CF8 100%);
+  background: linear-gradient(135deg, #FF0000, #ff4444);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 /* ============================================
-   GLASS CARD STYLES
+   CARD STYLES - White Cards
    ============================================ */
 
 .card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
 }
 
 .card:hover {
-  box-shadow: 0 8px 30px rgba(99, 102, 241, 0.15);
-  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-.dark .card {
-  background: rgba(30, 30, 60, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+/* Dark card variant */
+.card-dark {
+  background: #212121;
+  border: 1px solid #303030;
+  border-radius: 12px;
 }
 
-.dark .card:hover {
-  box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
-  border-color: rgba(99, 102, 241, 0.3);
-}
-
-/* Card accent bar */
-.card-accent {
-  height: 4px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #6366F1, #EC4899);
-}
-
-.dark .card-accent {
-  background: linear-gradient(90deg, #818CF8, #F472B6);
+.card-dark:hover {
+  background: #272727;
 }
 
 /* ============================================
@@ -198,82 +117,54 @@ body::before {
    ============================================ */
 
 .btn {
-  @apply inline-flex items-center justify-center px-6 py-2.5 font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  @apply inline-flex items-center justify-center px-6 py-2.5 font-medium transition-all duration-200 focus:outline-none;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #6366F1, #8B5CF6, #EC4899);
+  background: #FF0000;
   color: white;
   border: none;
-  border-radius: 50px;
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+  border-radius: 20px;
 }
 
 .btn-primary:hover {
-  box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5);
-  transform: translateY(-1px);
+  background: #cc0000;
 }
 
 .btn-primary:active {
-  transform: translateY(0);
+  background: #aa0000;
 }
 
 .btn-secondary {
-  @apply btn bg-white/80 backdrop-blur-sm text-gray-700 border border-gray-200 rounded-full;
+  @apply btn bg-white/10 text-white border border-white/20 rounded-full;
 }
 
 .btn-secondary:hover {
-  @apply bg-white shadow-lg;
-}
-
-.dark .btn-secondary {
-  @apply bg-white/10 text-white border-white/20;
-}
-
-.dark .btn-secondary:hover {
-  @apply bg-white/20 border-white/30;
+  @apply bg-white/20;
 }
 
 .btn-outline {
-  @apply btn bg-transparent border-2 border-primary-500 text-primary-600 rounded-full;
+  @apply btn bg-transparent border border-white/30 text-white rounded-full;
 }
 
 .btn-outline:hover {
-  @apply bg-primary-500 text-white;
-}
-
-.dark .btn-outline {
-  @apply border-primary-400 text-primary-400;
-}
-
-.dark .btn-outline:hover {
-  @apply bg-primary-500 text-white border-primary-500;
+  @apply bg-white/10;
 }
 
 .btn-ghost {
-  @apply btn bg-transparent text-gray-600 rounded-lg;
+  @apply btn bg-transparent text-gray-300 rounded-lg;
 }
 
 .btn-ghost:hover {
-  @apply bg-gray-100;
-}
-
-.dark .btn-ghost {
-  @apply text-gray-300;
-}
-
-.dark .btn-ghost:hover {
   @apply bg-white/10;
 }
 
 .btn-danger {
-  @apply btn bg-red-500 text-white rounded-full;
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  @apply btn bg-red-600 text-white rounded-full;
 }
 
 .btn-danger:hover {
-  @apply bg-red-600;
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+  @apply bg-red-700;
 }
 
 /* ============================================
@@ -281,24 +172,16 @@ body::before {
    ============================================ */
 
 .input {
-  @apply block w-full rounded-xl border-0 shadow-sm ring-1 ring-inset ring-gray-300
-         bg-white/80 backdrop-blur-sm
-         focus:ring-2 focus:ring-primary-500
-         placeholder:text-gray-400
+  @apply block w-full rounded-lg border-0 shadow-sm
+         bg-white/10 text-white
+         ring-1 ring-inset ring-white/10
+         focus:ring-2 focus:ring-red-500
+         placeholder:text-gray-500
          transition-all duration-200;
 }
 
 .input:focus {
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-}
-
-.dark .input {
-  @apply bg-white/5 ring-white/10 text-white placeholder:text-gray-500;
-}
-
-.dark .input:focus {
-  @apply ring-primary-400;
-  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .input-error {
@@ -314,39 +197,21 @@ body::before {
 }
 
 .badge-primary {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
-  color: #6366f1;
-  border: 1px solid rgba(99, 102, 241, 0.3);
-}
-
-.dark .badge-primary {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.3));
-  color: #a5b4fc;
-  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(255, 0, 0, 0.2);
+  color: #ff6666;
+  border: 1px solid rgba(255, 0, 0, 0.3);
 }
 
 .badge-success {
-  @apply badge bg-green-100 text-green-700 border border-green-200;
-}
-
-.dark .badge-success {
-  @apply bg-green-900/30 text-green-400 border-green-700/50;
+  @apply badge bg-green-900/30 text-green-400 border border-green-700/50;
 }
 
 .badge-warning {
-  @apply badge bg-yellow-100 text-yellow-700 border border-yellow-200;
-}
-
-.dark .badge-warning {
-  @apply bg-yellow-900/30 text-yellow-400 border-yellow-700/50;
+  @apply badge bg-yellow-900/30 text-yellow-400 border border-yellow-700/50;
 }
 
 .badge-danger {
-  @apply badge bg-red-100 text-red-700 border border-red-200;
-}
-
-.dark .badge-danger {
-  @apply bg-red-900/30 text-red-400 border-red-700/50;
+  @apply badge bg-red-900/30 text-red-400 border border-red-700/50;
 }
 
 /* ============================================
@@ -355,7 +220,7 @@ body::before {
 
 .video-container {
   @apply relative w-full;
-  padding-top: 56.25%; /* 16:9 aspect ratio */
+  padding-top: 56.25%;
 }
 
 .video-container video,
@@ -365,16 +230,11 @@ body::before {
 
 .video-thumbnail {
   @apply relative overflow-hidden rounded-xl;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .video-thumbnail:hover {
   transform: scale(1.02);
-  box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
-}
-
-.video-thumbnail:hover .thumbnail-overlay {
-  @apply opacity-100;
 }
 
 .thumbnail-overlay {
@@ -382,25 +242,52 @@ body::before {
          flex items-end justify-center pb-4 opacity-0 transition-opacity duration-300;
 }
 
+.video-thumbnail:hover .thumbnail-overlay {
+  @apply opacity-100;
+}
+
 .trending-badge {
-  background: linear-gradient(135deg, #ef4444, #ec4899);
-  @apply absolute top-3 left-3 px-3 py-1 text-white text-xs font-bold rounded-full shadow-lg;
+  background: #FF0000;
+  @apply absolute top-3 left-3 px-3 py-1 text-white text-xs font-bold rounded-full;
 }
 
 /* ============================================
-   NAVIGATION HEADER GLASS
+   NAVIGATION HEADER
    ============================================ */
 
 .nav-glass {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+  background: #0f0f0f;
+  border-bottom: 1px solid #303030;
 }
 
-.dark .nav-glass {
-  background: rgba(15, 15, 35, 0.85);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+/* ============================================
+   DROPDOWN MENU - White
+   ============================================ */
+
+.dropdown-glass {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4);
+  color: #0f0f0f;
+}
+
+.dropdown-glass .text-gray-700 {
+  color: #0f0f0f;
+}
+
+.dropdown-glass .text-gray-500 {
+  color: #606060;
+}
+
+/* ============================================
+   MODAL - White
+   ============================================ */
+
+.modal-glass {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  color: #0f0f0f;
 }
 
 /* ============================================
@@ -422,16 +309,6 @@ body::before {
   50% { opacity: 0.5; }
 }
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
 }
@@ -444,16 +321,6 @@ body::before {
   animation: pulse 2s infinite;
 }
 
-.animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
 /* ============================================
    SCORE INDICATORS
    ============================================ */
@@ -463,7 +330,7 @@ body::before {
 }
 
 .score-good {
-  @apply text-primary-500;
+  @apply text-blue-500;
 }
 
 .score-average {
@@ -480,13 +347,13 @@ body::before {
 
 .agent-verified {
   @apply inline-flex items-center gap-1;
-  color: #6366f1;
+  color: #FF0000;
 }
 
 .agent-verified-icon {
   width: 18px;
   height: 18px;
-  background: linear-gradient(135deg, #6366f1, #ec4899);
+  background: #FF0000;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -500,39 +367,12 @@ body::before {
 }
 
 /* ============================================
-   DROPDOWN MENU GLASS
+   SELECTION STYLES
    ============================================ */
 
-.dropdown-glass {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-}
-
-.dark .dropdown-glass {
-  background: rgba(30, 30, 60, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-}
-
-/* ============================================
-   MODAL GLASS
-   ============================================ */
-
-.modal-glass {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 24px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-}
-
-.dark .modal-glass {
-  background: rgba(30, 30, 60, 0.95);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+::selection {
+  background: rgba(255, 0, 0, 0.3);
+  color: inherit;
 }
 
 /* ============================================
@@ -550,7 +390,7 @@ body::before {
   left: 0;
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, #6366f1, #ec4899);
+  background: #FF0000;
   transition: width 0.3s ease;
 }
 
@@ -559,23 +399,9 @@ body::before {
 }
 
 /* ============================================
-   SELECTION STYLES
+   MOBILE & PWA STYLES
    ============================================ */
 
-::selection {
-  background: rgba(99, 102, 241, 0.3);
-  color: inherit;
-}
-
-.dark ::selection {
-  background: rgba(139, 92, 246, 0.4);
-}
-
-/* ============================================
-   MOBILE & CAPACITOR STYLES
-   ============================================ */
-
-/* Safe area insets for notched devices */
 .safe-area-top {
   padding-top: env(safe-area-inset-top);
 }
@@ -584,62 +410,28 @@ body::before {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-.safe-area-left {
-  padding-left: env(safe-area-inset-left);
-}
-
-.safe-area-right {
-  padding-right: env(safe-area-inset-right);
-}
-
-/* iOS keyboard handling */
-body.keyboard-visible {
-  --keyboard-offset: 0px;
-}
-
-body.keyboard-visible .fixed-bottom {
-  transform: translateY(calc(-1 * var(--keyboard-offset)));
-  transition: transform 0.25s ease-out;
-}
-
-/* PWA standalone mode styles */
 @media all and (display-mode: standalone) {
   body {
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-  /* Hide browser-specific elements in standalone mode */
   .hide-in-standalone {
     display: none !important;
   }
 }
 
-/* Touch-friendly tap targets */
 @media (pointer: coarse) {
-  button,
-  a,
-  input[type="checkbox"],
-  input[type="radio"] {
+  button, a {
     min-height: 44px;
-    min-width: 44px;
   }
 }
 
-/* Prevent text selection on tap for native feel */
 .no-select {
   -webkit-user-select: none;
   user-select: none;
-  -webkit-touch-callout: none;
 }
 
-/* Smooth scrolling for iOS */
-.scroll-smooth-ios {
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-}
-
-/* Hide scrollbar on mobile but keep functionality */
 .hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -647,4 +439,28 @@ body.keyboard-visible .fixed-bottom {
 
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* ============================================
+   DARK MODE OVERRIDES (for components using dark:)
+   Force dark styles since we're always dark now
+   ============================================ */
+
+.dark body,
+body {
+  background: #0f0f0f;
+  color: #f1f1f1;
+}
+
+/* Override any light mode styles */
+.bg-white {
+  background-color: #212121 !important;
+}
+
+.text-gray-900 {
+  color: #f1f1f1 !important;
+}
+
+.border-gray-200 {
+  border-color: #303030 !important;
 }

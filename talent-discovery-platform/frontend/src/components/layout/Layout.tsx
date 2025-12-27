@@ -115,15 +115,15 @@ const Layout: React.FC = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-2 rounded-xl hover:bg-white/50 dark:hover:bg-white/10 transition-colors"
+              className="lg:hidden p-2 rounded-xl hover:bg-white/10 transition-colors"
             >
-              <Bars3Icon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
+              <Bars3Icon className="w-6 h-6 text-white" />
             </button>
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-aurora">
+              <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center">
                 <span className="text-white font-bold text-lg">GN</span>
               </div>
-              <span className="hidden sm:block text-xl font-bold text-gradient">
+              <span className="hidden sm:block text-xl font-bold text-white">
                 Get-Noticed
               </span>
             </Link>
@@ -139,12 +139,9 @@ const Layout: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-12 pr-4 py-2.5 rounded-full
-                         bg-white/60 dark:bg-white/5
-                         border border-white/80 dark:border-white/10
-                         backdrop-blur-sm
-                         text-gray-900 dark:text-white
-                         placeholder:text-gray-500 dark:placeholder:text-gray-400
-                         focus:outline-none focus:ring-2 focus:ring-primary-500/50
+                         bg-[#121212] border border-[#303030]
+                         text-white placeholder:text-gray-500
+                         focus:outline-none focus:border-blue-500
                          transition-all"
               />
             </div>
@@ -157,9 +154,8 @@ const Layout: React.FC = () => {
                 <Link
                   to="/upload"
                   className="hidden sm:flex items-center gap-2 px-5 py-2.5
-                           bg-gradient-primary text-white rounded-full
-                           shadow-aurora hover:shadow-aurora-lg
-                           transition-all duration-300 hover:-translate-y-0.5"
+                           bg-red-600 hover:bg-red-700 text-white rounded-full
+                           transition-all duration-200"
                 >
                   <ArrowUpTrayIcon className="w-5 h-5" />
                   <span className="font-medium">Upload</span>
@@ -167,10 +163,10 @@ const Layout: React.FC = () => {
                 {/* Messages indicator */}
                 <Link
                   to="/messages"
-                  className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  className="relative p-2 rounded-full hover:bg-white/10 transition-colors"
                   aria-label="Messages"
                 >
-                  <EnvelopeIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+                  <EnvelopeIcon className="w-6 h-6 text-gray-300" />
                   {unreadMessages > 0 && (
                     <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center px-1 text-xs font-bold text-white bg-red-500 rounded-full">
                       {unreadMessages > 99 ? '99+' : unreadMessages}
@@ -486,51 +482,51 @@ const Layout: React.FC = () => {
       </main>
 
       {/* Footer - Glass Effect */}
-      <footer className="mt-16 border-t border-white/50 dark:border-white/10 bg-white/50 dark:bg-aurora/50 backdrop-blur-lg">
+      <footer className="mt-16 border-t border-[#303030] bg-[#181818]">
         <div className="max-w-7xl mx-auto px-4 lg:px-6 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">GN</span>
                 </div>
-                <h3 className="font-bold text-gradient">Get-Noticed</h3>
+                <h3 className="font-bold text-white">Get-Noticed</h3>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+              <p className="text-sm text-gray-400 leading-relaxed">
                 Discover and showcase your talent with AI-powered insights.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Explore</h3>
-              <ul className="space-y-2.5 text-sm text-gray-600 dark:text-gray-400">
-                <li><Link to="/trending" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Trending</Link></li>
-                <li><Link to="/clips" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Clips</Link></li>
-                <li><Link to="/category/singer" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Singers</Link></li>
-                <li><Link to="/category/actor" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Actors</Link></li>
-                <li><Link to="/category/dancer" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Dancers</Link></li>
+              <h3 className="font-semibold text-white mb-4">Explore</h3>
+              <ul className="space-y-2.5 text-sm text-gray-400">
+                <li><Link to="/trending" className="hover:text-white transition-colors">Trending</Link></li>
+                <li><Link to="/clips" className="hover:text-white transition-colors">Clips</Link></li>
+                <li><Link to="/category/singer" className="hover:text-white transition-colors">Singers</Link></li>
+                <li><Link to="/category/actor" className="hover:text-white transition-colors">Actors</Link></li>
+                <li><Link to="/category/dancer" className="hover:text-white transition-colors">Dancers</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Company</h3>
-              <ul className="space-y-2.5 text-sm text-gray-600 dark:text-gray-400">
-                <li><Link to="/about" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">About</Link></li>
-                <li><Link to="/contact" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Contact</Link></li>
-                <li><Link to="/terms" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Terms</Link></li>
+              <h3 className="font-semibold text-white mb-4">Company</h3>
+              <ul className="space-y-2.5 text-sm text-gray-400">
+                <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
+                <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+                <li><Link to="/terms" className="hover:text-white transition-colors">Terms</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4">For Agents</h3>
-              <ul className="space-y-2.5 text-sm text-gray-600 dark:text-gray-400">
-                <li><Link to="/register?role=agent" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Join as Agent</Link></li>
-                <li><Link to="/agent" className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Agent Dashboard</Link></li>
+              <h3 className="font-semibold text-white mb-4">For Agents</h3>
+              <ul className="space-y-2.5 text-sm text-gray-400">
+                <li><Link to="/register?role=agent" className="hover:text-white transition-colors">Join as Agent</Link></li>
+                <li><Link to="/agent" className="hover:text-white transition-colors">Agent Dashboard</Link></li>
               </ul>
             </div>
           </div>
-          <div className="mt-10 pt-8 border-t border-gray-200/50 dark:border-white/10 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="mt-10 pt-8 border-t border-[#303030] text-center">
+            <p className="text-sm text-gray-500">
               &copy; {new Date().getFullYear()} Get-Noticed. All rights reserved.
             </p>
-            <div className="mt-2 h-1 w-24 mx-auto bg-gradient-primary rounded-full opacity-50" />
+            <div className="mt-2 h-1 w-24 mx-auto bg-red-600 rounded-full" />
           </div>
         </div>
       </footer>
