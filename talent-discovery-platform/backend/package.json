@@ -25,7 +25,8 @@
     "lint:fix": "eslint src/**/*.ts --fix",
     "regenerate-thumbnails": "ts-node scripts/regenerate-thumbnails.ts",
     "resize-categories": "ts-node scripts/resize-category-images.ts",
-    "resize-all-categories": "ts-node scripts/resize-all-category-images.ts"
+    "resize-all-categories": "ts-node scripts/resize-all-category-images.ts",
+    "fix-categories": "ts-node scripts/fix-category-images.ts"
   },
   "dependencies": {
     "@aws-sdk/client-mediaconvert": "^3.450.0",
