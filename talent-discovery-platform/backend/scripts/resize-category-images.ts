@@ -12,15 +12,33 @@ import * as dotenv from 'dotenv';
 // Load environment variables
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
-const sequelize = new Sequelize({
-  dialect: 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  database: process.env.DB_NAME || 'talent_platform',
-  username: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || '',
-  logging: false,
-});
+// Parse DATABASE_URL or use individual variables
+function getSequelizeConfig() {
+  const databaseUrl = process.env.DATABASE_URL;
+
+  if (databaseUrl) {
+    return {
+      dialect: 'postgres' as const,
+      url: databaseUrl,
+      logging: false,
+    };
+  }
+
+  return {
+    dialect: 'postgres' as const,
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '5432'),
+    database: process.env.DB_NAME || 'talent_platform',
+    username: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || '',
+    logging: false,
+  };
+}
+
+const config = getSequelizeConfig();
+const sequelize = 'url' in config && config.url
+  ? new Sequelize(config.url, { dialect: 'postgres', logging: false })
+  : new Sequelize(config);
 
 const UPLOADS_DIR = path.join(__dirname, '../uploads');
 
