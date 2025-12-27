@@ -99,7 +99,7 @@ async function resizeCategoryImages() {
         const tempPath = imagePath.replace(/\.(jpg|jpeg|png|webp)$/i, '_temp.jpg');
 
         await sharp(imagePath)
-          .resize(400, 240, {
+          .resize(500, 300, {
             fit: 'cover',
             position: 'center'
           })

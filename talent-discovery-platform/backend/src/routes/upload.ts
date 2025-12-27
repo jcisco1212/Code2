@@ -831,10 +831,10 @@ router.post(
       const optimizedFilename = `${baseName}_optimized.jpg`;
       const optimizedPath = path.join(path.dirname(originalPath), optimizedFilename);
 
-      // Resize and crop image to fit category tile dimensions (400x240 for 5:3 aspect ratio)
+      // Resize and crop image to fit category tile dimensions (500x300 for 5:3 aspect ratio)
       // Using 'cover' to fill the area while maintaining aspect ratio (crops excess)
       await sharp(originalPath)
-        .resize(400, 240, {
+        .resize(500, 300, {
           fit: 'cover',
           position: 'center'
         })

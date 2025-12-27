@@ -377,7 +377,7 @@ const Home: React.FC = () => {
               <Link
                 key={category.id}
                 to={`/category/${category.slug}`}
-                className={`group relative overflow-hidden rounded-2xl h-32 ${!category.iconUrl ? `bg-gradient-to-br ${getCategoryColor(category, index)}` : ''}
+                className={`group relative overflow-hidden rounded-2xl aspect-[5/3] ${!category.iconUrl ? `bg-gradient-to-br ${getCategoryColor(category, index)}` : ''}
                            text-white shadow-lg hover:shadow-xl
                            hover:scale-105 hover:-translate-y-1
                            transition-all duration-300`}

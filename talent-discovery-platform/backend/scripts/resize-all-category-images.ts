@@ -41,7 +41,7 @@ async function resizeAllCategoryImages() {
       if (stats.size < 50000) {
         // Verify dimensions
         const metadata = await sharp(imagePath).metadata();
-        if (metadata.width === 400 && metadata.height === 240) {
+        if (metadata.width === 500 && metadata.height === 300) {
           process.stdout.write('⏭️  Already correct size\n');
           skipped++;
           continue;
@@ -57,11 +57,11 @@ async function resizeAllCategoryImages() {
         fs.copyFileSync(imagePath, backupPath);
       }
 
-      // Resize image
+      // Resize image to 5:3 aspect ratio (matches frontend tiles)
       const tempPath = path.join(CATEGORIES_DIR, `${baseName}_temp.jpg`);
 
       await sharp(imagePath)
-        .resize(400, 240, {
+        .resize(500, 300, {
           fit: 'cover',
           position: 'center'
         })
