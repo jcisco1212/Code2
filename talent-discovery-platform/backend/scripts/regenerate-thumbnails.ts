@@ -47,11 +47,11 @@ const THUMBNAILS_DIR = path.join(UPLOADS_DIR, 'thumbnails');
 
 interface VideoRecord {
   id: string;
-  userId: string;
+  user_id: string;
   title: string;
-  hlsUrl: string | null;
-  s3Key: string | null;
-  thumbnailUrl: string | null;
+  hls_url: string | null;
+  s3_key: string | null;
+  thumbnail_url: string | null;
   duration: number | null;
 }
 
@@ -103,13 +103,13 @@ async function getVideoPath(video: VideoRecord): Promise<string | null> {
   // Check for local video file
   const possiblePaths = [
     // Transcoded MP4
-    path.join(UPLOADS_DIR, 'videos', video.userId, video.id, 'transcoded.mp4'),
+    path.join(UPLOADS_DIR, 'videos', video.user_id, video.id, 'transcoded.mp4'),
     // Original upload
-    path.join(UPLOADS_DIR, 'videos', video.userId, video.id, 'original.mp4'),
-    // From hlsUrl
-    video.hlsUrl ? path.join(UPLOADS_DIR, video.hlsUrl.replace('/uploads/', '')) : null,
-    // From s3Key
-    video.s3Key ? path.join(UPLOADS_DIR, video.s3Key) : null,
+    path.join(UPLOADS_DIR, 'videos', video.user_id, video.id, 'original.mp4'),
+    // From hls_url
+    video.hls_url ? path.join(UPLOADS_DIR, video.hls_url.replace('/uploads/', '')) : null,
+    // From s3_key
+    video.s3_key ? path.join(UPLOADS_DIR, video.s3_key) : null,
   ];
 
   for (const videoPath of possiblePaths) {
@@ -119,7 +119,7 @@ async function getVideoPath(video: VideoRecord): Promise<string | null> {
   }
 
   // Check for any video file in user's directory
-  const userVideoDir = path.join(UPLOADS_DIR, 'videos', video.userId, video.id);
+  const userVideoDir = path.join(UPLOADS_DIR, 'videos', video.user_id, video.id);
   if (fs.existsSync(userVideoDir)) {
     const files = fs.readdirSync(userVideoDir);
     const videoFile = files.find(f =>
@@ -142,10 +142,10 @@ async function regenerateThumbnails() {
 
     // Get all videos
     const [videos] = await sequelize.query(`
-      SELECT id, "userId", title, "hlsUrl", "s3Key", "thumbnailUrl", duration
+      SELECT id, user_id, title, hls_url, s3_key, thumbnail_url, duration
       FROM videos
       WHERE status = 'ready'
-      ORDER BY "createdAt" DESC
+      ORDER BY created_at DESC
     `) as [VideoRecord[], unknown];
 
     console.log(`📹 Found ${videos.length} videos to process\n`);
@@ -167,7 +167,7 @@ async function regenerateThumbnails() {
         }
 
         // Create thumbnail directory
-        const thumbnailDir = path.join(THUMBNAILS_DIR, video.userId, video.id);
+        const thumbnailDir = path.join(THUMBNAILS_DIR, video.user_id, video.id);
         if (!fs.existsSync(thumbnailDir)) {
           fs.mkdirSync(thumbnailDir, { recursive: true });
         }
@@ -181,10 +181,10 @@ async function regenerateThumbnails() {
         await generateThumbnail(videoPath, thumbnailPath, thumbnailTime);
 
         // Update database
-        const newThumbnailUrl = `/uploads/thumbnails/${video.userId}/${video.id}/thumbnail.jpg`;
+        const newThumbnailUrl = `/uploads/thumbnails/${video.user_id}/${video.id}/thumbnail.jpg`;
         await sequelize.query(`
           UPDATE videos
-          SET "thumbnailUrl" = :thumbnailUrl
+          SET thumbnail_url = :thumbnailUrl
           WHERE id = :id
         `, {
           replacements: { thumbnailUrl: newThumbnailUrl, id: video.id }
