@@ -261,22 +261,22 @@ body {
 }
 
 /* ============================================
-   DROPDOWN MENU - White
+   DROPDOWN MENU - Dark (YouTube style)
    ============================================ */
 
 .dropdown-glass {
-  background: #ffffff;
+  background: #282828;
   border-radius: 12px;
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4);
-  color: #0f0f0f;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
+  border: 1px solid #404040;
 }
 
-.dropdown-glass .text-gray-700 {
-  color: #0f0f0f;
+.dropdown-glass .dropdown-header {
+  border-bottom: 1px solid #404040;
 }
 
-.dropdown-glass .text-gray-500 {
-  color: #606060;
+.dropdown-glass .dropdown-divider {
+  border-color: #404040;
 }
 
 /* ============================================

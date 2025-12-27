@@ -203,17 +203,17 @@ const Layout: React.FC = () => {
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <Menu.Items className="absolute right-0 mt-3 w-64 origin-top-right dropdown-glass focus:outline-none divide-y divide-gray-200/50 dark:divide-white/10 overflow-hidden">
+                    <Menu.Items className="absolute right-0 mt-3 w-64 origin-top-right dropdown-glass focus:outline-none divide-y divide-[#404040] overflow-hidden">
                       <div className="px-4 py-4">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{user?.firstName} {user?.lastName}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">@{user?.username}</p>
+                        <p className="text-sm font-semibold text-white">{user?.firstName} {user?.lastName}</p>
+                        <p className="text-sm text-gray-400">@{user?.username}</p>
                       </div>
                       <div className="py-2">
                         <Menu.Item>
                           {({ active }) => (
                             <Link
                               to={`/profile/${user?.username}`}
-                              className={`${active ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-200'} flex items-center gap-3 px-4 py-2.5 text-sm transition-colors`}
+                              className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:text-white transition-colors`}
                             >
                               <UserCircleIcon className="w-5 h-5" />
                               Your Profile
@@ -224,7 +224,7 @@ const Layout: React.FC = () => {
                           {({ active }) => (
                             <Link
                               to="/studio"
-                              className={`${active ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-200'} flex items-center gap-3 px-4 py-2.5 text-sm transition-colors`}
+                              className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:text-white transition-colors`}
                             >
                               <ChartBarIcon className="w-5 h-5" />
                               Creator Studio
@@ -235,7 +235,7 @@ const Layout: React.FC = () => {
                           {({ active }) => (
                             <Link
                               to="/library"
-                              className={`${active ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-200'} flex items-center gap-3 px-4 py-2.5 text-sm transition-colors`}
+                              className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:text-white transition-colors`}
                             >
                               <FolderIcon className="w-5 h-5" />
                               Library
@@ -246,7 +246,7 @@ const Layout: React.FC = () => {
                           {({ active }) => (
                             <Link
                               to="/messages"
-                              className={`${active ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-200'} flex items-center gap-3 px-4 py-2.5 text-sm transition-colors`}
+                              className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:text-white transition-colors`}
                             >
                               <EnvelopeIcon className="w-5 h-5" />
                               Messages
@@ -257,7 +257,7 @@ const Layout: React.FC = () => {
                           {({ active }) => (
                             <Link
                               to="/settings"
-                              className={`${active ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-200'} flex items-center gap-3 px-4 py-2.5 text-sm transition-colors`}
+                              className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:text-white transition-colors`}
                             >
                               <Cog6ToothIcon className="w-5 h-5" />
                               Settings
@@ -269,7 +269,7 @@ const Layout: React.FC = () => {
                             {({ active }) => (
                               <Link
                                 to="/agent"
-                                className={`${active ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-200'} flex items-center gap-3 px-4 py-2.5 text-sm transition-colors`}
+                                className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:text-white transition-colors`}
                               >
                                 <ChartBarIcon className="w-5 h-5" />
                                 Agent Dashboard
@@ -282,7 +282,7 @@ const Layout: React.FC = () => {
                             {({ active }) => (
                               <Link
                                 to="/admin"
-                                className={`${active ? 'bg-primary-500/10 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-200'} flex items-center gap-3 px-4 py-2.5 text-sm transition-colors`}
+                                className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:text-white transition-colors`}
                               >
                                 <Cog6ToothIcon className="w-5 h-5" />
                                 Admin Panel
@@ -293,14 +293,14 @@ const Layout: React.FC = () => {
                       </div>
                       {/* Dark Mode Toggle */}
                       <div className="py-3 px-4">
-                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Appearance</p>
-                        <div className="flex items-center gap-1 bg-gray-100/80 dark:bg-white/10 rounded-xl p-1">
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Appearance</p>
+                        <div className="flex items-center gap-1 bg-[#1a1a1a] rounded-xl p-1">
                           <button
                             onClick={() => setTheme('light')}
                             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                               theme === 'light'
-                                ? 'bg-white dark:bg-white/20 text-primary-600 dark:text-primary-400 shadow-sm'
-                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                ? 'bg-[#3d3d3d] text-white shadow-sm'
+                                : 'text-gray-400 hover:text-white'
                             }`}
                           >
                             <SunIcon className="w-4 h-4" />
@@ -310,8 +310,8 @@ const Layout: React.FC = () => {
                             onClick={() => setTheme('dark')}
                             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                               theme === 'dark'
-                                ? 'bg-white dark:bg-white/20 text-primary-600 dark:text-primary-400 shadow-sm'
-                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                ? 'bg-[#3d3d3d] text-white shadow-sm'
+                                : 'text-gray-400 hover:text-white'
                             }`}
                           >
                             <MoonIcon className="w-4 h-4" />
@@ -321,8 +321,8 @@ const Layout: React.FC = () => {
                             onClick={() => setTheme('system')}
                             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                               theme === 'system'
-                                ? 'bg-white dark:bg-white/20 text-primary-600 dark:text-primary-400 shadow-sm'
-                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                ? 'bg-[#3d3d3d] text-white shadow-sm'
+                                : 'text-gray-400 hover:text-white'
                             }`}
                           >
                             <ComputerDesktopIcon className="w-4 h-4" />
@@ -335,7 +335,7 @@ const Layout: React.FC = () => {
                           {({ active }) => (
                             <button
                               onClick={handleLogout}
-                              className={`${active ? 'bg-red-500/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm w-full text-red-600 dark:text-red-400 transition-colors`}
+                              className={`${active ? 'bg-red-500/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm w-full text-red-500 hover:text-red-400 transition-colors`}
                             >
                               <ArrowRightOnRectangleIcon className="w-5 h-5" />
                               Sign out

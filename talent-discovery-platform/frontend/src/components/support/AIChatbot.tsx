@@ -223,7 +223,7 @@ const AIChatbot: React.FC = () => {
       <button
         onClick={() => setIsOpen(true)}
         className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full
-                   bg-gradient-to-r from-primary-500 to-accent-500
+                   bg-red-600 hover:bg-red-700
                    text-white shadow-lg hover:shadow-xl
                    transition-all duration-300 hover:scale-110
                    flex items-center justify-center
@@ -234,13 +234,13 @@ const AIChatbot: React.FC = () => {
 
       {/* Chat Window */}
       <div className={`fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)]
-                      bg-white dark:bg-gray-900 rounded-2xl shadow-2xl
-                      border border-gray-200 dark:border-white/10
+                      bg-[#1a1a1a] rounded-2xl shadow-2xl
+                      border border-[#404040]
                       transition-all duration-300 origin-bottom-right
                       ${isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'}`}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-white/10
-                      bg-gradient-to-r from-primary-500 to-accent-500 rounded-t-2xl">
+        <div className="flex items-center justify-between p-4 border-b border-[#404040]
+                      bg-red-600 rounded-t-2xl">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
               <SparklesIcon className="w-5 h-5 text-white" />
@@ -267,8 +267,8 @@ const AIChatbot: React.FC = () => {
             >
               <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center
                             ${message.role === 'user'
-                              ? 'bg-primary-500 text-white'
-                              : 'bg-gradient-to-br from-primary-500 to-accent-500 text-white'}`}>
+                              ? 'bg-[#404040] text-white'
+                              : 'bg-red-600 text-white'}`}>
                 {message.role === 'user' ? (
                   <UserIcon className="w-4 h-4" />
                 ) : (
@@ -277,8 +277,8 @@ const AIChatbot: React.FC = () => {
               </div>
               <div className={`max-w-[75%] p-3 rounded-2xl text-sm
                             ${message.role === 'user'
-                              ? 'bg-primary-500 text-white rounded-tr-sm'
-                              : 'bg-gray-100 dark:bg-white/10 text-gray-800 dark:text-gray-200 rounded-tl-sm'}`}>
+                              ? 'bg-red-600 text-white rounded-tr-sm'
+                              : 'bg-[#282828] text-gray-200 rounded-tl-sm'}`}>
                 <div className="whitespace-pre-wrap" dangerouslySetInnerHTML={{
                   __html: message.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 }} />
@@ -288,14 +288,14 @@ const AIChatbot: React.FC = () => {
 
           {isTyping && (
             <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center">
                 <SparklesIcon className="w-4 h-4 text-white" />
               </div>
-              <div className="bg-gray-100 dark:bg-white/10 p-3 rounded-2xl rounded-tl-sm">
+              <div className="bg-[#282828] p-3 rounded-2xl rounded-tl-sm">
                 <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               </div>
             </div>
@@ -307,7 +307,7 @@ const AIChatbot: React.FC = () => {
         {/* Quick Questions */}
         {messages.length <= 2 && (
           <div className="px-4 pb-2">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1">
+            <p className="text-xs text-gray-400 mb-2 flex items-center gap-1">
               <QuestionMarkCircleIcon className="w-3.5 h-3.5" />
               Quick questions
             </p>
@@ -316,8 +316,8 @@ const AIChatbot: React.FC = () => {
                 <button
                   key={i}
                   onClick={() => handleQuickQuestion(q)}
-                  className="text-xs px-3 py-1.5 bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300
-                           rounded-full hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
+                  className="text-xs px-3 py-1.5 bg-[#282828] text-gray-300
+                           rounded-full hover:bg-[#3d3d3d] hover:text-white transition-colors"
                 >
                   {q}
                 </button>
@@ -333,7 +333,7 @@ const AIChatbot: React.FC = () => {
             e.preventDefault();
             handleSend();
           }}
-          className="p-4 border-t border-gray-200 dark:border-white/10"
+          className="p-4 border-t border-[#404040]"
         >
           <div className="flex gap-2">
             <input
@@ -341,15 +341,15 @@ const AIChatbot: React.FC = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask me anything..."
-              className="flex-1 px-4 py-2.5 rounded-xl bg-gray-100 dark:bg-white/10
-                       text-gray-900 dark:text-white placeholder:text-gray-500
-                       border-0 focus:ring-2 focus:ring-primary-500 transition-all"
+              className="flex-1 px-4 py-2.5 rounded-xl bg-[#282828]
+                       text-white placeholder:text-gray-500
+                       border border-[#404040] focus:border-red-500 focus:ring-1 focus:ring-red-500 focus:outline-none transition-all"
             />
             <button
               type="submit"
               disabled={!input.trim() || isTyping}
-              className="p-2.5 bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-xl
-                       hover:shadow-lg transition-all disabled:opacity-50"
+              className="p-2.5 bg-red-600 text-white rounded-xl
+                       hover:bg-red-700 transition-all disabled:opacity-50"
             >
               <ArrowRightIcon className="w-5 h-5" />
             </button>
