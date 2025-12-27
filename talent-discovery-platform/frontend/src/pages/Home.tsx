@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
 import { fetchTrendingVideos, fetchFeaturedVideos } from '../store/slices/videosSlice';
 import VideoCard from '../components/video/VideoCard';
-import { FireIcon, SparklesIcon, ArrowRightIcon, PlayIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon, ArrowRightIcon, PlayIcon } from '@heroicons/react/24/outline';
 import { PlayIcon as PlayIconSolid, EyeIcon, HeartIcon } from '@heroicons/react/24/solid';
 import { categoriesAPI, clipsAPI, getUploadUrl } from '../services/api';
 
@@ -327,10 +327,12 @@ const Home: React.FC = () => {
       <section className="mb-16">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 text-white">
-              <FireIcon className="w-6 h-6" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Trending</h2>
+            <img
+              src="/images/flame.svg"
+              alt="Trending"
+              className="w-10 h-10 object-contain"
+            />
+            <h2 className="text-2xl font-bold text-white">Trending</h2>
           </div>
           <Link
             to="/trending"
