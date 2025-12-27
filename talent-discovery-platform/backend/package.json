@@ -23,7 +23,8 @@
     "test:watch": "jest --watch",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "regenerate-thumbnails": "ts-node scripts/regenerate-thumbnails.ts"
+    "regenerate-thumbnails": "ts-node scripts/regenerate-thumbnails.ts",
+    "resize-categories": "ts-node scripts/resize-category-images.ts"
   },
   "dependencies": {
     "@aws-sdk/client-mediaconvert": "^3.450.0",
