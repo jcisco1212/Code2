@@ -57,20 +57,21 @@ interface VideoRecord {
 
 async function generateThumbnail(videoPath: string, outputPath: string, timeSeconds: number = 1): Promise<void> {
   return new Promise((resolve, reject) => {
-    const tempPath = outputPath.replace('.jpg', '_temp.jpg');
+    const tempPath = outputPath.replace('.jpg', '_temp.png');
     const outputDir = path.dirname(outputPath);
 
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
+    // Capture at native resolution (don't force size - prevents stretching)
     ffmpeg(videoPath)
       .on('end', async () => {
         try {
-          // Post-process with sharp for better quality
+          // Post-process with sharp - crop to 16:9 without stretching
           await sharp(tempPath)
             .resize(1280, 720, {
-              fit: 'cover',
+              fit: 'cover',      // Crop to fill, don't stretch
               position: 'center'
             })
             .jpeg({ quality: 90, progressive: true })
@@ -82,9 +83,16 @@ async function generateThumbnail(videoPath: string, outputPath: string, timeSeco
           }
           resolve();
         } catch (sharpError) {
-          // If sharp fails, rename temp file
+          // If sharp fails, try to convert temp file directly
           if (fs.existsSync(tempPath)) {
-            fs.renameSync(tempPath, outputPath);
+            try {
+              await sharp(tempPath)
+                .jpeg({ quality: 85 })
+                .toFile(outputPath);
+              fs.unlinkSync(tempPath);
+            } catch {
+              fs.renameSync(tempPath, outputPath.replace('.jpg', '.png'));
+            }
           }
           resolve();
         }
@@ -93,8 +101,8 @@ async function generateThumbnail(videoPath: string, outputPath: string, timeSeco
       .screenshots({
         timestamps: [timeSeconds],
         filename: path.basename(tempPath),
-        folder: outputDir,
-        size: '1920x1080'
+        folder: outputDir
+        // No size specified - captures at native video resolution
       });
   });
 }
