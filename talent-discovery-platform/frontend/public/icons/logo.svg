@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f093fb"/>
+      <stop offset="100%" style="stop-color:#f5576c"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#primaryGradient)"/>
+
+  <!-- Spotlight rays -->
+  <g opacity="0.3" fill="#fff">
+    <path d="M256 80 L280 180 L256 160 L232 180 Z"/>
+    <path d="M256 80 L300 160 L256 150 L212 160 Z" transform="rotate(30 256 256)"/>
+    <path d="M256 80 L300 160 L256 150 L212 160 Z" transform="rotate(-30 256 256)"/>
+    <path d="M256 80 L290 150 L256 145 L222 150 Z" transform="rotate(60 256 256)"/>
+    <path d="M256 80 L290 150 L256 145 L222 150 Z" transform="rotate(-60 256 256)"/>
+  </g>
+
+  <!-- Star (representing being noticed/standing out) -->
+  <g filter="url(#glow)">
+    <path d="M256 120
+             L280 200 L365 200 L298 252
+             L322 335 L256 285 L190 335
+             L214 252 L147 200 L232 200 Z"
+          fill="url(#accentGradient)"/>
+  </g>
+
+  <!-- Inner highlight on star -->
+  <path d="M256 145
+           L273 205 L335 205 L285 243
+           L303 305 L256 268 L209 305
+           L227 243 L177 205 L239 205 Z"
+        fill="#fff" opacity="0.3"/>
+
+  <!-- "GN" text -->
+  <text x="256" y="420"
+        font-family="Arial, sans-serif"
+        font-size="80"
+        font-weight="bold"
+        fill="#fff"
+        text-anchor="middle"
+        opacity="0.9">GN</text>
+</svg>

@@ -1,10 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <linearGradient id="star" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f093fb"/>
+      <stop offset="100%" style="stop-color:#f5576c"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="76" fill="url(#grad)"/>
-  <text x="256" y="280" font-family="Arial, Helvetica, sans-serif" font-size="205" font-weight="bold" fill="white" text-anchor="middle">TV</text>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <g opacity="0.25" fill="#fff">
+    <polygon points="256,60 275,150 256,135 237,150"/>
+    <polygon points="256,60 290,140 256,130 222,140" transform="rotate(25 256 256)"/>
+    <polygon points="256,60 290,140 256,130 222,140" transform="rotate(-25 256 256)"/>
+  </g>
+  <path d="M256 100 L285 195 L385 195 L305 255 L335 350 L256 295 L177 350 L207 255 L127 195 L227 195 Z" fill="url(#star)"/>
+  <path d="M256 130 L277 200 L355 200 L295 248 L318 325 L256 280 L194 325 L217 248 L157 200 L235 200 Z" fill="#fff" opacity="0.25"/>
+  <text x="256" y="440" font-family="Arial, sans-serif" font-size="85" font-weight="bold" fill="#fff" text-anchor="middle">GN</text>
 </svg>
