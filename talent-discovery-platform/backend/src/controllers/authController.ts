@@ -93,7 +93,7 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
     const verificationUrl = `${process.env.APP_URL || 'http://localhost:3001'}/verify-email?token=${emailVerificationToken}`;
     sendEmail({
       to: email,
-      subject: 'Verify your TalentVault account',
+      subject: 'Verify your Get-Noticed account',
       template: 'email-verification',
       data: {
         name: displayName,
@@ -308,7 +308,7 @@ export const forgotPassword = async (req: AuthRequest, res: Response, next: Next
     const resetUrl = `${process.env.APP_URL || 'http://localhost:3001'}/reset-password?token=${passwordResetToken}`;
     sendEmail({
       to: user.email,
-      subject: 'Reset your TalentVault password',
+      subject: 'Reset your Get-Noticed password',
       template: 'password-reset',
       data: {
         name: user.displayName || user.username,
@@ -370,7 +370,7 @@ export const enable2FA = async (req: AuthRequest, res: Response, next: NextFunct
 
     // Generate secret
     const secret = speakeasy.generateSecret({
-      name: `TalentVault (${user.email})`,
+      name: `Get-Noticed (${user.email})`,
       length: 20
     });
 
@@ -515,7 +515,7 @@ export const resendVerification = async (req: AuthRequest, res: Response, next: 
     const verificationUrl = `${process.env.APP_URL || 'http://localhost:3001'}/verify-email?token=${emailVerificationToken}`;
     await sendEmail({
       to: user.email,
-      subject: 'Verify your TalentVault account',
+      subject: 'Verify your Get-Noticed account',
       template: 'email-verification',
       data: {
         name: user.displayName || user.username,

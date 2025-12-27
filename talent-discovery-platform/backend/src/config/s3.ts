@@ -24,9 +24,9 @@ if (process.env.S3_ENDPOINT) {
 
 export const s3Client = new S3Client(s3Config);
 
-const BUCKET_NAME = process.env.S3_BUCKET || 'talentvault-videos';
-const THUMBNAILS_BUCKET = process.env.S3_THUMBNAILS_BUCKET || 'talentvault-thumbnails';
-const PROFILES_BUCKET = process.env.S3_PROFILES_BUCKET || 'talentvault-profiles';
+const BUCKET_NAME = process.env.S3_BUCKET || 'get-noticed-videos';
+const THUMBNAILS_BUCKET = process.env.S3_THUMBNAILS_BUCKET || 'get-noticed-thumbnails';
+const PROFILES_BUCKET = process.env.S3_PROFILES_BUCKET || 'get-noticed-profiles';
 
 // Generate presigned URL for upload (PUT)
 export const generateUploadUrl = async (

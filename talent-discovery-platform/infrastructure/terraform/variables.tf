@@ -1,4 +1,4 @@
-# TalentVault - Terraform Variables
+# Get-Noticed - Terraform Variables
 
 variable "environment" {
   description = "Environment name (e.g., production, staging)"
@@ -29,7 +29,7 @@ variable "vpc_cidr" {
 variable "video_bucket_name" {
   description = "Name for the video storage S3 bucket"
   type        = string
-  default     = "talentvault-videos"
+  default     = "get-noticed-videos"
 }
 
 # CloudFront Variables
@@ -61,7 +61,7 @@ variable "db_instance_class" {
 variable "database_name" {
   description = "Name of the database"
   type        = string
-  default     = "talentvault"
+  default     = "get-noticed"
 }
 
 variable "database_username" {

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# TalentVault - Stop All Services Script
+# Get-Noticed - Stop All Services Script
 
 set -e
 
@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}   TalentVault Shutdown Script${NC}"
+echo -e "${BLUE}   Get-Noticed Shutdown Script${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 

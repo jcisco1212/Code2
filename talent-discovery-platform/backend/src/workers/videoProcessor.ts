@@ -19,8 +19,8 @@ const s3Client = new S3Client({
   forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true'
 });
 
-const BUCKET = process.env.S3_BUCKET || 'talentvault-videos';
-const THUMBNAILS_BUCKET = process.env.S3_THUMBNAILS_BUCKET || 'talentvault-thumbnails';
+const BUCKET = process.env.S3_BUCKET || 'get-noticed-videos';
+const THUMBNAILS_BUCKET = process.env.S3_THUMBNAILS_BUCKET || 'get-noticed-thumbnails';
 const TEMP_DIR = '/tmp/videos';
 
 interface ProcessVideoData {

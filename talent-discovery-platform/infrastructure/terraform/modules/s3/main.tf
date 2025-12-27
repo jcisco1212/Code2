@@ -17,7 +17,7 @@ resource "aws_s3_bucket" "videos" {
   bucket = "${var.bucket_name}-${var.environment}"
 
   tags = {
-    Name = "TalentVault Video Storage"
+    Name = "Get-Noticed Video Storage"
   }
 }
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# TalentVault - Full Stack Startup Script
+# Get-Noticed - Full Stack Startup Script
 # This script starts all services: Infrastructure, Backend, and Frontend
 
 set -e
@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}   TalentVault Startup Script${NC}"
+echo -e "${BLUE}   Get-Noticed Startup Script${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 

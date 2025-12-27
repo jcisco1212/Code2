@@ -22,18 +22,18 @@ variable "security_group_ids" {
 
 # ElastiCache Subnet Group
 resource "aws_elasticache_subnet_group" "main" {
-  name        = "talentvault-${var.environment}-redis-subnet"
+  name        = "get-noticed-${var.environment}-redis-subnet"
   description = "Redis subnet group"
   subnet_ids  = var.subnet_ids
 
   tags = {
-    Name = "talentvault-${var.environment}-redis-subnet"
+    Name = "get-noticed-${var.environment}-redis-subnet"
   }
 }
 
 # ElastiCache Parameter Group
 resource "aws_elasticache_parameter_group" "main" {
-  name   = "talentvault-${var.environment}-redis-params"
+  name   = "get-noticed-${var.environment}-redis-params"
   family = "redis7"
 
   parameter {
@@ -47,14 +47,14 @@ resource "aws_elasticache_parameter_group" "main" {
   }
 
   tags = {
-    Name = "talentvault-${var.environment}-redis-params"
+    Name = "get-noticed-${var.environment}-redis-params"
   }
 }
 
 # ElastiCache Replication Group
 resource "aws_elasticache_replication_group" "main" {
-  replication_group_id       = "talentvault-${var.environment}"
-  description                = "TalentVault Redis cluster"
+  replication_group_id       = "get-noticed-${var.environment}"
+  description                = "Get-Noticed Redis cluster"
 
   node_type             = var.node_type
   port                  = 6379
@@ -91,7 +91,7 @@ resource "aws_elasticache_replication_group" "main" {
   }
 
   tags = {
-    Name = "talentvault-${var.environment}-redis"
+    Name = "get-noticed-${var.environment}-redis"
   }
 }
 
@@ -103,7 +103,7 @@ resource "random_password" "redis_auth" {
 
 # CloudWatch Log Group
 resource "aws_cloudwatch_log_group" "redis" {
-  name              = "/elasticache/talentvault-${var.environment}"
+  name              = "/elasticache/get-noticed-${var.environment}"
   retention_in_days = 30
 
   tags = {
@@ -113,7 +113,7 @@ resource "aws_cloudwatch_log_group" "redis" {
 
 # Store auth token in Secrets Manager
 resource "aws_secretsmanager_secret" "redis_auth" {
-  name = "${var.environment}/talentvault/redis-auth"
+  name = "${var.environment}/get-noticed/redis-auth"
 
   tags = {
     Name = "Redis Auth Token"

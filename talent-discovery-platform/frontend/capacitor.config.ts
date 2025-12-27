@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.talentvault.app',
-  appName: 'TalentVault',
+  appId: 'com.get-noticed.app',
+  appName: 'Get-Noticed',
   webDir: 'build',
   bundledWebRuntime: false,
 
@@ -18,7 +18,7 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'automatic',
     backgroundColor: '#ffffff',
-    scheme: 'TalentVault'
+    scheme: 'Get-Noticed'
   },
 
   // Android specific configuration
@@ -49,8 +49,8 @@ const config: CapacitorConfig = {
     },
     App: {
       deepLinks: {
-        hosts: ['talentvault.app', '*.talentvault.app'],
-        schemes: ['talentvault']
+        hosts: ['get-noticed.app', '*.get-noticed.app'],
+        schemes: ['get-noticed']
       }
     }
   }

@@ -6,7 +6,7 @@ variable "environment" {
 
 # Video Processing Queue
 resource "aws_sqs_queue" "video_processing" {
-  name                       = "talentvault-${var.environment}-video-processing"
+  name                       = "get-noticed-${var.environment}-video-processing"
   delay_seconds              = 0
   max_message_size          = 262144
   message_retention_seconds  = 1209600  # 14 days
@@ -25,7 +25,7 @@ resource "aws_sqs_queue" "video_processing" {
 
 # Video Processing Dead Letter Queue
 resource "aws_sqs_queue" "video_processing_dlq" {
-  name                      = "talentvault-${var.environment}-video-processing-dlq"
+  name                      = "get-noticed-${var.environment}-video-processing-dlq"
   message_retention_seconds = 1209600
 
   tags = {
@@ -35,7 +35,7 @@ resource "aws_sqs_queue" "video_processing_dlq" {
 
 # AI Analysis Queue
 resource "aws_sqs_queue" "ai_analysis" {
-  name                       = "talentvault-${var.environment}-ai-analysis"
+  name                       = "get-noticed-${var.environment}-ai-analysis"
   delay_seconds              = 0
   max_message_size          = 262144
   message_retention_seconds  = 1209600
@@ -54,7 +54,7 @@ resource "aws_sqs_queue" "ai_analysis" {
 
 # AI Analysis Dead Letter Queue
 resource "aws_sqs_queue" "ai_analysis_dlq" {
-  name                      = "talentvault-${var.environment}-ai-analysis-dlq"
+  name                      = "get-noticed-${var.environment}-ai-analysis-dlq"
   message_retention_seconds = 1209600
 
   tags = {
@@ -64,7 +64,7 @@ resource "aws_sqs_queue" "ai_analysis_dlq" {
 
 # Email Notification Queue
 resource "aws_sqs_queue" "email_notification" {
-  name                       = "talentvault-${var.environment}-email-notification"
+  name                       = "get-noticed-${var.environment}-email-notification"
   delay_seconds              = 0
   max_message_size          = 65536
   message_retention_seconds  = 345600  # 4 days
@@ -83,7 +83,7 @@ resource "aws_sqs_queue" "email_notification" {
 
 # Email Notification Dead Letter Queue
 resource "aws_sqs_queue" "email_notification_dlq" {
-  name                      = "talentvault-${var.environment}-email-notification-dlq"
+  name                      = "get-noticed-${var.environment}-email-notification-dlq"
   message_retention_seconds = 1209600
 
   tags = {
@@ -93,7 +93,7 @@ resource "aws_sqs_queue" "email_notification_dlq" {
 
 # Trending Calculation Queue
 resource "aws_sqs_queue" "trending_calculation" {
-  name                       = "talentvault-${var.environment}-trending-calculation"
+  name                       = "get-noticed-${var.environment}-trending-calculation"
   delay_seconds              = 0
   max_message_size          = 65536
   message_retention_seconds  = 86400  # 1 day

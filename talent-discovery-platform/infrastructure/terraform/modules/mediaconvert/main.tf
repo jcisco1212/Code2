@@ -14,17 +14,17 @@ variable "output_bucket_arn" {
 
 # MediaConvert Queue
 resource "aws_media_convert_queue" "main" {
-  name   = "talentvault-${var.environment}"
+  name   = "get-noticed-${var.environment}"
   status = "ACTIVE"
 
   tags = {
-    Name = "TalentVault Video Queue"
+    Name = "Get-Noticed Video Queue"
   }
 }
 
 # IAM Role for MediaConvert
 resource "aws_iam_role" "mediaconvert" {
-  name = "talentvault-${var.environment}-mediaconvert"
+  name = "get-noticed-${var.environment}-mediaconvert"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

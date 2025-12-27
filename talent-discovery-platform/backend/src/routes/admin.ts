@@ -954,7 +954,7 @@ router.get(
       if (format === 'excel' || format === 'xlsx') {
         // Generate Excel file
         const workbook = new ExcelJS.Workbook();
-        workbook.creator = 'TalentVault Admin';
+        workbook.creator = 'Get-Noticed Admin';
         workbook.created = new Date();
 
         const worksheet = workbook.addWorksheet('User Report');

@@ -24,6 +24,6 @@ serviceWorkerRegistration.register({
     }
   },
   onSuccess: () => {
-    console.log('TalentVault is ready for offline use.');
+    console.log('Get-Noticed is ready for offline use.');
   }
 });

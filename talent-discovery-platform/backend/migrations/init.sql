@@ -1,4 +1,4 @@
--- TalentVault Database Initialization Script
+-- Get-Noticed Database Initialization Script
 -- This script runs on first PostgreSQL container startup
 
 -- Enable required extensions
@@ -307,7 +307,7 @@ CREATE TRIGGER update_comments_updated_at
     EXECUTE FUNCTION update_updated_at_column();
 
 -- Grant permissions (adjust as needed)
--- GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO talentvault_user;
--- GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO talentvault_user;
+-- GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO get-noticed_user;
+-- GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO get-noticed_user;
 
 COMMIT;

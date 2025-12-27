@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'TalentVault - AI-Powered Video Sharing Platform Infrastructure'
+Description: 'Get-Noticed - AI-Powered Video Sharing Platform Infrastructure'
 
 Parameters:
   Environment:
@@ -53,14 +53,14 @@ Resources:
       EnableDnsSupport: true
       Tags:
         - Key: Name
-          Value: !Sub 'talentvault-${Environment}-vpc'
+          Value: !Sub 'get-noticed-${Environment}-vpc'
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
-          Value: !Sub 'talentvault-${Environment}-igw'
+          Value: !Sub 'get-noticed-${Environment}-igw'
 
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -77,7 +77,7 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub 'talentvault-${Environment}-public-1'
+          Value: !Sub 'get-noticed-${Environment}-public-1'
 
   PublicSubnet2:
     Type: AWS::EC2::Subnet
@@ -88,7 +88,7 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub 'talentvault-${Environment}-public-2'
+          Value: !Sub 'get-noticed-${Environment}-public-2'
 
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
@@ -98,7 +98,7 @@ Resources:
       AvailabilityZone: !Select [0, !GetAZs '']
       Tags:
         - Key: Name
-          Value: !Sub 'talentvault-${Environment}-private-1'
+          Value: !Sub 'get-noticed-${Environment}-private-1'
 
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
@@ -108,7 +108,7 @@ Resources:
       AvailabilityZone: !Select [1, !GetAZs '']
       Tags:
         - Key: Name
-          Value: !Sub 'talentvault-${Environment}-private-2'
+          Value: !Sub 'get-noticed-${Environment}-private-2'
 
   # NAT Gateway
   NatGatewayEIP:
@@ -124,7 +124,7 @@ Resources:
       SubnetId: !Ref PublicSubnet1
       Tags:
         - Key: Name
-          Value: !Sub 'talentvault-${Environment}-nat'
+          Value: !Sub 'get-noticed-${Environment}-nat'
 
   # Route Tables
   PublicRouteTable:
@@ -133,7 +133,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub 'talentvault-${Environment}-public-rt'
+          Value: !Sub 'get-noticed-${Environment}-public-rt'
 
   PublicRoute:
     Type: AWS::EC2::Route
@@ -149,7 +149,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub 'talentvault-${Environment}-private-rt'
+          Value: !Sub 'get-noticed-${Environment}-private-rt'
 
   PrivateRoute:
     Type: AWS::EC2::Route
@@ -199,7 +199,7 @@ Resources:
           CidrIp: '0.0.0.0/0'
       Tags:
         - Key: Name
-          Value: !Sub 'talentvault-${Environment}-alb-sg'
+          Value: !Sub 'get-noticed-${Environment}-alb-sg'
 
   ECSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -217,7 +217,7 @@ Resources:
           SourceSecurityGroupId: !Ref ALBSecurityGroup
       Tags:
         - Key: Name
-          Value: !Sub 'talentvault-${Environment}-ecs-sg'
+          Value: !Sub 'get-noticed-${Environment}-ecs-sg'
 
   DatabaseSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -231,7 +231,7 @@ Resources:
           SourceSecurityGroupId: !Ref ECSSecurityGroup
       Tags:
         - Key: Name
-          Value: !Sub 'talentvault-${Environment}-db-sg'
+          Value: !Sub 'get-noticed-${Environment}-db-sg'
 
   RedisSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -245,13 +245,13 @@ Resources:
           SourceSecurityGroupId: !Ref ECSSecurityGroup
       Tags:
         - Key: Name
-          Value: !Sub 'talentvault-${Environment}-redis-sg'
+          Value: !Sub 'get-noticed-${Environment}-redis-sg'
 
   # S3 Bucket for Videos
   VideoBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub 'talentvault-${Environment}-videos-${AWS::AccountId}'
+      BucketName: !Sub 'get-noticed-${Environment}-videos-${AWS::AccountId}'
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
@@ -299,7 +299,7 @@ Resources:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
     Properties:
       CloudFrontOriginAccessIdentityConfig:
-        Comment: !Sub 'TalentVault ${Environment} OAI'
+        Comment: !Sub 'Get-Noticed ${Environment} OAI'
 
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
@@ -334,7 +334,7 @@ Resources:
     Type: AWS::CloudFront::CachePolicy
     Properties:
       CachePolicyConfig:
-        Name: !Sub 'talentvault-${Environment}-video-cache'
+        Name: !Sub 'get-noticed-${Environment}-video-cache'
         DefaultTTL: 86400
         MaxTTL: 31536000
         MinTTL: 1
@@ -355,7 +355,7 @@ Resources:
   CloudFrontLogsBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub 'talentvault-${Environment}-cf-logs-${AWS::AccountId}'
+      BucketName: !Sub 'get-noticed-${Environment}-cf-logs-${AWS::AccountId}'
       OwnershipControls:
         Rules:
           - ObjectOwnership: BucketOwnerPreferred
@@ -369,7 +369,7 @@ Resources:
   WAFWebACL:
     Type: AWS::WAFv2::WebACL
     Properties:
-      Name: !Sub 'talentvault-${Environment}-waf'
+      Name: !Sub 'get-noticed-${Environment}-waf'
       Scope: CLOUDFRONT
       DefaultAction:
         Allow: {}
@@ -425,7 +425,7 @@ Resources:
       VisibilityConfig:
         SampledRequestsEnabled: true
         CloudWatchMetricsEnabled: true
-        MetricName: !Sub 'talentvault-${Environment}-waf'
+        MetricName: !Sub 'get-noticed-${Environment}-waf'
 
   # RDS
   DBSubnetGroup:
@@ -437,12 +437,12 @@ Resources:
         - !Ref PrivateSubnet2
       Tags:
         - Key: Name
-          Value: !Sub 'talentvault-${Environment}-db-subnet'
+          Value: !Sub 'get-noticed-${Environment}-db-subnet'
 
   DBInstance:
     Type: AWS::RDS::DBInstance
     Properties:
-      DBInstanceIdentifier: !Sub 'talentvault-${Environment}'
+      DBInstanceIdentifier: !Sub 'get-noticed-${Environment}'
       DBInstanceClass: db.t3.medium
       Engine: postgres
       EngineVersion: '15.4'
@@ -450,7 +450,7 @@ Resources:
       MaxAllocatedStorage: 500
       StorageType: gp3
       StorageEncrypted: true
-      DBName: talentvault
+      DBName: get-noticed
       MasterUsername: admin
       MasterUserPassword: !Ref DatabasePassword
       DBSubnetGroupName: !Ref DBSubnetGroup
@@ -462,7 +462,7 @@ Resources:
       EnablePerformanceInsights: true
       Tags:
         - Key: Name
-          Value: !Sub 'talentvault-${Environment}-db'
+          Value: !Sub 'get-noticed-${Environment}-db'
 
   # ElastiCache
   ElastiCacheSubnetGroup:
@@ -476,8 +476,8 @@ Resources:
   ElastiCacheCluster:
     Type: AWS::ElastiCache::ReplicationGroup
     Properties:
-      ReplicationGroupId: !Sub 'talentvault-${Environment}'
-      ReplicationGroupDescription: TalentVault Redis cluster
+      ReplicationGroupId: !Sub 'get-noticed-${Environment}'
+      ReplicationGroupDescription: Get-Noticed Redis cluster
       Engine: redis
       EngineVersion: '7.0'
       CacheNodeType: cache.t3.medium
@@ -492,13 +492,13 @@ Resources:
       SnapshotRetentionLimit: 7
       Tags:
         - Key: Name
-          Value: !Sub 'talentvault-${Environment}-redis'
+          Value: !Sub 'get-noticed-${Environment}-redis'
 
   # SQS Queues
   VideoProcessingQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Sub 'talentvault-${Environment}-video-processing'
+      QueueName: !Sub 'get-noticed-${Environment}-video-processing'
       VisibilityTimeout: 3600
       MessageRetentionPeriod: 1209600
       RedrivePolicy:
@@ -508,13 +508,13 @@ Resources:
   VideoProcessingDLQ:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Sub 'talentvault-${Environment}-video-processing-dlq'
+      QueueName: !Sub 'get-noticed-${Environment}-video-processing-dlq'
       MessageRetentionPeriod: 1209600
 
   AIAnalysisQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Sub 'talentvault-${Environment}-ai-analysis'
+      QueueName: !Sub 'get-noticed-${Environment}-ai-analysis'
       VisibilityTimeout: 1800
       MessageRetentionPeriod: 1209600
       RedrivePolicy:
@@ -524,14 +524,14 @@ Resources:
   AIAnalysisDLQ:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Sub 'talentvault-${Environment}-ai-analysis-dlq'
+      QueueName: !Sub 'get-noticed-${Environment}-ai-analysis-dlq'
       MessageRetentionPeriod: 1209600
 
   # ECS Cluster
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: !Sub 'talentvault-${Environment}'
+      ClusterName: !Sub 'get-noticed-${Environment}'
       ClusterSettings:
         - Name: containerInsights
           Value: enabled
@@ -549,7 +549,7 @@ Resources:
   ALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: !Sub 'talentvault-${Environment}-alb'
+      Name: !Sub 'get-noticed-${Environment}-alb'
       Type: application
       Scheme: internet-facing
       SecurityGroups:
@@ -561,7 +561,7 @@ Resources:
   ALBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: !Sub 'talentvault-${Environment}-api'
+      Name: !Sub 'get-noticed-${Environment}-api'
       Port: 3000
       Protocol: HTTP
       VpcId: !Ref VPC
@@ -601,18 +601,18 @@ Resources:
   AppSecrets:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: !Sub '${Environment}/talentvault/app-secrets'
+      Name: !Sub '${Environment}/get-noticed/app-secrets'
       SecretString: !Sub |
         {
           "JWT_SECRET": "${JwtSecret}",
-          "DATABASE_URL": "postgresql://admin:${DatabasePassword}@${DBInstance.Endpoint.Address}:5432/talentvault"
+          "DATABASE_URL": "postgresql://admin:${DatabasePassword}@${DBInstance.Endpoint.Address}:5432/get-noticed"
         }
 
   # SNS Topic for Alarms
   AlarmTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: !Sub 'talentvault-${Environment}-alarms'
+      TopicName: !Sub 'get-noticed-${Environment}-alarms'
 
   AlarmSubscription:
     Type: AWS::SNS::Subscription
@@ -625,7 +625,7 @@ Resources:
   APIHighLatencyAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmName: !Sub 'talentvault-${Environment}-api-high-latency'
+      AlarmName: !Sub 'get-noticed-${Environment}-api-high-latency'
       MetricName: TargetResponseTime
       Namespace: AWS/ApplicationELB
       Statistic: Average

@@ -25,7 +25,7 @@ const QUICK_QUESTIONS = [
 ];
 
 const AI_RESPONSES: Record<string, string> = {
-  'how do i upload a video': `To upload a video on TalentVault:
+  'how do i upload a video': `To upload a video on Get-Noticed:
 
 1. Click the **Upload** button in the navigation bar
 2. Select your video file (MP4, MOV, or WebM, max 500MB)
@@ -50,7 +50,7 @@ Your video will be processed and reviewed by our AI system before going live. Th
 
 You can also manage your privacy settings and notification preferences from this page.`,
 
-  'what are the video requirements': `Video requirements for TalentVault:
+  'what are the video requirements': `Video requirements for Get-Noticed:
 
 **Format:** MP4, MOV, or WebM
 **Max size:** 500MB
@@ -98,7 +98,7 @@ Verified agents get a badge on their profile and priority access to talent disco
 
   'how can i contact support': `You can reach our support team through:
 
-**Email:** support@talentvault.com
+**Email:** support@get-noticed.com
 **Response time:** 24-48 hours
 
 **In-app help:**
@@ -113,7 +113,7 @@ Verified agents get a badge on their profile and priority access to talent disco
 
 For urgent matters, please include your account email and a detailed description of the issue.`,
 
-  'default': `I'm here to help you with TalentVault! I can assist with:
+  'default': `I'm here to help you with Get-Noticed! I can assist with:
 
 - **Uploading videos** - How to upload and optimize your content
 - **Profile management** - Editing your profile and settings
@@ -131,7 +131,7 @@ const AIChatbot: React.FC = () => {
     {
       id: '1',
       role: 'assistant',
-      content: `Hi! I'm your TalentVault AI assistant. How can I help you today?`,
+      content: `Hi! I'm your Get-Noticed AI assistant. How can I help you today?`,
       timestamp: new Date()
     }
   ]);

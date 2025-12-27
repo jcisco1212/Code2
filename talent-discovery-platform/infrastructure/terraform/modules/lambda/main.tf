@@ -26,7 +26,7 @@ variable "mediaconvert_role_arn" {
 
 # IAM Role for Lambda
 resource "aws_iam_role" "lambda" {
-  name = "talentvault-${var.environment}-lambda"
+  name = "get-noticed-${var.environment}-lambda"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -93,7 +93,7 @@ resource "aws_iam_role_policy" "lambda" {
 
 # CloudWatch Log Group
 resource "aws_cloudwatch_log_group" "lambda" {
-  name              = "/aws/lambda/talentvault-${var.environment}-video-trigger"
+  name              = "/aws/lambda/get-noticed-${var.environment}-video-trigger"
   retention_in_days = 14
 
   tags = {
@@ -103,7 +103,7 @@ resource "aws_cloudwatch_log_group" "lambda" {
 
 # Lambda Function - Video Upload Trigger
 resource "aws_lambda_function" "video_trigger" {
-  function_name = "talentvault-${var.environment}-video-trigger"
+  function_name = "get-noticed-${var.environment}-video-trigger"
   role          = aws_iam_role.lambda.arn
   handler       = "index.handler"
   runtime       = "nodejs18.x"
@@ -322,7 +322,7 @@ EOF
 
 # SQS Queue (defined here for the Lambda to use)
 resource "aws_sqs_queue" "video_processing" {
-  name                       = "talentvault-${var.environment}-lambda-video-processing"
+  name                       = "get-noticed-${var.environment}-lambda-video-processing"
   visibility_timeout_seconds = 3600
 }
 
@@ -351,7 +351,7 @@ resource "aws_lambda_permission" "s3" {
 
 # Lambda Function - MediaConvert Job Complete
 resource "aws_lambda_function" "job_complete" {
-  function_name = "talentvault-${var.environment}-job-complete"
+  function_name = "get-noticed-${var.environment}-job-complete"
   role          = aws_iam_role.lambda.arn
   handler       = "complete.handler"
   runtime       = "nodejs18.x"
@@ -402,7 +402,7 @@ EOF
 
 # EventBridge Rule for MediaConvert
 resource "aws_cloudwatch_event_rule" "mediaconvert" {
-  name        = "talentvault-${var.environment}-mediaconvert-events"
+  name        = "get-noticed-${var.environment}-mediaconvert-events"
   description = "Capture MediaConvert job state changes"
 
   event_pattern = jsonencode({

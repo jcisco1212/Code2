@@ -69,7 +69,7 @@ const Login: React.FC = () => {
               Welcome Back
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Sign in to continue to TalentVault
+              Sign in to continue to Get-Noticed
             </p>
           </div>
 
@@ -165,7 +165,7 @@ const Login: React.FC = () => {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-4 bg-white/70 dark:bg-transparent text-gray-500 dark:text-gray-400">
-                New to TalentVault?
+                New to Get-Noticed?
               </span>
             </div>
           </div>

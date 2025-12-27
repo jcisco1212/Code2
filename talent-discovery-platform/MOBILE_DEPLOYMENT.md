@@ -1,14 +1,14 @@
-# TalentVault Mobile Deployment Guide
+# Get-Noticed Mobile Deployment Guide
 
-This guide explains how to deploy TalentVault as a website, PWA, and native iOS/Android apps.
+This guide explains how to deploy Get-Noticed as a website, PWA, and native iOS/Android apps.
 
 ## Platform Options
 
 ### 1. Website (Already Running)
-Your TalentVault website works immediately on all devices with a web browser.
+Your Get-Noticed website works immediately on all devices with a web browser.
 
 ### 2. Progressive Web App (PWA)
-PWA support is already configured! Users can install TalentVault from their browser:
+PWA support is already configured! Users can install Get-Noticed from their browser:
 - **iOS**: Open in Safari → Share → "Add to Home Screen"
 - **Android**: Chrome will show an "Install" prompt automatically
 
@@ -44,7 +44,7 @@ npm run cap:open:ios
 
 In Xcode:
 1. Select your Apple Developer team in Signing & Capabilities
-2. Set the Bundle Identifier (com.talentvault.app)
+2. Set the Bundle Identifier (com.get-noticed.app)
 3. Build and run on simulator or device
 4. Archive for App Store submission
 
@@ -127,8 +127,8 @@ Capacitor auto-generates splash screens from a single image. Add your splash ima
 
 ### capacitor.config.ts
 Main configuration for native apps:
-- App ID: `com.talentvault.app`
-- App Name: `TalentVault`
+- App ID: `com.get-noticed.app`
+- App Name: `Get-Noticed`
 - Web directory: `build`
 
 ### manifest.json
@@ -140,8 +140,8 @@ Configure deep links to open your app from URLs:
 - iOS: Configure in Xcode under Signing & Capabilities → Associated Domains
 - Android: Configure in `android/app/src/main/AndroidManifest.xml`
 
-URL scheme: `talentvault://`
-Universal links: `https://talentvault.app/*`
+URL scheme: `get-noticed://`
+Universal links: `https://get-noticed.app/*`
 
 ## Push Notifications (Future Enhancement)
 

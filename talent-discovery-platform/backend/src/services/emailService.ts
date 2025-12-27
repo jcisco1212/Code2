@@ -39,25 +39,25 @@ const templates: Record<string, (data: any) => { html: string; text: string }> =
       <body>
         <div class="container">
           <div class="header">
-            <h1>TalentVault</h1>
+            <h1>Get-Noticed</h1>
           </div>
           <div class="content">
             <h2>Welcome, ${data.firstName}!</h2>
-            <p>Thank you for joining TalentVault. Please verify your email address to activate your account.</p>
+            <p>Thank you for joining Get-Noticed. Please verify your email address to activate your account.</p>
             <a href="${data.verificationUrl}" class="button">Verify Email</a>
             <p>Or copy and paste this link into your browser:</p>
             <p style="word-break: break-all;">${data.verificationUrl}</p>
             <p>This link will expire in 24 hours.</p>
           </div>
           <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} TalentVault. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} Get-Noticed. All rights reserved.</p>
           </div>
         </div>
       </body>
       </html>
     `,
     text: `
-      Welcome to TalentVault, ${data.firstName}!
+      Welcome to Get-Noticed, ${data.firstName}!
 
       Please verify your email address by visiting this link:
       ${data.verificationUrl}
@@ -84,7 +84,7 @@ const templates: Record<string, (data: any) => { html: string; text: string }> =
       <body>
         <div class="container">
           <div class="header">
-            <h1>TalentVault</h1>
+            <h1>Get-Noticed</h1>
           </div>
           <div class="content">
             <h2>Reset Your Password</h2>
@@ -97,7 +97,7 @@ const templates: Record<string, (data: any) => { html: string; text: string }> =
             <p>If you didn't request this, you can safely ignore this email.</p>
           </div>
           <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} TalentVault. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} Get-Noticed. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -135,17 +135,17 @@ const templates: Record<string, (data: any) => { html: string; text: string }> =
       <body>
         <div class="container">
           <div class="header">
-            <h1>TalentVault</h1>
+            <h1>Get-Noticed</h1>
           </div>
           <div class="content">
             <h2>Your Video is Live!</h2>
             <p>Hi ${data.firstName},</p>
-            <p>Great news! Your video "<strong>${data.videoTitle}</strong>" has been processed and is now live on TalentVault.</p>
+            <p>Great news! Your video "<strong>${data.videoTitle}</strong>" has been processed and is now live on Get-Noticed.</p>
             <a href="${data.videoUrl}" class="button">View Your Video</a>
             <p>Start sharing it with your audience and watch your talent grow!</p>
           </div>
           <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} TalentVault. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} Get-Noticed. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -156,7 +156,7 @@ const templates: Record<string, (data: any) => { html: string; text: string }> =
 
       Hi ${data.firstName},
 
-      Great news! Your video "${data.videoTitle}" has been processed and is now live on TalentVault.
+      Great news! Your video "${data.videoTitle}" has been processed and is now live on Get-Noticed.
 
       View it here: ${data.videoUrl}
     `
@@ -179,7 +179,7 @@ const templates: Record<string, (data: any) => { html: string; text: string }> =
       <body>
         <div class="container">
           <div class="header">
-            <h1>TalentVault</h1>
+            <h1>Get-Noticed</h1>
           </div>
           <div class="content">
             <h2>Video Processing Failed</h2>
@@ -189,7 +189,7 @@ const templates: Record<string, (data: any) => { html: string; text: string }> =
             <p>Please try uploading again. If the issue persists, contact our support team.</p>
           </div>
           <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} TalentVault. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} Get-Noticed. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -225,17 +225,17 @@ const templates: Record<string, (data: any) => { html: string; text: string }> =
       <body>
         <div class="container">
           <div class="header">
-            <h1>TalentVault</h1>
+            <h1>Get-Noticed</h1>
           </div>
           <div class="content">
             <h2>New Message from an Agent!</h2>
             <p>Hi ${data.firstName},</p>
-            <p><strong>${data.agentName}</strong> from <strong>${data.agencyName}</strong> has sent you a message on TalentVault.</p>
+            <p><strong>${data.agentName}</strong> from <strong>${data.agencyName}</strong> has sent you a message on Get-Noticed.</p>
             <a href="${data.messageUrl}" class="button">View Message</a>
             <p>This could be a great opportunity!</p>
           </div>
           <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} TalentVault. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} Get-Noticed. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -246,7 +246,7 @@ const templates: Record<string, (data: any) => { html: string; text: string }> =
 
       Hi ${data.firstName},
 
-      ${data.agentName} from ${data.agencyName} has sent you a message on TalentVault.
+      ${data.agentName} from ${data.agencyName} has sent you a message on Get-Noticed.
 
       View it here: ${data.messageUrl}
     `
@@ -264,7 +264,7 @@ export const sendEmail = async (options: EmailOptions): Promise<void> => {
     const { html, text } = template(options.data);
 
     await transporter.sendMail({
-      from: `"${process.env.SMTP_FROM_NAME || 'TalentVault'}" <${process.env.SMTP_FROM || 'noreply@talentvault.com'}>`,
+      from: `"${process.env.SMTP_FROM_NAME || 'Get-Noticed'}" <${process.env.SMTP_FROM || 'noreply@get-noticed.com'}>`,
       to: options.to,
       subject: options.subject,
       html,

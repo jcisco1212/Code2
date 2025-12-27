@@ -26,12 +26,12 @@ variable "waf_web_acl_id" {
 
 # Origin Access Identity
 resource "aws_cloudfront_origin_access_identity" "main" {
-  comment = "TalentVault ${var.environment} OAI"
+  comment = "Get-Noticed ${var.environment} OAI"
 }
 
 # CloudFront Cache Policy
 resource "aws_cloudfront_cache_policy" "video" {
-  name        = "talentvault-${var.environment}-video-cache"
+  name        = "get-noticed-${var.environment}-video-cache"
   comment     = "Cache policy for video content"
   min_ttl     = 1
   default_ttl = 86400    # 1 day
@@ -59,7 +59,7 @@ resource "aws_cloudfront_cache_policy" "video" {
 resource "aws_cloudfront_distribution" "main" {
   enabled             = true
   is_ipv6_enabled     = true
-  comment             = "TalentVault ${var.environment} CDN"
+  comment             = "Get-Noticed ${var.environment} CDN"
   default_root_object = "index.html"
   price_class         = "PriceClass_All"
   web_acl_id          = var.waf_web_acl_id
@@ -151,26 +151,26 @@ resource "aws_cloudfront_distribution" "main" {
   }
 
   tags = {
-    Name = "talentvault-${var.environment}-cdn"
+    Name = "get-noticed-${var.environment}-cdn"
   }
 }
 
 # CloudFront Key Group for signed URLs
 resource "aws_cloudfront_public_key" "main" {
-  name        = "talentvault-${var.environment}-public-key"
+  name        = "get-noticed-${var.environment}-public-key"
   comment     = "Public key for signed URLs"
   encoded_key = file("${path.module}/public_key.pem")
 }
 
 resource "aws_cloudfront_key_group" "main" {
-  name    = "talentvault-${var.environment}-key-group"
+  name    = "get-noticed-${var.environment}-key-group"
   items   = [aws_cloudfront_public_key.main.id]
   comment = "Key group for video signed URLs"
 }
 
 # Logging bucket
 resource "aws_s3_bucket" "logs" {
-  bucket = "talentvault-${var.environment}-cf-logs"
+  bucket = "get-noticed-${var.environment}-cf-logs"
 
   tags = {
     Name = "CloudFront Logs"

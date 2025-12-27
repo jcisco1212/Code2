@@ -80,7 +80,7 @@ variable "certificate_arn" {
 
 # ECS Cluster
 resource "aws_ecs_cluster" "main" {
-  name = "talentvault-${var.environment}"
+  name = "get-noticed-${var.environment}"
 
   setting {
     name  = "containerInsights"
@@ -99,7 +99,7 @@ resource "aws_ecs_cluster" "main" {
   }
 
   tags = {
-    Name = "talentvault-${var.environment}-cluster"
+    Name = "get-noticed-${var.environment}-cluster"
   }
 }
 
@@ -123,7 +123,7 @@ resource "aws_ecs_cluster_capacity_providers" "main" {
 
 # CloudWatch Log Group
 resource "aws_cloudwatch_log_group" "ecs" {
-  name              = "/ecs/talentvault-${var.environment}"
+  name              = "/ecs/get-noticed-${var.environment}"
   retention_in_days = 30
 
   tags = {
@@ -133,7 +133,7 @@ resource "aws_cloudwatch_log_group" "ecs" {
 
 # IAM Role for ECS Task Execution
 resource "aws_iam_role" "ecs_execution" {
-  name = "talentvault-${var.environment}-ecs-execution"
+  name = "get-noticed-${var.environment}-ecs-execution"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -171,7 +171,7 @@ resource "aws_iam_role_policy" "ecs_execution_secrets" {
 
 # IAM Role for ECS Tasks
 resource "aws_iam_role" "ecs_task" {
-  name = "talentvault-${var.environment}-ecs-task"
+  name = "get-noticed-${var.environment}-ecs-task"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -238,7 +238,7 @@ resource "aws_iam_role_policy" "ecs_task" {
 
 # Application Load Balancer
 resource "aws_lb" "main" {
-  name               = "talentvault-${var.environment}-alb"
+  name               = "get-noticed-${var.environment}-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [var.alb_security_group]
@@ -253,13 +253,13 @@ resource "aws_lb" "main" {
   }
 
   tags = {
-    Name = "talentvault-${var.environment}-alb"
+    Name = "get-noticed-${var.environment}-alb"
   }
 }
 
 # ALB Logs Bucket
 resource "aws_s3_bucket" "alb_logs" {
-  bucket = "talentvault-${var.environment}-alb-logs"
+  bucket = "get-noticed-${var.environment}-alb-logs"
 
   tags = {
     Name = "ALB Logs"
@@ -284,7 +284,7 @@ resource "aws_s3_bucket_policy" "alb_logs" {
 
 # ALB Target Groups
 resource "aws_lb_target_group" "api" {
-  name        = "talentvault-${var.environment}-api"
+  name        = "get-noticed-${var.environment}-api"
   port        = 3000
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
@@ -308,7 +308,7 @@ resource "aws_lb_target_group" "api" {
 }
 
 resource "aws_lb_target_group" "ai" {
-  name        = "talentvault-${var.environment}-ai"
+  name        = "get-noticed-${var.environment}-ai"
   port        = 8000
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
@@ -379,7 +379,7 @@ resource "aws_lb_listener_rule" "ai" {
 
 # ECS Task Definition - API
 resource "aws_ecs_task_definition" "api" {
-  family                   = "talentvault-${var.environment}-api"
+  family                   = "get-noticed-${var.environment}-api"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.api_cpu
@@ -405,9 +405,9 @@ resource "aws_ecs_task_definition" "api" {
     ]
 
     secrets = [
-      { name = "DATABASE_URL", valueFrom = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:${var.environment}/talentvault/database-url" },
-      { name = "REDIS_URL", valueFrom = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:${var.environment}/talentvault/redis-url" },
-      { name = "JWT_SECRET", valueFrom = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:${var.environment}/talentvault/app-secrets:JWT_SECRET::" }
+      { name = "DATABASE_URL", valueFrom = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:${var.environment}/get-noticed/database-url" },
+      { name = "REDIS_URL", valueFrom = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:${var.environment}/get-noticed/redis-url" },
+      { name = "JWT_SECRET", valueFrom = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:${var.environment}/get-noticed/app-secrets:JWT_SECRET::" }
     ]
 
     logConfiguration = {
@@ -435,7 +435,7 @@ resource "aws_ecs_task_definition" "api" {
 
 # ECS Task Definition - Worker
 resource "aws_ecs_task_definition" "worker" {
-  family                   = "talentvault-${var.environment}-worker"
+  family                   = "get-noticed-${var.environment}-worker"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.worker_cpu
@@ -453,8 +453,8 @@ resource "aws_ecs_task_definition" "worker" {
     ]
 
     secrets = [
-      { name = "DATABASE_URL", valueFrom = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:${var.environment}/talentvault/database-url" },
-      { name = "REDIS_URL", valueFrom = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:${var.environment}/talentvault/redis-url" }
+      { name = "DATABASE_URL", valueFrom = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:${var.environment}/get-noticed/database-url" },
+      { name = "REDIS_URL", valueFrom = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:${var.environment}/get-noticed/redis-url" }
     ]
 
     logConfiguration = {
@@ -474,7 +474,7 @@ resource "aws_ecs_task_definition" "worker" {
 
 # ECS Task Definition - AI Services
 resource "aws_ecs_task_definition" "ai" {
-  family                   = "talentvault-${var.environment}-ai"
+  family                   = "get-noticed-${var.environment}-ai"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = 2048

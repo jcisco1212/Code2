@@ -4,7 +4,7 @@ import { logger } from '../utils/logger';
 
 dotenv.config();
 
-const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/talentvault';
+const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/get-noticed';
 
 export const sequelize = new Sequelize(databaseUrl, {
   dialect: 'postgres',

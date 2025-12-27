@@ -11,8 +11,8 @@ variable "rate_limit" {
 
 # WAF Web ACL
 resource "aws_wafv2_web_acl" "main" {
-  name        = "talentvault-${var.environment}-waf"
-  description = "WAF for TalentVault CloudFront distribution"
+  name        = "get-noticed-${var.environment}-waf"
+  description = "WAF for Get-Noticed CloudFront distribution"
   scope       = "CLOUDFRONT"
 
   default_action {
@@ -250,18 +250,18 @@ resource "aws_wafv2_web_acl" "main" {
 
   visibility_config {
     cloudwatch_metrics_enabled = true
-    metric_name               = "talentvault-${var.environment}-waf"
+    metric_name               = "get-noticed-${var.environment}-waf"
     sampled_requests_enabled  = true
   }
 
   tags = {
-    Name = "talentvault-${var.environment}-waf"
+    Name = "get-noticed-${var.environment}-waf"
   }
 }
 
 # Regex pattern set for bad user agents
 resource "aws_wafv2_regex_pattern_set" "bad_user_agents" {
-  name        = "talentvault-${var.environment}-bad-user-agents"
+  name        = "get-noticed-${var.environment}-bad-user-agents"
   scope       = "CLOUDFRONT"
   description = "Block known bad user agents"
 
@@ -288,7 +288,7 @@ resource "aws_wafv2_regex_pattern_set" "bad_user_agents" {
 
 # IP Set for blocking specific IPs (can be updated via API)
 resource "aws_wafv2_ip_set" "blocked_ips" {
-  name               = "talentvault-${var.environment}-blocked-ips"
+  name               = "get-noticed-${var.environment}-blocked-ips"
   scope              = "CLOUDFRONT"
   ip_address_version = "IPV4"
   addresses          = []  # Add IPs to block here
@@ -300,7 +300,7 @@ resource "aws_wafv2_ip_set" "blocked_ips" {
 
 # CloudWatch Log Group for WAF logs
 resource "aws_cloudwatch_log_group" "waf" {
-  name              = "aws-waf-logs-talentvault-${var.environment}"
+  name              = "aws-waf-logs-get-noticed-${var.environment}"
   retention_in_days = 30
 
   tags = {

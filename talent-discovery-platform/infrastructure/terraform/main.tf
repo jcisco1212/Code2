@@ -1,4 +1,4 @@
-# TalentVault - Terraform Infrastructure
+# Get-Noticed - Terraform Infrastructure
 # AWS Infrastructure for Video Sharing Platform
 
 terraform {
@@ -12,7 +12,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "talentvault-terraform-state"
+    bucket         = "get-noticed-terraform-state"
     key            = "production/terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true
@@ -25,7 +25,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project     = "TalentVault"
+      Project     = "Get-Noticed"
       Environment = var.environment
       ManagedBy   = "Terraform"
     }
@@ -167,10 +167,10 @@ module "cloudwatch" {
 
 # Secrets Manager
 resource "aws_secretsmanager_secret" "app_secrets" {
-  name = "${var.environment}/talentvault/app-secrets"
+  name = "${var.environment}/get-noticed/app-secrets"
 
   tags = {
-    Name = "TalentVault App Secrets"
+    Name = "Get-Noticed App Secrets"
   }
 }
 

@@ -19,7 +19,7 @@ resource "aws_vpc" "main" {
   enable_dns_support   = true
 
   tags = {
-    Name = "talentvault-${var.environment}-vpc"
+    Name = "get-noticed-${var.environment}-vpc"
   }
 }
 
@@ -28,7 +28,7 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "talentvault-${var.environment}-igw"
+    Name = "get-noticed-${var.environment}-igw"
   }
 }
 
@@ -41,7 +41,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "talentvault-${var.environment}-public-${count.index + 1}"
+    Name = "get-noticed-${var.environment}-public-${count.index + 1}"
     Type = "public"
   }
 }
@@ -54,7 +54,7 @@ resource "aws_subnet" "private" {
   availability_zone = var.availability_zones[count.index]
 
   tags = {
-    Name = "talentvault-${var.environment}-private-${count.index + 1}"
+    Name = "get-noticed-${var.environment}-private-${count.index + 1}"
     Type = "private"
   }
 }
@@ -65,7 +65,7 @@ resource "aws_eip" "nat" {
   domain = "vpc"
 
   tags = {
-    Name = "talentvault-${var.environment}-nat-eip-${count.index + 1}"
+    Name = "get-noticed-${var.environment}-nat-eip-${count.index + 1}"
   }
 
   depends_on = [aws_internet_gateway.main]
@@ -78,7 +78,7 @@ resource "aws_nat_gateway" "main" {
   subnet_id     = aws_subnet.public[count.index].id
 
   tags = {
-    Name = "talentvault-${var.environment}-nat-${count.index + 1}"
+    Name = "get-noticed-${var.environment}-nat-${count.index + 1}"
   }
 
   depends_on = [aws_internet_gateway.main]
@@ -94,7 +94,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "talentvault-${var.environment}-public-rt"
+    Name = "get-noticed-${var.environment}-public-rt"
   }
 }
 
@@ -109,7 +109,7 @@ resource "aws_route_table" "private" {
   }
 
   tags = {
-    Name = "talentvault-${var.environment}-private-rt-${count.index + 1}"
+    Name = "get-noticed-${var.environment}-private-rt-${count.index + 1}"
   }
 }
 
@@ -130,7 +130,7 @@ resource "aws_route_table_association" "private" {
 
 # ALB Security Group
 resource "aws_security_group" "alb" {
-  name        = "talentvault-${var.environment}-alb-sg"
+  name        = "get-noticed-${var.environment}-alb-sg"
   description = "Security group for Application Load Balancer"
   vpc_id      = aws_vpc.main.id
 
@@ -158,13 +158,13 @@ resource "aws_security_group" "alb" {
   }
 
   tags = {
-    Name = "talentvault-${var.environment}-alb-sg"
+    Name = "get-noticed-${var.environment}-alb-sg"
   }
 }
 
 # ECS Security Group
 resource "aws_security_group" "ecs" {
-  name        = "talentvault-${var.environment}-ecs-sg"
+  name        = "get-noticed-${var.environment}-ecs-sg"
   description = "Security group for ECS tasks"
   vpc_id      = aws_vpc.main.id
 
@@ -192,13 +192,13 @@ resource "aws_security_group" "ecs" {
   }
 
   tags = {
-    Name = "talentvault-${var.environment}-ecs-sg"
+    Name = "get-noticed-${var.environment}-ecs-sg"
   }
 }
 
 # Database Security Group
 resource "aws_security_group" "database" {
-  name        = "talentvault-${var.environment}-db-sg"
+  name        = "get-noticed-${var.environment}-db-sg"
   description = "Security group for RDS"
   vpc_id      = aws_vpc.main.id
 
@@ -211,13 +211,13 @@ resource "aws_security_group" "database" {
   }
 
   tags = {
-    Name = "talentvault-${var.environment}-db-sg"
+    Name = "get-noticed-${var.environment}-db-sg"
   }
 }
 
 # Redis Security Group
 resource "aws_security_group" "redis" {
-  name        = "talentvault-${var.environment}-redis-sg"
+  name        = "get-noticed-${var.environment}-redis-sg"
   description = "Security group for ElastiCache Redis"
   vpc_id      = aws_vpc.main.id
 
@@ -230,7 +230,7 @@ resource "aws_security_group" "redis" {
   }
 
   tags = {
-    Name = "talentvault-${var.environment}-redis-sg"
+    Name = "get-noticed-${var.environment}-redis-sg"
   }
 }
 

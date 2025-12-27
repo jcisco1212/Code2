@@ -1,6 +1,6 @@
-# TalentVault Installation Guide
+# Get-Noticed Installation Guide
 
-Complete installation instructions for the TalentVault AI-powered video sharing platform.
+Complete installation instructions for the Get-Noticed AI-powered video sharing platform.
 
 ## Table of Contents
 
@@ -140,7 +140,7 @@ NODE_ENV=development
 PORT=3000
 
 # Database
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/talentvault
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/get-noticed
 
 # Redis
 REDIS_URL=redis://localhost:6379
@@ -151,7 +151,7 @@ JWT_REFRESH_SECRET=your-super-secret-refresh-key-min-32-chars
 
 # S3/MinIO (local development)
 S3_ENDPOINT=http://localhost:9000
-S3_BUCKET=talentvault-videos
+S3_BUCKET=get-noticed-videos
 AWS_ACCESS_KEY_ID=minioadmin
 AWS_SECRET_ACCESS_KEY=minioadmin
 
@@ -238,7 +238,7 @@ export AWS_DEFAULT_REGION=us-east-1
 
 ```bash
 # Create S3 bucket for Terraform state
-aws s3 mb s3://talentvault-terraform-state --region us-east-1
+aws s3 mb s3://get-noticed-terraform-state --region us-east-1
 
 # Create DynamoDB table for state locking
 aws dynamodb create-table \
@@ -271,10 +271,10 @@ database_username = "admin"
 database_password = "your-secure-database-password"
 
 # Docker images (after pushing to ECR)
-api_image      = "123456789012.dkr.ecr.us-east-1.amazonaws.com/talentvault-api:latest"
-worker_image   = "123456789012.dkr.ecr.us-east-1.amazonaws.com/talentvault-worker:latest"
-ai_image       = "123456789012.dkr.ecr.us-east-1.amazonaws.com/talentvault-ai:latest"
-frontend_image = "123456789012.dkr.ecr.us-east-1.amazonaws.com/talentvault-frontend:latest"
+api_image      = "123456789012.dkr.ecr.us-east-1.amazonaws.com/get-noticed-api:latest"
+worker_image   = "123456789012.dkr.ecr.us-east-1.amazonaws.com/get-noticed-worker:latest"
+ai_image       = "123456789012.dkr.ecr.us-east-1.amazonaws.com/get-noticed-ai:latest"
+frontend_image = "123456789012.dkr.ecr.us-east-1.amazonaws.com/get-noticed-frontend:latest"
 
 # Secrets
 jwt_secret         = "your-production-jwt-secret-min-32-characters"
@@ -315,19 +315,19 @@ terraform output > outputs.txt
 
 ```bash
 # Create ECR repositories
-aws ecr create-repository --repository-name talentvault-api
-aws ecr create-repository --repository-name talentvault-worker
-aws ecr create-repository --repository-name talentvault-ai
-aws ecr create-repository --repository-name talentvault-frontend
+aws ecr create-repository --repository-name get-noticed-api
+aws ecr create-repository --repository-name get-noticed-worker
+aws ecr create-repository --repository-name get-noticed-ai
+aws ecr create-repository --repository-name get-noticed-frontend
 
 # Login to ECR
 aws ecr get-login-password --region us-east-1 | \
   docker login --username AWS --password-stdin 123456789012.dkr.ecr.us-east-1.amazonaws.com
 
 # Build and push images
-docker build -t talentvault-api:latest ./backend
-docker tag talentvault-api:latest 123456789012.dkr.ecr.us-east-1.amazonaws.com/talentvault-api:latest
-docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/talentvault-api:latest
+docker build -t get-noticed-api:latest ./backend
+docker tag get-noticed-api:latest 123456789012.dkr.ecr.us-east-1.amazonaws.com/get-noticed-api:latest
+docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/get-noticed-api:latest
 
 # Repeat for worker, ai-services, and frontend
 ```
@@ -337,7 +337,7 @@ docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/talentvault-api:latest
 ```bash
 # Connect to ECS task and run migrations
 aws ecs execute-command \
-  --cluster talentvault-production \
+  --cluster get-noticed-production \
   --task <task-id> \
   --container api \
   --interactive \
@@ -351,7 +351,7 @@ cd infrastructure/cloudformation
 
 # Create the stack
 aws cloudformation create-stack \
-  --stack-name talentvault-production \
+  --stack-name get-noticed-production \
   --template-body file://main.yaml \
   --parameters \
     ParameterKey=Environment,ParameterValue=production \
@@ -362,7 +362,7 @@ aws cloudformation create-stack \
   --capabilities CAPABILITY_IAM
 
 # Monitor stack creation
-aws cloudformation describe-stack-events --stack-name talentvault-production
+aws cloudformation describe-stack-events --stack-name get-noticed-production
 ```
 
 ---
@@ -409,7 +409,7 @@ openssl rand -hex 32
 npm run db:migrate
 
 # Production (via ECS)
-aws ecs execute-command --cluster talentvault-production \
+aws ecs execute-command --cluster get-noticed-production \
   --task <task-id> --container api \
   --command "npm run db:migrate"
 ```
@@ -429,7 +429,7 @@ npm run create-admin -- --email admin@domain.com --password SecurePass123!
 ```bash
 # Backup (RDS)
 aws rds create-db-snapshot \
-  --db-instance-identifier talentvault-production \
+  --db-instance-identifier get-noticed-production \
   --db-snapshot-identifier backup-$(date +%Y%m%d)
 
 # Performance tuning
@@ -528,7 +528,7 @@ Configured in the API middleware:
 
 Access via AWS Console or:
 ```bash
-aws cloudwatch get-dashboard --dashboard-name talentvault-production
+aws cloudwatch get-dashboard --dashboard-name get-noticed-production
 ```
 
 ### Key Metrics to Monitor
@@ -554,11 +554,11 @@ Alerts are sent to the configured SNS topic for:
 
 ```bash
 # CloudWatch Logs
-aws logs tail /ecs/talentvault-production --follow
+aws logs tail /ecs/get-noticed-production --follow
 
 # Download logs
 aws logs get-log-events \
-  --log-group-name /ecs/talentvault-production \
+  --log-group-name /ecs/get-noticed-production \
   --log-stream-name api/xxx
 ```
 
@@ -632,12 +632,12 @@ docker-compose exec api node -e "require('./src/services/emailService').testConn
 ```bash
 # View task stopped reason
 aws ecs describe-tasks \
-  --cluster talentvault-production \
+  --cluster get-noticed-production \
   --tasks <task-arn>
 
 # View container logs
 aws logs get-log-events \
-  --log-group-name /ecs/talentvault-production \
+  --log-group-name /ecs/get-noticed-production \
   --log-stream-name api/<task-id>
 ```
 
@@ -649,7 +649,7 @@ aws ec2 describe-security-groups --group-ids <sg-id>
 
 # Test connectivity from ECS
 aws ecs execute-command \
-  --cluster talentvault-production \
+  --cluster get-noticed-production \
   --task <task-id> \
   --container api \
   --command "nc -zv <rds-endpoint> 5432"
@@ -688,5 +688,5 @@ terraform apply                  # Deploy changes
 terraform destroy               # Tear down infrastructure
 
 # AWS ECS
-aws ecs update-service --cluster talentvault-production --service api --force-new-deployment
+aws ecs update-service --cluster get-noticed-production --service api --force-new-deployment
 ```

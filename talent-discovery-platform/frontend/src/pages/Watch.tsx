@@ -232,7 +232,7 @@ const Watch: React.FC = () => {
 
   const handleEmailShare = () => {
     const subject = encodeURIComponent(`Check out this video: ${video?.title}`);
-    const body = encodeURIComponent(`I found this great video on TalentVault:\n\n${video?.title}\n${window.location.href}`);
+    const body = encodeURIComponent(`I found this great video on Get-Noticed:\n\n${video?.title}\n${window.location.href}`);
     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
     setShowShareModal(false);
   };
@@ -590,7 +590,7 @@ const Watch: React.FC = () => {
                   </div>
                   <div className="text-left">
                     <p className="font-medium text-gray-900 dark:text-white">Send to User</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Share via TalentVault message</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Share via Get-Noticed message</p>
                   </div>
                 </Link>
               </div>

@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="TalentVault AI Services",
+    title="Get-Noticed AI Services",
     description="AI-powered talent analysis and scoring services",
     version="1.0.0"
 )

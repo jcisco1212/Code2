@@ -34,18 +34,18 @@ variable "security_group_ids" {
 
 # DB Subnet Group
 resource "aws_db_subnet_group" "main" {
-  name        = "talentvault-${var.environment}-db-subnet"
+  name        = "get-noticed-${var.environment}-db-subnet"
   description = "Database subnet group"
   subnet_ids  = var.subnet_ids
 
   tags = {
-    Name = "talentvault-${var.environment}-db-subnet"
+    Name = "get-noticed-${var.environment}-db-subnet"
   }
 }
 
 # DB Parameter Group
 resource "aws_db_parameter_group" "main" {
-  name   = "talentvault-${var.environment}-pg-params"
+  name   = "get-noticed-${var.environment}-pg-params"
   family = "postgres15"
 
   parameter {
@@ -74,13 +74,13 @@ resource "aws_db_parameter_group" "main" {
   }
 
   tags = {
-    Name = "talentvault-${var.environment}-pg-params"
+    Name = "get-noticed-${var.environment}-pg-params"
   }
 }
 
 # RDS Instance
 resource "aws_db_instance" "main" {
-  identifier = "talentvault-${var.environment}"
+  identifier = "get-noticed-${var.environment}"
 
   engine               = "postgres"
   engine_version       = "15.4"
@@ -107,7 +107,7 @@ resource "aws_db_instance" "main" {
 
   deletion_protection = var.environment == "production" ? true : false
   skip_final_snapshot = var.environment == "production" ? false : true
-  final_snapshot_identifier = var.environment == "production" ? "talentvault-${var.environment}-final-snapshot" : null
+  final_snapshot_identifier = var.environment == "production" ? "get-noticed-${var.environment}-final-snapshot" : null
 
   performance_insights_enabled          = true
   performance_insights_retention_period = 7
@@ -117,7 +117,7 @@ resource "aws_db_instance" "main" {
   auto_minor_version_upgrade = true
 
   tags = {
-    Name = "talentvault-${var.environment}-db"
+    Name = "get-noticed-${var.environment}-db"
   }
 }
 
@@ -125,7 +125,7 @@ resource "aws_db_instance" "main" {
 resource "aws_db_instance" "replica" {
   count = var.environment == "production" ? 1 : 0
 
-  identifier          = "talentvault-${var.environment}-replica"
+  identifier          = "get-noticed-${var.environment}-replica"
   replicate_source_db = aws_db_instance.main.identifier
 
   instance_class    = var.instance_class
@@ -140,7 +140,7 @@ resource "aws_db_instance" "replica" {
   performance_insights_retention_period = 7
 
   tags = {
-    Name = "talentvault-${var.environment}-db-replica"
+    Name = "get-noticed-${var.environment}-db-replica"
   }
 }
 

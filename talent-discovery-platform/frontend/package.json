@@ -1,5 +1,5 @@
 {
-  "name": "talentvault-frontend",
+  "name": "get-noticed-frontend",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
@@ -44,7 +44,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "cap:install": "npm install @capacitor/core @capacitor/cli @capacitor/ios @capacitor/android @capacitor/app @capacitor/splash-screen @capacitor/status-bar @capacitor/keyboard @capacitor/haptics @capacitor/share @capacitor/camera @capacitor/filesystem",
-    "cap:init": "npx cap init TalentVault com.talentvault.app --web-dir build",
+    "cap:init": "npx cap init Get-Noticed com.getnoticed.app --web-dir build",
     "cap:add:ios": "npm run cap:install && npx cap add ios",
     "cap:add:android": "npm run cap:install && npx cap add android",
     "cap:sync": "npx cap sync",

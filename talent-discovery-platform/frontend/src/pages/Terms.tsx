@@ -12,9 +12,9 @@ const Terms: React.FC = () => {
           <div className="prose prose-indigo dark:prose-invert max-w-none">
             {/* Introduction */}
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Welcome to TalentVault</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Welcome to Get-Noticed</h2>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                These Terms of Service ("Terms") govern your access to and use of the TalentVault platform,
+                These Terms of Service ("Terms") govern your access to and use of the Get-Noticed platform,
                 including our website, mobile applications, APIs, and all related services (collectively, the "Service").
                 By accessing or using our Service, you agree to be bound by these Terms and our{' '}
                 <Link to="/privacy" className="text-indigo-600 dark:text-indigo-400 hover:underline">Privacy Policy</Link>.
@@ -90,15 +90,15 @@ const Terms: React.FC = () => {
               <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-3">Ownership</h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
                 You retain ownership of any intellectual property rights that you hold in the content you upload,
-                post, or share through the Service ("Your Content"). TalentVault does not claim ownership of Your Content.
+                post, or share through the Service ("Your Content"). Get-Noticed does not claim ownership of Your Content.
               </p>
 
-              <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-3">License to TalentVault</h3>
+              <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-3">License to Get-Noticed</h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                By uploading, posting, or sharing Your Content through the Service, you grant TalentVault a worldwide,
+                By uploading, posting, or sharing Your Content through the Service, you grant Get-Noticed a worldwide,
                 non-exclusive, royalty-free, sublicensable, and transferable license to use, reproduce, distribute,
                 prepare derivative works of, display, and perform Your Content in connection with the Service and
-                TalentVault's business operations, including for promoting and redistributing part or all of the
+                Get-Noticed's business operations, including for promoting and redistributing part or all of the
                 Service in any media formats and through any media channels.
               </p>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
@@ -196,7 +196,7 @@ const Terms: React.FC = () => {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">5. AI Features and Analysis</h2>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                TalentVault uses artificial intelligence and machine learning technologies to analyze content,
+                Get-Noticed uses artificial intelligence and machine learning technologies to analyze content,
                 provide performance scores, and power various platform features.
               </p>
 
@@ -221,10 +221,10 @@ const Terms: React.FC = () => {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">6. Intellectual Property</h2>
 
-              <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-3">TalentVault's Rights</h3>
+              <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-3">Get-Noticed's Rights</h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
                 The Service and its original content (excluding Your Content), features, and functionality are and
-                will remain the exclusive property of TalentVault and its licensors. The Service is protected by
+                will remain the exclusive property of Get-Noticed and its licensors. The Service is protected by
                 copyright, trademark, and other laws. Our trademarks and trade dress may not be used in connection
                 with any product or service without prior written consent.
               </p>
@@ -255,7 +255,7 @@ const Terms: React.FC = () => {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">7. Account Suspension and Termination</h2>
 
-              <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-3">By TalentVault</h3>
+              <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-3">By Get-Noticed</h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
                 We may suspend or terminate your access to the Service at any time, with or without cause, with or
                 without notice, effective immediately. Reasons for termination may include, but are not limited to:
@@ -289,7 +289,7 @@ const Terms: React.FC = () => {
                 PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT.
               </p>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                TalentVault does not warrant that:
+                Get-Noticed does not warrant that:
               </p>
               <ul className="list-disc pl-6 text-gray-600 dark:text-gray-300 space-y-2">
                 <li>The Service will be uninterrupted, timely, secure, or error-free</li>
@@ -304,7 +304,7 @@ const Terms: React.FC = () => {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">9. Limitation of Liability</h2>
               <p className="text-gray-600 dark:text-gray-300 mb-4 uppercase font-medium">
-                TO THE MAXIMUM EXTENT PERMITTED BY LAW, TALENTVAULT AND ITS OFFICERS, DIRECTORS, EMPLOYEES, AND
+                TO THE MAXIMUM EXTENT PERMITTED BY LAW, GET-NOTICED AND ITS OFFICERS, DIRECTORS, EMPLOYEES, AND
                 AGENTS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE
                 DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY
                 LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, RESULTING FROM:
@@ -322,7 +322,7 @@ const Terms: React.FC = () => {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">10. Indemnification</h2>
               <p className="text-gray-600 dark:text-gray-300">
-                You agree to defend, indemnify, and hold harmless TalentVault, its parent, subsidiaries, affiliates,
+                You agree to defend, indemnify, and hold harmless Get-Noticed, its parent, subsidiaries, affiliates,
                 officers, directors, employees, agents, partners, and licensors from and against any claims, damages,
                 obligations, losses, liabilities, costs, or debt, and expenses (including attorneys' fees) arising
                 from: (a) your use of and access to the Service; (b) your violation of any term of these Terms;
@@ -339,12 +339,12 @@ const Terms: React.FC = () => {
               <p className="text-gray-600 dark:text-gray-300 mb-4">
                 Before filing a claim, you agree to try to resolve the dispute informally by contacting us. We'll
                 try to resolve the dispute informally by contacting you via email. If a dispute is not resolved
-                within 30 days of submission, you or TalentVault may bring a formal proceeding.
+                within 30 days of submission, you or Get-Noticed may bring a formal proceeding.
               </p>
 
               <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-3">Arbitration Agreement</h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                You and TalentVault agree to resolve any claims relating to these Terms or the Service through
+                You and Get-Noticed agree to resolve any claims relating to these Terms or the Service through
                 final and binding arbitration, except as set forth below. The arbitration will be conducted under
                 the rules of the American Arbitration Association ("AAA").
               </p>
@@ -369,7 +369,7 @@ const Terms: React.FC = () => {
 
               <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-3">Entire Agreement</h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                These Terms constitute the entire agreement between you and TalentVault regarding the Service and
+                These Terms constitute the entire agreement between you and Get-Noticed regarding the Service and
                 supersede all prior agreements and understandings.
               </p>
 
@@ -400,8 +400,8 @@ const Terms: React.FC = () => {
               </p>
               <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                 <p className="text-gray-700 dark:text-gray-300">
-                  <strong>TalentVault Legal Team</strong><br />
-                  Email: legal@talentvault.com<br />
+                  <strong>Get-Noticed Legal Team</strong><br />
+                  Email: legal@get-noticed.com<br />
                   Address: 123 Innovation Drive, Suite 500<br />
                   San Francisco, CA 94105<br />
                   United States
@@ -412,7 +412,7 @@ const Terms: React.FC = () => {
             {/* Acknowledgment */}
             <section className="border-t border-gray-200 dark:border-gray-700 pt-8">
               <p className="text-gray-600 dark:text-gray-300 text-center italic">
-                By using TalentVault, you acknowledge that you have read, understood, and agree to be bound by
+                By using Get-Noticed, you acknowledge that you have read, understood, and agree to be bound by
                 these Terms of Service.
               </p>
             </section>

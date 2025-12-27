@@ -1,8 +1,8 @@
-// TalentVault Service Worker
+// Get-Noticed Service Worker
 // Provides offline functionality and caching for the PWA
 
-const CACHE_NAME = 'talentvault-v1';
-const RUNTIME_CACHE = 'talentvault-runtime';
+const CACHE_NAME = 'get-noticed-v1';
+const RUNTIME_CACHE = 'get-noticed-runtime';
 
 // Resources to cache immediately on install
 const PRECACHE_URLS = [

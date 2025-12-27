@@ -121,10 +121,10 @@ const Layout: React.FC = () => {
             </button>
             <Link to="/" className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-aurora">
-                <span className="text-white font-bold text-lg">TV</span>
+                <span className="text-white font-bold text-lg">GN</span>
               </div>
               <span className="hidden sm:block text-xl font-bold text-gradient">
-                TalentVault
+                Get-Noticed
               </span>
             </Link>
           </div>
@@ -492,9 +492,9 @@ const Layout: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">TV</span>
+                  <span className="text-white font-bold text-sm">GN</span>
                 </div>
-                <h3 className="font-bold text-gradient">TalentVault</h3>
+                <h3 className="font-bold text-gradient">Get-Noticed</h3>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                 Discover and showcase your talent with AI-powered insights.
@@ -528,7 +528,7 @@ const Layout: React.FC = () => {
           </div>
           <div className="mt-10 pt-8 border-t border-gray-200/50 dark:border-white/10 text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              &copy; {new Date().getFullYear()} TalentVault. All rights reserved.
+              &copy; {new Date().getFullYear()} Get-Noticed. All rights reserved.
             </p>
             <div className="mt-2 h-1 w-24 mx-auto bg-gradient-primary rounded-full opacity-50" />
           </div>

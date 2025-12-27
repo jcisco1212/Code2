@@ -1,4 +1,4 @@
-# TalentVault Terraform Variables Example
+# Get-Noticed Terraform Variables Example
 # Copy this file to terraform.tfvars and fill in your values
 
 environment = "production"
@@ -9,7 +9,7 @@ vpc_cidr           = "10.0.0.0/16"
 availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
 
 # S3
-video_bucket_name = "talentvault-videos"
+video_bucket_name = "get-noticed-videos"
 
 # CloudFront
 cdn_domain_name = "cdn.yourdomain.com"
@@ -20,7 +20,7 @@ waf_rate_limit = 2000
 
 # RDS
 db_instance_class = "db.t3.medium"
-database_name     = "talentvault"
+database_name     = "get-noticed"
 database_username = "admin"
 database_password = "your-secure-password-here"
 
@@ -28,10 +28,10 @@ database_password = "your-secure-password-here"
 redis_node_type = "cache.t3.medium"
 
 # ECS
-api_image      = "123456789012.dkr.ecr.us-east-1.amazonaws.com/talentvault-api:latest"
-worker_image   = "123456789012.dkr.ecr.us-east-1.amazonaws.com/talentvault-worker:latest"
-ai_image       = "123456789012.dkr.ecr.us-east-1.amazonaws.com/talentvault-ai:latest"
-frontend_image = "123456789012.dkr.ecr.us-east-1.amazonaws.com/talentvault-frontend:latest"
+api_image      = "123456789012.dkr.ecr.us-east-1.amazonaws.com/get-noticed-api:latest"
+worker_image   = "123456789012.dkr.ecr.us-east-1.amazonaws.com/get-noticed-worker:latest"
+ai_image       = "123456789012.dkr.ecr.us-east-1.amazonaws.com/get-noticed-ai:latest"
+frontend_image = "123456789012.dkr.ecr.us-east-1.amazonaws.com/get-noticed-frontend:latest"
 
 api_cpu     = 512
 api_memory  = 1024

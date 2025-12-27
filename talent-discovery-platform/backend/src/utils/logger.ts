@@ -26,7 +26,7 @@ export const logger = winston.createLogger({
     errors({ stack: true }),
     logFormat
   ),
-  defaultMeta: { service: 'talentvault-api' },
+  defaultMeta: { service: 'get-noticed-api' },
   transports: [
     // Console transport
     new winston.transports.Console({

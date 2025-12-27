@@ -20,7 +20,7 @@ import dotenv from 'dotenv';
 
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
-const sequelize = new Sequelize(process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/talentvault', {
+const sequelize = new Sequelize(process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/get-noticed', {
   logging: false
 });
 

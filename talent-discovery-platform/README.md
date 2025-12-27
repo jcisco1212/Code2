@@ -1,4 +1,4 @@
-# TalentVault - AI-Powered Talent Discovery Platform
+# Get-Noticed - AI-Powered Talent Discovery Platform
 
 A comprehensive video sharing platform designed for talent discovery, featuring AI-powered performance scoring, talent ranking, and agent matching capabilities.
 

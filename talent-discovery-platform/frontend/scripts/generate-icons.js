@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Generate PWA icons for TalentVault
+ * Generate PWA icons for Get-Noticed
  * Run this script with: node scripts/generate-icons.js
  *
  * Prerequisites: npm install canvas
@@ -23,7 +23,7 @@ try {
 const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
 const iconsDir = path.join(__dirname, '../public/icons');
 
-// TalentVault brand colors
+// Get-Noticed brand colors
 const primaryColor = '#667eea';
 const secondaryColor = '#764ba2';
 

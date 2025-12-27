@@ -14,7 +14,7 @@ variable "alarm_email" {
 
 # SNS Topic for Alarms
 resource "aws_sns_topic" "alarms" {
-  name = "talentvault-${var.environment}-alarms"
+  name = "get-noticed-${var.environment}-alarms"
 
   tags = {
     Name = "Alarm Notifications"
@@ -29,7 +29,7 @@ resource "aws_sns_topic_subscription" "email" {
 
 # Dashboard
 resource "aws_cloudwatch_dashboard" "main" {
-  dashboard_name = "talentvault-${var.environment}"
+  dashboard_name = "get-noticed-${var.environment}"
 
   dashboard_body = jsonencode({
     widgets = [
@@ -43,7 +43,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           title  = "API Response Time"
           region = data.aws_region.current.name
           metrics = [
-            ["AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "talentvault-${var.environment}-alb", { stat = "Average" }],
+            ["AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "get-noticed-${var.environment}-alb", { stat = "Average" }],
             ["...", { stat = "p99" }]
           ]
         }
@@ -58,7 +58,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           title  = "API Request Count"
           region = data.aws_region.current.name
           metrics = [
-            ["AWS/ApplicationELB", "RequestCount", "LoadBalancer", "talentvault-${var.environment}-alb", { stat = "Sum" }]
+            ["AWS/ApplicationELB", "RequestCount", "LoadBalancer", "get-noticed-${var.environment}-alb", { stat = "Sum" }]
           ]
         }
       },
@@ -104,7 +104,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           title  = "RDS CPU"
           region = data.aws_region.current.name
           metrics = [
-            ["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", "talentvault-${var.environment}", { stat = "Average" }]
+            ["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", "get-noticed-${var.environment}", { stat = "Average" }]
           ]
         }
       },
@@ -118,7 +118,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           title  = "RDS Connections"
           region = data.aws_region.current.name
           metrics = [
-            ["AWS/RDS", "DatabaseConnections", "DBInstanceIdentifier", "talentvault-${var.environment}", { stat = "Average" }]
+            ["AWS/RDS", "DatabaseConnections", "DBInstanceIdentifier", "get-noticed-${var.environment}", { stat = "Average" }]
           ]
         }
       },
@@ -132,7 +132,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           title  = "Redis CPU"
           region = data.aws_region.current.name
           metrics = [
-            ["AWS/ElastiCache", "CPUUtilization", "CacheClusterId", "talentvault-${var.environment}", { stat = "Average" }]
+            ["AWS/ElastiCache", "CPUUtilization", "CacheClusterId", "get-noticed-${var.environment}", { stat = "Average" }]
           ]
         }
       },
@@ -146,8 +146,8 @@ resource "aws_cloudwatch_dashboard" "main" {
           title  = "SQS Messages"
           region = data.aws_region.current.name
           metrics = [
-            ["AWS/SQS", "ApproximateNumberOfMessagesVisible", "QueueName", "talentvault-${var.environment}-video-processing", { stat = "Sum" }],
-            ["...", "QueueName", "talentvault-${var.environment}-ai-analysis", { stat = "Sum" }]
+            ["AWS/SQS", "ApproximateNumberOfMessagesVisible", "QueueName", "get-noticed-${var.environment}-video-processing", { stat = "Sum" }],
+            ["...", "QueueName", "get-noticed-${var.environment}-ai-analysis", { stat = "Sum" }]
           ]
         }
       },
@@ -173,7 +173,7 @@ resource "aws_cloudwatch_dashboard" "main" {
 
 # API High Response Time
 resource "aws_cloudwatch_metric_alarm" "api_response_time" {
-  alarm_name          = "talentvault-${var.environment}-api-high-latency"
+  alarm_name          = "get-noticed-${var.environment}-api-high-latency"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 3
   metric_name         = "TargetResponseTime"
@@ -186,7 +186,7 @@ resource "aws_cloudwatch_metric_alarm" "api_response_time" {
   ok_actions          = [aws_sns_topic.alarms.arn]
 
   dimensions = {
-    LoadBalancer = "talentvault-${var.environment}-alb"
+    LoadBalancer = "get-noticed-${var.environment}-alb"
   }
 
   tags = {
@@ -196,7 +196,7 @@ resource "aws_cloudwatch_metric_alarm" "api_response_time" {
 
 # API 5xx Errors
 resource "aws_cloudwatch_metric_alarm" "api_5xx_errors" {
-  alarm_name          = "talentvault-${var.environment}-api-5xx-errors"
+  alarm_name          = "get-noticed-${var.environment}-api-5xx-errors"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 2
   metric_name         = "HTTPCode_Target_5XX_Count"
@@ -209,7 +209,7 @@ resource "aws_cloudwatch_metric_alarm" "api_5xx_errors" {
   ok_actions          = [aws_sns_topic.alarms.arn]
 
   dimensions = {
-    LoadBalancer = "talentvault-${var.environment}-alb"
+    LoadBalancer = "get-noticed-${var.environment}-alb"
   }
 
   tags = {
@@ -219,7 +219,7 @@ resource "aws_cloudwatch_metric_alarm" "api_5xx_errors" {
 
 # ECS CPU High
 resource "aws_cloudwatch_metric_alarm" "ecs_cpu_high" {
-  alarm_name          = "talentvault-${var.environment}-ecs-cpu-high"
+  alarm_name          = "get-noticed-${var.environment}-ecs-cpu-high"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 3
   metric_name         = "CPUUtilization"
@@ -242,7 +242,7 @@ resource "aws_cloudwatch_metric_alarm" "ecs_cpu_high" {
 
 # RDS CPU High
 resource "aws_cloudwatch_metric_alarm" "rds_cpu_high" {
-  alarm_name          = "talentvault-${var.environment}-rds-cpu-high"
+  alarm_name          = "get-noticed-${var.environment}-rds-cpu-high"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 3
   metric_name         = "CPUUtilization"
@@ -254,7 +254,7 @@ resource "aws_cloudwatch_metric_alarm" "rds_cpu_high" {
   alarm_actions       = [aws_sns_topic.alarms.arn]
 
   dimensions = {
-    DBInstanceIdentifier = "talentvault-${var.environment}"
+    DBInstanceIdentifier = "get-noticed-${var.environment}"
   }
 
   tags = {
@@ -264,7 +264,7 @@ resource "aws_cloudwatch_metric_alarm" "rds_cpu_high" {
 
 # RDS Storage Low
 resource "aws_cloudwatch_metric_alarm" "rds_storage_low" {
-  alarm_name          = "talentvault-${var.environment}-rds-storage-low"
+  alarm_name          = "get-noticed-${var.environment}-rds-storage-low"
   comparison_operator = "LessThanThreshold"
   evaluation_periods  = 1
   metric_name         = "FreeStorageSpace"
@@ -276,7 +276,7 @@ resource "aws_cloudwatch_metric_alarm" "rds_storage_low" {
   alarm_actions       = [aws_sns_topic.alarms.arn]
 
   dimensions = {
-    DBInstanceIdentifier = "talentvault-${var.environment}"
+    DBInstanceIdentifier = "get-noticed-${var.environment}"
   }
 
   tags = {
@@ -286,7 +286,7 @@ resource "aws_cloudwatch_metric_alarm" "rds_storage_low" {
 
 # SQS DLQ Messages
 resource "aws_cloudwatch_metric_alarm" "dlq_messages" {
-  alarm_name          = "talentvault-${var.environment}-dlq-messages"
+  alarm_name          = "get-noticed-${var.environment}-dlq-messages"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   metric_name         = "ApproximateNumberOfMessagesVisible"
@@ -298,7 +298,7 @@ resource "aws_cloudwatch_metric_alarm" "dlq_messages" {
   alarm_actions       = [aws_sns_topic.alarms.arn]
 
   dimensions = {
-    QueueName = "talentvault-${var.environment}-video-processing-dlq"
+    QueueName = "get-noticed-${var.environment}-video-processing-dlq"
   }
 
   tags = {
@@ -308,23 +308,23 @@ resource "aws_cloudwatch_metric_alarm" "dlq_messages" {
 
 # Log Metric Filters
 resource "aws_cloudwatch_log_metric_filter" "error_count" {
-  name           = "talentvault-${var.environment}-error-count"
+  name           = "get-noticed-${var.environment}-error-count"
   pattern        = "ERROR"
-  log_group_name = "/ecs/talentvault-${var.environment}"
+  log_group_name = "/ecs/get-noticed-${var.environment}"
 
   metric_transformation {
     name      = "ErrorCount"
-    namespace = "TalentVault/${var.environment}"
+    namespace = "Get-Noticed/${var.environment}"
     value     = "1"
   }
 }
 
 resource "aws_cloudwatch_metric_alarm" "error_count" {
-  alarm_name          = "talentvault-${var.environment}-error-count"
+  alarm_name          = "get-noticed-${var.environment}-error-count"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 2
   metric_name         = "ErrorCount"
-  namespace           = "TalentVault/${var.environment}"
+  namespace           = "Get-Noticed/${var.environment}"
   period              = 300
   statistic           = "Sum"
   threshold           = 50
