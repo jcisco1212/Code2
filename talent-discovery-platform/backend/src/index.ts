@@ -43,6 +43,7 @@ import clipsRoutes from './routes/clips';
 import compCardsRoutes from './routes/compCards';
 import chatRoomsRoutes from './routes/chatRooms';
 import contactRoutes from './routes/contact';
+import challengesRoutes from './routes/challenges';
 
 dotenv.config();
 
@@ -156,6 +157,7 @@ app.use('/api/v1/clips', clipsRoutes);
 app.use('/api/v1/comp-cards', compCardsRoutes);
 app.use('/api/v1/chat-rooms', chatRoomsRoutes);
 app.use('/api/v1/contact', contactRoutes);
+app.use('/api/v1/challenges', challengesRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

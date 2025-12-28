@@ -27,7 +27,8 @@ import {
   PencilIcon,
   MegaphoneIcon,
   DocumentIcon,
-  FilmIcon
+  FilmIcon,
+  TrophyIcon
 } from '@heroicons/react/24/outline';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
@@ -76,7 +77,8 @@ const Layout: React.FC = () => {
   const navigation = [
     { name: 'Home', href: '/', icon: HomeIcon },
     { name: 'Trending', href: '/trending', icon: FireIcon },
-    { name: 'Clips', href: '/clips', icon: FilmIcon }
+    { name: 'Clips', href: '/clips', icon: FilmIcon },
+    { name: 'Challenges', href: '/challenges', icon: TrophyIcon }
   ];
 
   const userNavigation = isAuthenticated

@@ -14,6 +14,9 @@ import CompCard from './CompCard';
 import ChatRoom, { ChatRoomType } from './ChatRoom';
 import ChatRoomMember, { MemberRole } from './ChatRoomMember';
 import ChatRoomMessage, { ChatMessageType } from './ChatRoomMessage';
+import Challenge, { ChallengeStatus } from './Challenge';
+import ChallengeEntry, { EntryStatus } from './ChallengeEntry';
+import ChallengeVote from './ChallengeVote';
 
 // User associations
 User.hasMany(Video, { foreignKey: 'userId', as: 'videos' });
@@ -115,6 +118,27 @@ ChatRoomMessage.belongsTo(ChatRoomMessage, { foreignKey: 'replyToId', as: 'reply
 ChatRoom.hasMany(ChatRoomMessage, { foreignKey: 'chatRoomId', as: 'messages' });
 User.hasMany(ChatRoomMessage, { foreignKey: 'senderId', as: 'chatMessages' });
 
+// Challenge associations
+Challenge.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+Challenge.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
+Challenge.belongsTo(User, { foreignKey: 'winnerId', as: 'winner' });
+Challenge.hasMany(ChallengeEntry, { foreignKey: 'challengeId', as: 'entries' });
+User.hasMany(Challenge, { foreignKey: 'createdBy', as: 'createdChallenges' });
+
+// ChallengeEntry associations
+ChallengeEntry.belongsTo(Challenge, { foreignKey: 'challengeId', as: 'challenge' });
+ChallengeEntry.belongsTo(Video, { foreignKey: 'videoId', as: 'video' });
+ChallengeEntry.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+ChallengeEntry.hasMany(ChallengeVote, { foreignKey: 'entryId', as: 'votes' });
+User.hasMany(ChallengeEntry, { foreignKey: 'userId', as: 'challengeEntries' });
+Video.hasMany(ChallengeEntry, { foreignKey: 'videoId', as: 'challengeEntries' });
+
+// ChallengeVote associations
+ChallengeVote.belongsTo(Challenge, { foreignKey: 'challengeId', as: 'challenge' });
+ChallengeVote.belongsTo(ChallengeEntry, { foreignKey: 'entryId', as: 'entry' });
+ChallengeVote.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+User.hasMany(ChallengeVote, { foreignKey: 'userId', as: 'challengeVotes' });
+
 export {
   User,
   UserRole,
@@ -145,7 +169,12 @@ export {
   ChatRoomMember,
   MemberRole,
   ChatRoomMessage,
-  ChatMessageType
+  ChatMessageType,
+  Challenge,
+  ChallengeStatus,
+  ChallengeEntry,
+  EntryStatus,
+  ChallengeVote
 };
 
 export default {
@@ -164,5 +193,8 @@ export default {
   CompCard,
   ChatRoom,
   ChatRoomMember,
-  ChatRoomMessage
+  ChatRoomMessage,
+  Challenge,
+  ChallengeEntry,
+  ChallengeVote
 };

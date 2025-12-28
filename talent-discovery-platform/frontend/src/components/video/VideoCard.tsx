@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { getUploadUrl } from '../../services/api';
+import ShareButton from './ShareButton';
 
 interface VideoCardProps {
   video: {
@@ -105,8 +106,13 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, featured, size = 'medium' 
           </div>
         )}
 
-        {/* Hover overlay */}
+        {/* Hover overlay with share button */}
         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+        {/* Share button on hover */}
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <ShareButton videoId={video.id} title={video.title} size="sm" />
+        </div>
       </div>
 
       {/* Video Info - YouTube Style */}

@@ -24,6 +24,8 @@ import Clips from './pages/Clips';
 import About from './pages/About';
 import Terms from './pages/Terms';
 import Contact from './pages/Contact';
+import Challenges from './pages/Challenges';
+import ChallengeDetail from './pages/ChallengeDetail';
 
 // Auth Pages
 import Login from './pages/auth/Login';
@@ -90,6 +92,8 @@ function App() {
               <Route path="category/:categorySlug" element={<Category />} />
               <Route path="trending" element={<Trending />} />
               <Route path="clips" element={<Clips />} />
+              <Route path="challenges" element={<Challenges />} />
+              <Route path="challenges/:id" element={<ChallengeDetail />} />
               <Route path="about" element={<About />} />
               <Route path="terms" element={<Terms />} />
               <Route path="contact" element={<Contact />} />

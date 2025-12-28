@@ -534,3 +534,34 @@ export const chatRoomsAPI = {
   discoverPublic: (params?: { type?: string; search?: string; limit?: number; offset?: number }) =>
     api.get('/chat-rooms/discover/public', { params })
 };
+
+export const challengesAPI = {
+  getChallenges: (params?: { status?: string; categoryId?: string; page?: number; limit?: number }) =>
+    api.get('/challenges', { params }),
+  getActive: () =>
+    api.get('/challenges/active'),
+  getFeatured: () =>
+    api.get('/challenges/featured'),
+  getChallenge: (id: string) =>
+    api.get(`/challenges/${id}`),
+  getEntries: (id: string, params?: { page?: number; limit?: number; sort?: string }) =>
+    api.get(`/challenges/${id}/entries`, { params }),
+  getLeaderboard: (id: string, limit?: number) =>
+    api.get(`/challenges/${id}/leaderboard`, { params: { limit } }),
+  createChallenge: (data: any) =>
+    api.post('/challenges', data),
+  updateChallenge: (id: string, data: any) =>
+    api.put(`/challenges/${id}`, data),
+  deleteChallenge: (id: string) =>
+    api.delete(`/challenges/${id}`),
+  submitEntry: (challengeId: string, videoId: string) =>
+    api.post(`/challenges/${challengeId}/entries`, { videoId }),
+  removeEntry: (challengeId: string, entryId: string) =>
+    api.delete(`/challenges/${challengeId}/entries/${entryId}`),
+  vote: (challengeId: string, entryId: string) =>
+    api.post(`/challenges/${challengeId}/vote`, { entryId }),
+  getMyVote: (challengeId: string) =>
+    api.get(`/challenges/${challengeId}/my-vote`),
+  getMyEntry: (challengeId: string) =>
+    api.get(`/challenges/${challengeId}/my-entry`)
+};
