@@ -44,6 +44,9 @@ import compCardsRoutes from './routes/compCards';
 import chatRoomsRoutes from './routes/chatRooms';
 import contactRoutes from './routes/contact';
 import challengesRoutes from './routes/challenges';
+import achievementsRoutes from './routes/achievements';
+import duetsRoutes from './routes/duets';
+import watchPartiesRoutes from './routes/watchParties';
 
 dotenv.config();
 
@@ -158,6 +161,9 @@ app.use('/api/v1/comp-cards', compCardsRoutes);
 app.use('/api/v1/chat-rooms', chatRoomsRoutes);
 app.use('/api/v1/contact', contactRoutes);
 app.use('/api/v1/challenges', challengesRoutes);
+app.use('/api/v1/achievements', achievementsRoutes);
+app.use('/api/v1/duets', duetsRoutes);
+app.use('/api/v1/watch-parties', watchPartiesRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

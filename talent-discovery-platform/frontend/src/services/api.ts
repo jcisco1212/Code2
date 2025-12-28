@@ -565,3 +565,73 @@ export const challengesAPI = {
   getMyEntry: (challengeId: string) =>
     api.get(`/challenges/${challengeId}/my-entry`)
 };
+
+export const achievementsAPI = {
+  getAll: () =>
+    api.get('/achievements'),
+  getMyAchievements: () =>
+    api.get('/achievements/me'),
+  getUserAchievements: (userId: string) =>
+    api.get(`/achievements/user/${userId}`),
+  getDisplayedAchievements: (userId: string) =>
+    api.get(`/achievements/user/${userId}/displayed`),
+  toggleDisplay: (achievementId: string, isDisplayed: boolean) =>
+    api.put(`/achievements/${achievementId}/display`, { isDisplayed }),
+  seedAchievements: () =>
+    api.post('/achievements/seed')
+};
+
+export const duetsAPI = {
+  getTrending: (limit?: number) =>
+    api.get('/duets/trending', { params: { limit } }),
+  getMyDuets: (params?: { page?: number; limit?: number }) =>
+    api.get('/duets/me', { params }),
+  getVideoDuets: (videoId: string, params?: { page?: number; limit?: number }) =>
+    api.get(`/duets/video/${videoId}`, { params }),
+  getDuet: (duetId: string) =>
+    api.get(`/duets/${duetId}`),
+  checkAllowed: (videoId: string) =>
+    api.get(`/duets/check/${videoId}`),
+  createDuet: (data: {
+    originalVideoId: string;
+    responseVideoId: string;
+    layout?: 'side_by_side' | 'top_bottom' | 'picture_in_picture' | 'green_screen';
+    audioMix?: 'both' | 'original' | 'response';
+    originalVolume?: number;
+    responseVolume?: number;
+    syncOffset?: number;
+  }) =>
+    api.post('/duets', data),
+  updateDuet: (duetId: string, data: any) =>
+    api.put(`/duets/${duetId}`, data),
+  deleteDuet: (duetId: string) =>
+    api.delete(`/duets/${duetId}`)
+};
+
+export const watchPartiesAPI = {
+  getActive: (params?: { page?: number; limit?: number }) =>
+    api.get('/watch-parties/active', { params }),
+  getMyParties: (type?: 'all' | 'hosted' | 'joined') =>
+    api.get('/watch-parties/me', { params: { type } }),
+  getParty: (partyId: string) =>
+    api.get(`/watch-parties/${partyId}`),
+  getByInvite: (inviteCode: string) =>
+    api.get(`/watch-parties/invite/${inviteCode}`),
+  createParty: (data: {
+    videoId: string;
+    title: string;
+    description?: string;
+    isPrivate?: boolean;
+    maxParticipants?: number;
+    scheduledAt?: string;
+  }) =>
+    api.post('/watch-parties', data),
+  joinParty: (partyId: string) =>
+    api.post(`/watch-parties/${partyId}/join`),
+  leaveParty: (partyId: string) =>
+    api.post(`/watch-parties/${partyId}/leave`),
+  updateState: (partyId: string, data: { status?: string; currentTime?: number; isPlaying?: boolean }) =>
+    api.put(`/watch-parties/${partyId}/state`, data),
+  endParty: (partyId: string) =>
+    api.post(`/watch-parties/${partyId}/end`)
+};

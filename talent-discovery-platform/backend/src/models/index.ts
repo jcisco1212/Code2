@@ -17,6 +17,11 @@ import ChatRoomMessage, { ChatMessageType } from './ChatRoomMessage';
 import Challenge, { ChallengeStatus } from './Challenge';
 import ChallengeEntry, { EntryStatus } from './ChallengeEntry';
 import ChallengeVote from './ChallengeVote';
+import Achievement, { AchievementCategory, AchievementRarity } from './Achievement';
+import UserAchievement from './UserAchievement';
+import Duet, { DuetLayout, DuetStatus } from './Duet';
+import WatchParty, { WatchPartyStatus } from './WatchParty';
+import WatchPartyParticipant from './WatchPartyParticipant';
 
 // User associations
 User.hasMany(Video, { foreignKey: 'userId', as: 'videos' });
@@ -139,6 +144,30 @@ ChallengeVote.belongsTo(ChallengeEntry, { foreignKey: 'entryId', as: 'entry' });
 ChallengeVote.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 User.hasMany(ChallengeVote, { foreignKey: 'userId', as: 'challengeVotes' });
 
+// Achievement associations
+UserAchievement.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+UserAchievement.belongsTo(Achievement, { foreignKey: 'achievementId', as: 'achievement' });
+User.hasMany(UserAchievement, { foreignKey: 'userId', as: 'achievements' });
+Achievement.hasMany(UserAchievement, { foreignKey: 'achievementId', as: 'userAchievements' });
+
+// Duet associations
+Duet.belongsTo(Video, { foreignKey: 'originalVideoId', as: 'originalVideo' });
+Duet.belongsTo(Video, { foreignKey: 'responseVideoId', as: 'responseVideo' });
+Duet.belongsTo(User, { foreignKey: 'creatorId', as: 'creator' });
+Video.hasMany(Duet, { foreignKey: 'originalVideoId', as: 'duets' });
+Video.hasMany(Duet, { foreignKey: 'responseVideoId', as: 'duetResponses' });
+User.hasMany(Duet, { foreignKey: 'creatorId', as: 'createdDuets' });
+
+// Watch Party associations
+WatchParty.belongsTo(User, { foreignKey: 'hostId', as: 'host' });
+WatchParty.belongsTo(Video, { foreignKey: 'videoId', as: 'video' });
+WatchParty.hasMany(WatchPartyParticipant, { foreignKey: 'watchPartyId', as: 'participants' });
+WatchPartyParticipant.belongsTo(WatchParty, { foreignKey: 'watchPartyId', as: 'watchParty' });
+WatchPartyParticipant.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+User.hasMany(WatchParty, { foreignKey: 'hostId', as: 'hostedParties' });
+User.hasMany(WatchPartyParticipant, { foreignKey: 'userId', as: 'partyParticipations' });
+Video.hasMany(WatchParty, { foreignKey: 'videoId', as: 'watchParties' });
+
 export {
   User,
   UserRole,
@@ -174,7 +203,17 @@ export {
   ChallengeStatus,
   ChallengeEntry,
   EntryStatus,
-  ChallengeVote
+  ChallengeVote,
+  Achievement,
+  AchievementCategory,
+  AchievementRarity,
+  UserAchievement,
+  Duet,
+  DuetLayout,
+  DuetStatus,
+  WatchParty,
+  WatchPartyStatus,
+  WatchPartyParticipant
 };
 
 export default {
@@ -196,5 +235,10 @@ export default {
   ChatRoomMessage,
   Challenge,
   ChallengeEntry,
-  ChallengeVote
+  ChallengeVote,
+  Achievement,
+  UserAchievement,
+  Duet,
+  WatchParty,
+  WatchPartyParticipant
 };

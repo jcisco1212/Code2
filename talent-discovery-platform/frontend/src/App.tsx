@@ -26,6 +26,10 @@ import Terms from './pages/Terms';
 import Contact from './pages/Contact';
 import Challenges from './pages/Challenges';
 import ChallengeDetail from './pages/ChallengeDetail';
+import Embed from './pages/Embed';
+import Achievements from './pages/Achievements';
+import Duets from './pages/Duets';
+import WatchParties from './pages/WatchParties';
 
 // Auth Pages
 import Login from './pages/auth/Login';
@@ -83,6 +87,9 @@ function App() {
           <BrowserRouter>
             <Toaster position="top-right" />
             <Routes>
+            {/* Embed Route (no layout) */}
+            <Route path="/embed/:videoId" element={<Embed />} />
+
             {/* Public Routes */}
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
@@ -94,6 +101,9 @@ function App() {
               <Route path="clips" element={<Clips />} />
               <Route path="challenges" element={<Challenges />} />
               <Route path="challenges/:id" element={<ChallengeDetail />} />
+              <Route path="achievements" element={<Achievements />} />
+              <Route path="duets" element={<Duets />} />
+              <Route path="watch-parties" element={<WatchParties />} />
               <Route path="about" element={<About />} />
               <Route path="terms" element={<Terms />} />
               <Route path="contact" element={<Contact />} />

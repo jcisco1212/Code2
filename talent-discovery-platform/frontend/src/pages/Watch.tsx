@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { videosAPI, savedVideosAPI, socialAPI, getUploadUrl } from '../services/api';
-import { EyeIcon, HeartIcon, ShareIcon, BookmarkIcon, EnvelopeIcon, ChatBubbleLeftIcon, LinkIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, HeartIcon, ShareIcon, BookmarkIcon, EnvelopeIcon, ChatBubbleLeftIcon, LinkIcon, XMarkIcon, CodeBracketIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 import Comments from '../components/video/Comments';
 import VideoCard from '../components/video/VideoCard';
+import EmbedModal from '../components/video/EmbedModal';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 
@@ -75,6 +76,7 @@ const Watch: React.FC = () => {
   const [followLoading, setFollowLoading] = useState(false);
   const [relatedVideos, setRelatedVideos] = useState<RelatedVideo[]>([]);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showEmbedModal, setShowEmbedModal] = useState(false);
   const [viewRecorded, setViewRecorded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const sessionIdRef = useRef<string>(generateSessionId());
@@ -379,6 +381,15 @@ const Watch: React.FC = () => {
                 )}
                 <span>{saved ? 'Saved' : 'Save'}</span>
               </button>
+
+              <button
+                onClick={() => setShowEmbedModal(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                title="Embed video"
+              >
+                <CodeBracketIcon className="w-5 h-5" />
+                <span className="hidden sm:inline">Embed</span>
+              </button>
             </div>
           </div>
 
@@ -597,6 +608,15 @@ const Watch: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Embed Modal */}
+      {showEmbedModal && video && (
+        <EmbedModal
+          videoId={video.id}
+          videoTitle={video.title}
+          onClose={() => setShowEmbedModal(false)}
+        />
       )}
     </div>
   );

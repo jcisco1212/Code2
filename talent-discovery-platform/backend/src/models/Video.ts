@@ -18,6 +18,12 @@ export enum VideoVisibility {
   PRIVATE = 'private'
 }
 
+export interface VideoChapter {
+  timestamp: number;
+  title: string;
+  thumbnailUrl?: string;
+}
+
 interface VideoAttributes {
   id: string;
   userId: string;
@@ -52,6 +58,7 @@ interface VideoAttributes {
   aiAnalysisStatus: string | null;
   aiAnalysisError: string | null;
   aiCategoryTags: string[] | null;
+  aiAutoTags: string[] | null;
   discoverScore: number;
   trendingScore: number;
   engagementScore: number;
@@ -67,6 +74,8 @@ interface VideoAttributes {
   scheduledAt: Date | null;
   customThumbnailUrl: string | null;
   isClip: boolean;
+  isAudio: boolean;
+  chapters: VideoChapter[] | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -77,10 +86,10 @@ interface VideoCreationAttributes extends Optional<VideoAttributes,
   'status' | 'visibility' | 'viewsCount' | 'likesCount' | 'dislikesCount' | 'commentsCount' |
   'sharesCount' | 'aiOverallScore' | 'aiVocalScore' | 'aiMovementScore' | 'aiExpressionScore' |
   'aiTimingScore' | 'aiPresenceScore' | 'aiPerformanceScore' | 'aiQualityScore' |
-  'aiAnalysisStatus' | 'aiAnalysisError' | 'aiCategoryTags' | 'discoverScore' | 'trendingScore' |
+  'aiAnalysisStatus' | 'aiAnalysisError' | 'aiCategoryTags' | 'aiAutoTags' | 'discoverScore' | 'trendingScore' |
   'engagementScore' | 'watchTimeTotal' | 'watchTimeAverage' | 'tags' | 'isFeatured' |
   'featuredAt' | 'commentsEnabled' | 'moderationStatus' | 'moderationNotes' | 'publishedAt' |
-  'scheduledAt' | 'customThumbnailUrl' | 'isClip' | 'createdAt' | 'updatedAt'
+  'scheduledAt' | 'customThumbnailUrl' | 'isClip' | 'isAudio' | 'chapters' | 'createdAt' | 'updatedAt'
 > {}
 
 class Video extends Model<VideoAttributes, VideoCreationAttributes> implements VideoAttributes {
@@ -132,6 +141,9 @@ class Video extends Model<VideoAttributes, VideoCreationAttributes> implements V
   declare scheduledAt: Date | null;
   declare customThumbnailUrl: string | null;
   declare isClip: boolean;
+  declare isAudio: boolean;
+  declare chapters: VideoChapter[] | null;
+  declare aiAutoTags: string[] | null;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 
@@ -186,8 +198,11 @@ class Video extends Model<VideoAttributes, VideoCreationAttributes> implements V
       aiPresenceScore: this.aiPresenceScore,
       aiPerformanceScore: this.aiPerformanceScore,
       tags: this.tags,
+      aiAutoTags: this.aiAutoTags,
       isFeatured: this.isFeatured,
       isClip: this.isClip,
+      isAudio: this.isAudio,
+      chapters: this.chapters,
       commentsEnabled: this.commentsEnabled,
       publishedAt: this.publishedAt,
       createdAt: this.createdAt,
@@ -437,6 +452,21 @@ Video.init(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
       field: 'is_clip'
+    },
+    isAudio: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      field: 'is_audio'
+    },
+    chapters: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: null
+    },
+    aiAutoTags: {
+      type: DataTypes.ARRAY(DataTypes.TEXT),
+      allowNull: true,
+      field: 'ai_auto_tags'
     },
     createdAt: {
       type: DataTypes.DATE,
