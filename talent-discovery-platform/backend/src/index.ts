@@ -47,6 +47,7 @@ import challengesRoutes from './routes/challenges';
 import achievementsRoutes from './routes/achievements';
 import duetsRoutes from './routes/duets';
 import watchPartiesRoutes from './routes/watchParties';
+import featureFlagsRoutes from './routes/featureFlags';
 
 dotenv.config();
 
@@ -164,6 +165,7 @@ app.use('/api/v1/challenges', challengesRoutes);
 app.use('/api/v1/achievements', achievementsRoutes);
 app.use('/api/v1/duets', duetsRoutes);
 app.use('/api/v1/watch-parties', watchPartiesRoutes);
+app.use('/api/v1/features', featureFlagsRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

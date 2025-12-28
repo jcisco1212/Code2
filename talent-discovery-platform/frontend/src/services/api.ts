@@ -635,3 +635,34 @@ export const watchPartiesAPI = {
   endParty: (partyId: string) =>
     api.post(`/watch-parties/${partyId}/end`)
 };
+
+export const featuresAPI = {
+  getEnabled: () =>
+    api.get('/features/enabled'),
+  checkFeature: (key: string) =>
+    api.get(`/features/check/${key}`),
+  getAll: (category?: string) =>
+    api.get('/features', { params: { category } }),
+  getStats: () =>
+    api.get('/features/stats'),
+  toggleFeature: (flagId: string, isEnabled: boolean) =>
+    api.put(`/features/${flagId}/toggle`, { isEnabled }),
+  updateFeature: (flagId: string, data: any) =>
+    api.put(`/features/${flagId}`, data),
+  createFeature: (data: {
+    key: string;
+    name: string;
+    description?: string;
+    category?: string;
+    isEnabled?: boolean;
+    enabledForRoles?: string[];
+    config?: Record<string, any>;
+  }) =>
+    api.post('/features', data),
+  deleteFeature: (flagId: string) =>
+    api.delete(`/features/${flagId}`),
+  seedFeatures: () =>
+    api.post('/features/seed'),
+  bulkToggle: (flagIds: string[], isEnabled: boolean) =>
+    api.put('/features/bulk-toggle', { flagIds, isEnabled })
+};

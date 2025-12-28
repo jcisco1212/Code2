@@ -22,6 +22,7 @@ import UserAchievement from './UserAchievement';
 import Duet, { DuetLayout, DuetStatus } from './Duet';
 import WatchParty, { WatchPartyStatus } from './WatchParty';
 import WatchPartyParticipant from './WatchPartyParticipant';
+import FeatureFlag, { FeatureCategory } from './FeatureFlag';
 
 // User associations
 User.hasMany(Video, { foreignKey: 'userId', as: 'videos' });
@@ -168,6 +169,10 @@ User.hasMany(WatchParty, { foreignKey: 'hostId', as: 'hostedParties' });
 User.hasMany(WatchPartyParticipant, { foreignKey: 'userId', as: 'partyParticipations' });
 Video.hasMany(WatchParty, { foreignKey: 'videoId', as: 'watchParties' });
 
+// FeatureFlag associations
+FeatureFlag.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+FeatureFlag.belongsTo(User, { foreignKey: 'updatedBy', as: 'updater' });
+
 export {
   User,
   UserRole,
@@ -213,7 +218,9 @@ export {
   DuetStatus,
   WatchParty,
   WatchPartyStatus,
-  WatchPartyParticipant
+  WatchPartyParticipant,
+  FeatureFlag,
+  FeatureCategory
 };
 
 export default {
@@ -240,5 +247,6 @@ export default {
   UserAchievement,
   Duet,
   WatchParty,
-  WatchPartyParticipant
+  WatchPartyParticipant,
+  FeatureFlag
 };

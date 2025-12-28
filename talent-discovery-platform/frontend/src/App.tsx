@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { store } from './store';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { FeatureProvider } from './contexts/FeatureContext';
 import { initializeCapacitor } from './utils/capacitor';
 
 // Layout
@@ -73,6 +74,7 @@ import AdminComplaints from './pages/admin/Complaints';
 import AdminAgentVerification from './pages/admin/AgentVerification';
 import AdminAnnouncements from './pages/admin/Announcements';
 import AdminAuditLogs from './pages/admin/AuditLogs';
+import AdminFeatureManagement from './pages/admin/FeatureManagement';
 
 function App() {
   // Initialize Capacitor for native platforms
@@ -84,8 +86,9 @@ function App() {
     <Provider store={store}>
       <ThemeProvider>
         <AuthProvider>
-          <BrowserRouter>
-            <Toaster position="top-right" />
+          <FeatureProvider>
+            <BrowserRouter>
+              <Toaster position="top-right" />
             <Routes>
             {/* Embed Route (no layout) */}
             <Route path="/embed/:videoId" element={<Embed />} />
@@ -157,12 +160,14 @@ function App() {
               <Route path="admin/verify-agents" element={<AdminRoute><AdminAgentVerification /></AdminRoute>} />
               <Route path="admin/announcements" element={<AdminRoute><AdminAnnouncements /></AdminRoute>} />
               <Route path="admin/audit-logs" element={<AdminRoute><AdminAuditLogs /></AdminRoute>} />
+              <Route path="admin/features" element={<AdminRoute><AdminFeatureManagement /></AdminRoute>} />
 
               {/* 404 */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
             </Routes>
-          </BrowserRouter>
+            </BrowserRouter>
+          </FeatureProvider>
         </AuthProvider>
       </ThemeProvider>
     </Provider>
