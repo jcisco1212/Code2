@@ -36,6 +36,10 @@ export interface SocialLinks {
 }
 
 export interface PrivacySettings {
+  profilePublic: boolean;
+  showEmail: boolean;
+  allowMessages: boolean;
+  showActivity: boolean;
   showAge: boolean;
   showDateOfBirth: boolean;
   showEthnicity: boolean;
@@ -185,7 +189,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       age: privacy.showAge ? this.age : null,
       dateOfBirth: privacy.showDateOfBirth ? this.dateOfBirth : null,
       ethnicity: privacy.showEthnicity ? this.ethnicity : null,
-      email: privacy.showEmail ? this.email : null,
+      email: privacy.showEmail ? this.email : undefined,
       photoGallery: this.photoGallery,
       artistType: this.artistType,
       genre: this.genre,
