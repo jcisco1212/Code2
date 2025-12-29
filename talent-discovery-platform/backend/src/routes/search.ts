@@ -35,7 +35,7 @@ router.get(
           include: [
             { model: User, as: 'user', attributes: ['id', 'username', 'avatarUrl'] }
           ],
-          order: [['views', 'DESC']],
+          order: [['viewsCount', 'DESC']],
           limit: Number(limit)
         });
         results.videos = videos.map(v => ({ ...v.toPublicJSON(), user: (v as any).user }));

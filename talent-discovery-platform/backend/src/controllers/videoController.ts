@@ -452,9 +452,9 @@ export const searchVideos = async (req: AuthRequest, res: Response, next: NextFu
 
     let orderClause: any[] = [['createdAt', 'DESC']];
     if (sortBy === 'views') {
-      orderClause = [['views', 'DESC']];
+      orderClause = [['viewsCount', 'DESC']];
     } else if (sortBy === 'likes') {
-      orderClause = [['likes', 'DESC']];
+      orderClause = [['likesCount', 'DESC']];
     } else if (sortBy === 'trending') {
       orderClause = [['trendingScore', 'DESC']];
     }
