@@ -48,6 +48,7 @@ const Settings: React.FC = () => {
 
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
@@ -185,6 +186,12 @@ const Settings: React.FC = () => {
       if (user.privacySettings) {
         setPrivacy(prev => ({
           ...prev,
+          // Main privacy settings
+          profilePublic: user.privacySettings?.profilePublic ?? true,
+          showEmail: user.privacySettings?.showEmail ?? false,
+          allowMessages: user.privacySettings?.allowMessages ?? true,
+          showActivity: user.privacySettings?.showActivity ?? true,
+          // Personal info visibility settings
           showAge: user.privacySettings?.showAge ?? true,
           showDateOfBirth: user.privacySettings?.showDateOfBirth ?? false,
           showEthnicity: user.privacySettings?.showEthnicity ?? true,
@@ -341,6 +348,45 @@ const Settings: React.FC = () => {
       // Reset the input so the same file can be selected again
       if (avatarInputRef.current) {
         avatarInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Invalid file type. Please use JPG, PNG, or WebP.');
+      return;
+    }
+
+    // Validate file size (10MB max for banners)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File too large. Maximum size is 10MB.');
+      return;
+    }
+
+    setUploadingBanner(true);
+    try {
+      // Upload the banner image - this also updates the user's bannerUrl
+      await uploadAPI.directBannerImageUpload(file);
+
+      // Refresh user data to show new banner
+      if (refreshUser) {
+        await refreshUser();
+      }
+
+      toast.success('Profile banner updated!');
+    } catch (err: any) {
+      toast.error(err.response?.data?.error?.message || 'Failed to upload banner');
+    } finally {
+      setUploadingBanner(false);
+      // Reset the input so the same file can be selected again
+      if (bannerInputRef.current) {
+        bannerInputRef.current.value = '';
       }
     }
   };
@@ -587,6 +633,47 @@ const Settings: React.FC = () => {
                   <div>
                     <h3 className="font-medium text-gray-900 dark:text-white">Profile Photo</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">JPG, PNG or WebP. Max 5MB.</p>
+                  </div>
+                </div>
+
+                {/* Banner Section */}
+                <div className="border-t dark:border-gray-700 pt-6">
+                  <h3 className="font-medium text-gray-900 dark:text-white mb-2">Profile Banner</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Add a custom banner image to your profile. Recommended size: 1920x400 pixels.
+                  </p>
+                  <div className="relative w-full h-32 rounded-lg overflow-hidden bg-gradient-to-r from-indigo-400 to-purple-500">
+                    {uploadingBanner ? (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                        <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
+                      </div>
+                    ) : user?.bannerUrl ? (
+                      <img
+                        src={getUploadUrl(user.bannerUrl) || ''}
+                        alt="Profile Banner"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-white/80 text-sm">No banner image set</span>
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => bannerInputRef.current?.click()}
+                      disabled={uploadingBanner}
+                      className="absolute bottom-2 right-2 flex items-center gap-2 px-3 py-1.5 bg-black/50 hover:bg-black/70 text-white text-sm rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      <CameraIcon className="w-4 h-4" />
+                      {user?.bannerUrl ? 'Change Banner' : 'Add Banner'}
+                    </button>
+                    <input
+                      ref={bannerInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={handleBannerUpload}
+                      className="hidden"
+                    />
                   </div>
                 </div>
 

@@ -215,6 +215,14 @@ export const uploadAPI = {
     return api.post('/upload/gallery-image/direct', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
+  },
+  // Direct banner image upload for profile banners
+  directBannerImageUpload: (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    return api.post('/upload/banner-image/direct', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
   }
 };
 

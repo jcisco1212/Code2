@@ -27,10 +27,12 @@ interface Video {
 interface User {
   id: string;
   username: string;
-  displayName: string;
+  displayName?: string;
+  firstName?: string;
+  lastName?: string;
   avatarUrl: string | null;
   bio: string | null;
-  followerCount: number;
+  followerCount?: number;
   role: string;
 }
 
@@ -144,7 +146,8 @@ const Search: React.FC = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const formatViews = (count: number) => {
+  const formatViews = (count: number | undefined | null) => {
+    if (count === undefined || count === null) return '0';
     if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
     if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
     return count.toString();
@@ -397,30 +400,39 @@ const Search: React.FC = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {users.map(user => (
-                    <Link
-                      key={user.id}
-                      to={`/profile/${user.username}`}
-                      className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm hover:shadow-lg transition-all flex items-center gap-4"
-                    >
-                      <img
-                        src={user.avatarUrl ? getUploadUrl(user.avatarUrl) || '/default-avatar.png' : '/default-avatar.png'}
-                        alt={user.displayName}
-                        className="w-16 h-16 rounded-full object-cover"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-semibold text-gray-900 dark:text-white truncate">{user.displayName}</h3>
-                        <p className="text-sm text-gray-500">@{user.username}</p>
-                        <p className="text-sm text-gray-400">{formatViews(user.followerCount)} followers</p>
-                        {user.bio && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1 mt-1">{user.bio}</p>
+                  {users.map(user => {
+                    // Construct display name from firstName + lastName if displayName is not available
+                    const displayName = user.displayName ||
+                      (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` :
+                       user.firstName || user.lastName || user.username);
+
+                    return (
+                      <Link
+                        key={user.id}
+                        to={`/profile/${user.username}`}
+                        className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm hover:shadow-lg transition-all flex items-center gap-4"
+                      >
+                        <img
+                          src={user.avatarUrl ? getUploadUrl(user.avatarUrl) || '/default-avatar.png' : '/default-avatar.png'}
+                          alt={displayName}
+                          className="w-16 h-16 rounded-full object-cover"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold text-gray-900 dark:text-white truncate">{displayName}</h3>
+                          <p className="text-sm text-gray-500">@{user.username}</p>
+                          {user.followerCount !== undefined && user.followerCount > 0 && (
+                            <p className="text-sm text-gray-400">{formatViews(user.followerCount)} followers</p>
+                          )}
+                          {user.bio && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1 mt-1">{user.bio}</p>
+                          )}
+                        </div>
+                        {user.role === 'creator' && (
+                          <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs rounded">Creator</span>
                         )}
-                      </div>
-                      {user.role === 'creator' && (
-                        <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs rounded">Creator</span>
-                      )}
-                    </Link>
-                  ))}
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </>

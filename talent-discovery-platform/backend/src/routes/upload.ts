@@ -726,6 +726,92 @@ router.post(
 );
 
 // ===========================================
+// Direct Banner Image Upload (for profile banner)
+// ===========================================
+
+// Configure multer for banner image uploads
+const bannerImageStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const authReq = req;
+    const userDir = path.join(UPLOADS_DIR, 'banners', authReq.userId || 'anonymous');
+    if (!fs.existsSync(userDir)) fs.mkdirSync(userDir, { recursive: true });
+    cb(null, userDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `banner${ext}`);
+  }
+});
+
+const bannerImageUpload = multer({
+  storage: bannerImageStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB for higher resolution banners
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Allowed: JPG, PNG, WebP'));
+    }
+  }
+});
+
+// Direct banner image upload - stores files locally and updates user profile
+router.post(
+  '/banner-image/direct',
+  authenticate as RequestHandler,
+  bannerImageUpload.single('image'),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.file) {
+        throw new BadRequestError('No image file uploaded');
+      }
+
+      const originalPath = req.file.path;
+      const ext = path.extname(req.file.originalname);
+      const optimizedFilename = `banner_optimized.jpg`;
+      const optimizedPath = path.join(path.dirname(originalPath), optimizedFilename);
+
+      // Resize and optimize banner to 1920x400 (standard banner aspect ratio)
+      await sharp(originalPath)
+        .resize(1920, 400, {
+          fit: 'cover',
+          position: 'center'
+        })
+        .jpeg({ quality: 85, progressive: true })
+        .toFile(optimizedPath);
+
+      // Remove original file
+      if (originalPath !== optimizedPath) {
+        try { fs.unlinkSync(originalPath); } catch (e) {}
+      }
+
+      // Generate a local URL for the image
+      const localKey = `banners/${req.userId}/${optimizedFilename}`;
+      const imageUrl = `/uploads/${localKey}`;
+
+      // Update user's bannerUrl directly
+      const { User } = await import('../models');
+      const user = await User.findByPk(req.userId);
+      if (user) {
+        await user.update({ bannerUrl: imageUrl });
+      }
+
+      logger.info(`Banner image uploaded for user ${req.userId}`);
+
+      res.json({
+        message: 'Banner image uploaded successfully',
+        imageUrl,
+        bannerUrl: imageUrl,
+        key: localKey
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// ===========================================
 // Direct Gallery Image Upload (for photo gallery)
 // ===========================================
 

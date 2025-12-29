@@ -250,6 +250,7 @@ router.get(
           { username: { [Op.iLike]: `%${searchTerm}%` } },
           { firstName: { [Op.iLike]: `%${searchTerm}%` } },
           { lastName: { [Op.iLike]: `%${searchTerm}%` } },
+          { displayName: { [Op.iLike]: `%${searchTerm}%` } },
           { bio: { [Op.iLike]: `%${searchTerm}%` } }
         ];
       }
@@ -308,7 +309,7 @@ router.get(
       const { count, rows } = await User.findAndCountAll({
         where,
         attributes: [
-          'id', 'username', 'firstName', 'lastName', 'avatarUrl', 'bio',
+          'id', 'username', 'displayName', 'firstName', 'lastName', 'avatarUrl', 'bio',
           'role', 'location', 'gender', 'dateOfBirth', 'ethnicity',
           'artistType', 'genre', 'talentCategories', 'photoGallery', 'isVerified', 'createdAt'
         ],

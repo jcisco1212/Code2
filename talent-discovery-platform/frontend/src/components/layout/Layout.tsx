@@ -219,7 +219,7 @@ const Layout: React.FC = () => {
                           {({ active }) => (
                             <Link
                               to={`/profile/${user?.username}`}
-                              className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:text-white transition-colors`}
+                              className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-800 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white transition-colors`}
                             >
                               <UserCircleIcon className="w-5 h-5" />
                               Your Profile
@@ -230,7 +230,7 @@ const Layout: React.FC = () => {
                           {({ active }) => (
                             <Link
                               to="/studio"
-                              className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:text-white transition-colors`}
+                              className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-800 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white transition-colors`}
                             >
                               <ChartBarIcon className="w-5 h-5" />
                               Creator Studio
@@ -241,7 +241,7 @@ const Layout: React.FC = () => {
                           {({ active }) => (
                             <Link
                               to="/library"
-                              className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:text-white transition-colors`}
+                              className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-800 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white transition-colors`}
                             >
                               <FolderIcon className="w-5 h-5" />
                               Library
@@ -252,7 +252,7 @@ const Layout: React.FC = () => {
                           {({ active }) => (
                             <Link
                               to="/messages"
-                              className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:text-white transition-colors`}
+                              className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-800 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white transition-colors`}
                             >
                               <EnvelopeIcon className="w-5 h-5" />
                               Messages
@@ -263,7 +263,7 @@ const Layout: React.FC = () => {
                           {({ active }) => (
                             <Link
                               to="/settings"
-                              className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:text-white transition-colors`}
+                              className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-800 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white transition-colors`}
                             >
                               <Cog6ToothIcon className="w-5 h-5" />
                               Settings
@@ -275,7 +275,7 @@ const Layout: React.FC = () => {
                             {({ active }) => (
                               <Link
                                 to="/agent"
-                                className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:text-white transition-colors`}
+                                className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-800 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white transition-colors`}
                               >
                                 <ChartBarIcon className="w-5 h-5" />
                                 Agent Dashboard
@@ -284,17 +284,30 @@ const Layout: React.FC = () => {
                           </Menu.Item>
                         )}
                         {(user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'moderator') && (
-                          <Menu.Item>
-                            {({ active }) => (
-                              <Link
-                                to="/admin"
-                                className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:text-white transition-colors`}
-                              >
-                                <Cog6ToothIcon className="w-5 h-5" />
-                                Admin Panel
-                              </Link>
-                            )}
-                          </Menu.Item>
+                          <>
+                            <Menu.Item>
+                              {({ active }) => (
+                                <Link
+                                  to="/admin"
+                                  className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-800 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white transition-colors`}
+                                >
+                                  <Cog6ToothIcon className="w-5 h-5" />
+                                  Admin Panel
+                                </Link>
+                              )}
+                            </Menu.Item>
+                            <Menu.Item>
+                              {({ active }) => (
+                                <Link
+                                  to="/admin/features"
+                                  className={`${active ? 'bg-white/10' : ''} flex items-center gap-3 px-4 py-2.5 text-sm text-gray-800 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white transition-colors`}
+                                >
+                                  <Cog6ToothIcon className="w-5 h-5" />
+                                  Feature Flags
+                                </Link>
+                              )}
+                            </Menu.Item>
+                          </>
                         )}
                       </div>
                       {/* Dark Mode Toggle */}
