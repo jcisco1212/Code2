@@ -241,8 +241,20 @@ const Watch: React.FC = () => {
 
   const handleTextShare = () => {
     const text = encodeURIComponent(`Check out this video: ${video?.title} ${window.location.href}`);
-    window.open(`sms:?body=${text}`, '_blank');
-    toast.success('Opening SMS app...');
+    const smsUrl = `sms:?body=${text}`;
+
+    // Try to detect if we're on mobile
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      // On mobile, use location.href for native protocol handling
+      window.location.href = smsUrl;
+      toast.success('Opening SMS app...');
+    } else {
+      // On desktop, copy to clipboard instead and show message
+      navigator.clipboard.writeText(`Check out this video: ${video?.title} ${window.location.href}`);
+      toast.success('Message copied to clipboard! SMS sharing works best on mobile devices.');
+    }
     setShowShareModal(false);
   };
 

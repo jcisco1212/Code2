@@ -442,7 +442,11 @@ export const searchVideos = async (req: AuthRequest, res: Response, next: NextFu
       [Op.or]: [
         { title: { [Op.iLike]: `%${searchTerm}%` } },
         { description: { [Op.iLike]: `%${searchTerm}%` } },
-        { tags: { [Op.contains]: [searchTerm] } }
+        { tags: { [Op.contains]: [searchTerm] } },
+        { '$user.username$': { [Op.iLike]: `%${searchTerm}%` } },
+        { '$user.first_name$': { [Op.iLike]: `%${searchTerm}%` } },
+        { '$user.last_name$': { [Op.iLike]: `%${searchTerm}%` } },
+        { '$user.display_name$': { [Op.iLike]: `%${searchTerm}%` } }
       ]
     };
 
@@ -467,7 +471,8 @@ export const searchVideos = async (req: AuthRequest, res: Response, next: NextFu
       ],
       order: orderClause,
       limit: Number(limit),
-      offset
+      offset,
+      subQuery: false  // Required for searching on associated model columns
     });
 
     res.json({
