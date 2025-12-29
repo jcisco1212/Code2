@@ -157,6 +157,10 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
 
   public toPublicJSON(): Partial<UserAttributes> & { age?: number | null; dateOfBirth?: Date | null } {
     const privacy = this.privacySettings || {
+      profilePublic: true,
+      showEmail: false,
+      allowMessages: true,
+      showActivity: true,
       showAge: true,
       showDateOfBirth: false,
       showEthnicity: true,
@@ -181,6 +185,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       age: privacy.showAge ? this.age : null,
       dateOfBirth: privacy.showDateOfBirth ? this.dateOfBirth : null,
       ethnicity: privacy.showEthnicity ? this.ethnicity : null,
+      email: privacy.showEmail ? this.email : null,
       photoGallery: this.photoGallery,
       artistType: this.artistType,
       genre: this.genre,

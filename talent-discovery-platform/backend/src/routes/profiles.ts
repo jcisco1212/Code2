@@ -376,6 +376,10 @@ router.put(
 
       // Merge with existing privacy settings
       const currentPrivacy = user.privacySettings || {
+        profilePublic: true,
+        showEmail: false,
+        allowMessages: true,
+        showActivity: true,
         showAge: true,
         showDateOfBirth: false,
         showEthnicity: true,
@@ -385,6 +389,10 @@ router.put(
 
       const updatedPrivacy = {
         ...currentPrivacy,
+        ...(settings.profilePublic !== undefined && { profilePublic: Boolean(settings.profilePublic) }),
+        ...(settings.showEmail !== undefined && { showEmail: Boolean(settings.showEmail) }),
+        ...(settings.allowMessages !== undefined && { allowMessages: Boolean(settings.allowMessages) }),
+        ...(settings.showActivity !== undefined && { showActivity: Boolean(settings.showActivity) }),
         ...(settings.showAge !== undefined && { showAge: Boolean(settings.showAge) }),
         ...(settings.showDateOfBirth !== undefined && { showDateOfBirth: Boolean(settings.showDateOfBirth) }),
         ...(settings.showEthnicity !== undefined && { showEthnicity: Boolean(settings.showEthnicity) }),

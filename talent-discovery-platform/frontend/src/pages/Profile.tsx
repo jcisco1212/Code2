@@ -38,6 +38,7 @@ interface UserProfile {
   dateOfBirth?: string | null;
   gender?: string | null;
   ethnicity?: string | null;
+  email?: string | null;
   isOwnProfile?: boolean;
 }
 
@@ -182,7 +183,7 @@ const Profile: React.FC = () => {
         <div className="h-64 md:h-80 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 relative overflow-hidden">
           {profile.bannerUrl ? (
             <img
-              src={profile.bannerUrl}
+              src={getUploadUrl(profile.bannerUrl) || ''}
               alt="Banner"
               className="w-full h-full object-cover"
             />
@@ -238,6 +239,17 @@ const Profile: React.FC = () => {
                         )}
                       </div>
                       <p className="text-gray-500 dark:text-gray-400 mt-1">@{profile.username}</p>
+                      {profile.email && (
+                        <a
+                          href={`mailto:${profile.email}`}
+                          className="flex items-center gap-1.5 text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 mt-1"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                          </svg>
+                          {profile.email}
+                        </a>
+                      )}
                     </div>
 
                     {/* Action Buttons */}
