@@ -13,7 +13,11 @@ export enum NotificationType {
   AGENT_MESSAGE = 'agent_message',
   AGENT_BOOKMARK = 'agent_bookmark',
   SYSTEM_ANNOUNCEMENT = 'system_announcement',
-  MODERATION_ACTION = 'moderation_action'
+  MODERATION_ACTION = 'moderation_action',
+  DUET = 'duet',
+  WATCH_PARTY = 'watch_party',
+  ACHIEVEMENT = 'achievement',
+  CHALLENGE = 'challenge'
 }
 
 interface NotificationAttributes {

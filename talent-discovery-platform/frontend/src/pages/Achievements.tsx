@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { achievementsAPI } from '../services/api';
-import { TrophyIcon, SparklesIcon, StarIcon, FireIcon, LockClosedIcon } from '@heroicons/react/24/outline';
-import { TrophyIcon as TrophySolidIcon, CheckBadgeIcon } from '@heroicons/react/24/solid';
+import { SparklesIcon, StarIcon, FireIcon, LockClosedIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { StarIcon as StarSolidIcon, CheckBadgeIcon } from '@heroicons/react/24/solid';
 
 interface Achievement {
   id: string;
@@ -30,7 +30,7 @@ const CATEGORY_LABELS: Record<string, { label: string; icon: React.ReactNode; co
   uploads: { label: 'Uploads', icon: <SparklesIcon className="w-5 h-5" />, color: 'text-blue-400' },
   views: { label: 'Views', icon: <FireIcon className="w-5 h-5" />, color: 'text-orange-400' },
   engagement: { label: 'Engagement', icon: <StarIcon className="w-5 h-5" />, color: 'text-yellow-400' },
-  social: { label: 'Social', icon: <TrophyIcon className="w-5 h-5" />, color: 'text-purple-400' },
+  social: { label: 'Social', icon: <UserGroupIcon className="w-5 h-5" />, color: 'text-purple-400' },
   special: { label: 'Special', icon: <CheckBadgeIcon className="w-5 h-5" />, color: 'text-red-400' }
 };
 
@@ -146,7 +146,7 @@ const Achievements: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <TrophySolidIcon className="w-8 h-8 text-yellow-500" />
+          <StarSolidIcon className="w-8 h-8 text-yellow-500" />
           <div>
             <h1 className="text-2xl font-bold text-white">Achievements</h1>
             <p className="text-gray-400">Unlock badges and earn XP</p>
@@ -201,7 +201,7 @@ const Achievements: React.FC = () => {
       {/* Achievements Grid */}
       {filteredAchievements.length === 0 ? (
         <div className="text-center py-16">
-          <TrophyIcon className="w-16 h-16 mx-auto text-gray-600 mb-4" />
+          <StarIcon className="w-16 h-16 mx-auto text-gray-600 mb-4" />
           <h3 className="text-lg font-medium text-white mb-2">No Achievements Found</h3>
           <p className="text-gray-400">
             {showEarnedOnly ? 'Start creating to earn your first achievement!' : 'Check back soon for new achievements!'}
@@ -308,7 +308,7 @@ const Achievements: React.FC = () => {
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <TrophyIcon className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+            <StarSolidIcon className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
             <div>
               <div className="font-medium text-white">Unlock Badges</div>
               <div className="text-gray-400">Complete requirements to unlock special badges for your profile</div>

@@ -73,7 +73,7 @@ class Challenge extends Model<ChallengeAttributes, ChallengeCreationAttributes> 
   get isVoting(): boolean {
     const now = new Date();
     return this.status === ChallengeStatus.VOTING ||
-           (this.votingEndDate && now > this.endDate && now <= this.votingEndDate);
+           (this.votingEndDate !== null && now > this.endDate && now <= this.votingEndDate);
   }
 
   get timeRemaining(): number {

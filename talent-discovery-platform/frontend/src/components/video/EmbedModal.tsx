@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { XMarkIcon, ClipboardIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ClipboardDocumentIcon, CheckIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
 interface EmbedModalProps {
@@ -138,7 +138,7 @@ const EmbedModal: React.FC<EmbedModalProps> = ({ videoId, videoTitle, onClose })
                 {copied ? (
                   <CheckIcon className="w-4 h-4 text-green-400" />
                 ) : (
-                  <ClipboardIcon className="w-4 h-4 text-gray-400" />
+                  <ClipboardDocumentIcon className="w-4 h-4 text-gray-400" />
                 )}
               </button>
             </div>
@@ -161,7 +161,7 @@ const EmbedModal: React.FC<EmbedModalProps> = ({ videoId, videoTitle, onClose })
                 }}
                 className="px-3 py-2 bg-[#404040] hover:bg-[#505050] rounded-lg transition-colors"
               >
-                <ClipboardIcon className="w-4 h-4 text-gray-400" />
+                <ClipboardDocumentIcon className="w-4 h-4 text-gray-400" />
               </button>
             </div>
           </div>

@@ -3,8 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { challengesAPI, videosAPI, getUploadUrl } from '../services/api';
-import { TrophyIcon, ClockIcon, UserGroupIcon, CheckCircleIcon, PlayIcon } from '@heroicons/react/24/outline';
-import { TrophyIcon as TrophySolidIcon, HeartIcon } from '@heroicons/react/24/solid';
+import { ClockIcon, UserGroupIcon, CheckCircleIcon, PlayIcon, StarIcon } from '@heroicons/react/24/outline';
+import { StarIcon as StarSolidIcon, HeartIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 
 interface Challenge {
@@ -272,7 +272,7 @@ const ChallengeDetail: React.FC = () => {
   if (!challenge) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-        <TrophyIcon className="w-16 h-16 mx-auto text-gray-600 mb-4" />
+        <StarIcon className="w-16 h-16 mx-auto text-gray-600 mb-4" />
         <h2 className="text-xl font-bold text-white mb-2">Challenge Not Found</h2>
         <Link to="/challenges" className="text-red-500 hover:text-red-400">
           Back to Challenges
@@ -316,7 +316,7 @@ const ChallengeDetail: React.FC = () => {
             <div className="flex flex-wrap items-center gap-4 text-sm">
               {challenge.prize && (
                 <div className="flex items-center gap-1 text-yellow-400">
-                  <TrophySolidIcon className="w-5 h-5" />
+                  <StarSolidIcon className="w-5 h-5" />
                   <span className="font-semibold">{challenge.prize}</span>
                 </div>
               )}
@@ -478,7 +478,7 @@ const ChallengeDetail: React.FC = () => {
         <div>
           <div className="bg-[#282828] rounded-xl p-6 sticky top-4">
             <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <TrophySolidIcon className="w-5 h-5 text-yellow-400" />
+              <StarSolidIcon className="w-5 h-5 text-yellow-400" />
               Leaderboard
             </h2>
             {leaderboard.length === 0 ? (

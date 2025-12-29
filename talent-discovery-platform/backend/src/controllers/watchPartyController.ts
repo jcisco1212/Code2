@@ -5,7 +5,7 @@ import WatchParty, { WatchPartyStatus } from '../models/WatchParty';
 import WatchPartyParticipant from '../models/WatchPartyParticipant';
 import Video from '../models/Video';
 import User from '../models/User';
-import Notification from '../models/Notification';
+import Notification, { NotificationType } from '../models/Notification';
 
 // Generate unique invite code
 const generateInviteCode = (): string => {
@@ -315,11 +315,10 @@ export const joinParty = async (req: Request, res: Response) => {
       const user = await User.findByPk(userId);
       await Notification.create({
         userId: party.hostId,
-        type: 'watch_party',
+        type: NotificationType.WATCH_PARTY,
         title: 'New Participant',
-        content: `${user?.username || 'Someone'} joined your watch party`,
-        relatedId: partyId,
-        relatedType: 'watch_party'
+        message: `${user?.username || 'Someone'} joined your watch party`,
+        data: { watchPartyId: partyId }
       });
     }
 

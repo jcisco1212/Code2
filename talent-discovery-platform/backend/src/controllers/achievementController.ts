@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import { Achievement, UserAchievement, User, Video, Follow } from '../models';
 import { logger } from '../utils/logger';
 
@@ -296,7 +296,7 @@ export const getDisplayedAchievements = async (req: Request, res: Response, next
       where: {
         userId,
         isDisplayed: true,
-        earnedAt: { [Op.ne]: null }
+        earnedAt: { [Op.ne]: null as unknown as Date }
       },
       include: [
         { model: Achievement, as: 'achievement' }

@@ -162,7 +162,9 @@ export const videosAPI = {
   likeVideo: (id: string) =>
     api.post(`/likes/video/${id}`, { type: 'like' }),
   unlikeVideo: (id: string) =>
-    api.post(`/likes/video/${id}`, { type: 'like' })
+    api.post(`/likes/video/${id}`, { type: 'like' }),
+  getUserVideos: (userId: string, params?: any) =>
+    api.get(`/videos/user/${userId}`, { params })
 };
 
 export const clipsAPI = {

@@ -104,6 +104,10 @@ declare module '@heroicons/react/24/outline' {
   export const ArrowTrendingUpIcon: ComponentType<SVGProps<SVGSVGElement>>;
   export const KeyIcon: ComponentType<SVGProps<SVGSVGElement>>;
   export const PaintBrushIcon: ComponentType<SVGProps<SVGSVGElement>>;
+  export const CheckCircleIcon: ComponentType<SVGProps<SVGSVGElement>>;
+  export const CheckBadgeIcon: ComponentType<SVGProps<SVGSVGElement>>;
+  export const SquaresPlusIcon: ComponentType<SVGProps<SVGSVGElement>>;
+  export const BeakerIcon: ComponentType<SVGProps<SVGSVGElement>>;
 }
 
 declare module '@heroicons/react/24/solid' {
@@ -128,6 +132,7 @@ declare module '@heroicons/react/24/solid' {
   export const BookmarkIcon: ComponentType<SVGProps<SVGSVGElement>>;
   export const FunnelIcon: ComponentType<SVGProps<SVGSVGElement>>;
   export const PlayIcon: ComponentType<SVGProps<SVGSVGElement>>;
+  export const PauseIcon: ComponentType<SVGProps<SVGSVGElement>>;
   export const ArrowRightIcon: ComponentType<SVGProps<SVGSVGElement>>;
   export const UserIcon: ComponentType<SVGProps<SVGSVGElement>>;
   export const CameraIcon: ComponentType<SVGProps<SVGSVGElement>>;
@@ -147,6 +152,12 @@ declare module '@heroicons/react/24/solid' {
   export const StarIcon: ComponentType<SVGProps<SVGSVGElement>>;
   export const HandThumbUpIcon: ComponentType<SVGProps<SVGSVGElement>>;
   export const HandThumbDownIcon: ComponentType<SVGProps<SVGSVGElement>>;
+  export const SpeakerWaveIcon: ComponentType<SVGProps<SVGSVGElement>>;
+  export const SpeakerXMarkIcon: ComponentType<SVGProps<SVGSVGElement>>;
+  export const ArrowsPointingOutIcon: ComponentType<SVGProps<SVGSVGElement>>;
+  export const TvIcon: ComponentType<SVGProps<SVGSVGElement>>;
+  export const CheckBadgeIcon: ComponentType<SVGProps<SVGSVGElement>>;
+  export const UsersIcon: ComponentType<SVGProps<SVGSVGElement>>;
 }
 
 declare module '@heroicons/react/20/solid' {

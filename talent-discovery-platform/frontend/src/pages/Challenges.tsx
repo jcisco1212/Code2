@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { challengesAPI, getUploadUrl } from '../services/api';
-import { TrophyIcon, ClockIcon, UserGroupIcon, FireIcon } from '@heroicons/react/24/outline';
-import { TrophyIcon as TrophySolidIcon } from '@heroicons/react/24/solid';
+import { ClockIcon, UserGroupIcon, FireIcon, StarIcon } from '@heroicons/react/24/outline';
+import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 
 interface Challenge {
   id: string;
@@ -101,7 +101,7 @@ const Challenges: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 py-6">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
-        <TrophySolidIcon className="w-8 h-8 text-yellow-500" />
+        <StarSolidIcon className="w-8 h-8 text-yellow-500" />
         <div>
           <h1 className="text-2xl font-bold text-white">Challenges</h1>
           <p className="text-gray-400">Compete, create, and win prizes</p>
@@ -147,7 +147,7 @@ const Challenges: React.FC = () => {
                     </div>
                     {challenge.prize && (
                       <div className="flex items-center gap-1 text-yellow-400">
-                        <TrophyIcon className="w-4 h-4" />
+                        <StarIcon className="w-4 h-4" />
                         <span>{challenge.prize}</span>
                       </div>
                     )}
@@ -194,7 +194,7 @@ const Challenges: React.FC = () => {
         </div>
       ) : challenges.length === 0 ? (
         <div className="text-center py-16">
-          <TrophyIcon className="w-16 h-16 mx-auto text-gray-600 mb-4" />
+          <StarIcon className="w-16 h-16 mx-auto text-gray-600 mb-4" />
           <h3 className="text-lg font-medium text-white mb-2">No Challenges Found</h3>
           <p className="text-gray-400">Check back soon for new challenges!</p>
         </div>
@@ -220,7 +220,7 @@ const Challenges: React.FC = () => {
                 </div>
               ) : (
                 <div className="aspect-video bg-gradient-to-br from-red-600/30 to-purple-600/30 flex items-center justify-center">
-                  <TrophyIcon className="w-16 h-16 text-gray-600" />
+                  <StarIcon className="w-16 h-16 text-gray-600" />
                 </div>
               )}
               <div className="p-4">

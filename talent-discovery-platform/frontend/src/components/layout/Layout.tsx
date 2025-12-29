@@ -28,7 +28,7 @@ import {
   MegaphoneIcon,
   DocumentIcon,
   FilmIcon,
-  TrophyIcon,
+  StarIcon,
   UsersIcon
 } from '@heroicons/react/24/outline';
 import { Menu, Transition } from '@headlessui/react';
@@ -79,9 +79,9 @@ const Layout: React.FC = () => {
     { name: 'Home', href: '/', icon: HomeIcon },
     { name: 'Trending', href: '/trending', icon: FireIcon },
     { name: 'Clips', href: '/clips', icon: FilmIcon },
-    { name: 'Challenges', href: '/challenges', icon: TrophyIcon },
+    { name: 'Challenges', href: '/challenges', icon: FireIcon },
     { name: 'Duets', href: '/duets', icon: UsersIcon },
-    { name: 'Achievements', href: '/achievements', icon: TrophyIcon }
+    { name: 'Achievements', href: '/achievements', icon: StarIcon }
   ];
 
   const userNavigation = isAuthenticated

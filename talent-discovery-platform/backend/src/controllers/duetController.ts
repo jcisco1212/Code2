@@ -3,7 +3,7 @@ import { Op } from 'sequelize';
 import Duet, { DuetLayout, DuetStatus } from '../models/Duet';
 import Video from '../models/Video';
 import User from '../models/User';
-import Notification from '../models/Notification';
+import Notification, { NotificationType } from '../models/Notification';
 
 // Get all duets for a video
 export const getVideoDuets = async (req: Request, res: Response) => {
@@ -146,11 +146,10 @@ export const createDuet = async (req: Request, res: Response) => {
     if (originalVideo.userId !== userId) {
       await Notification.create({
         userId: originalVideo.userId,
-        type: 'duet',
+        type: NotificationType.DUET,
         title: 'New Duet',
-        content: `Someone created a duet with your video "${originalVideo.title}"`,
-        relatedId: duet.id,
-        relatedType: 'duet'
+        message: `Someone created a duet with your video "${originalVideo.title}"`,
+        data: { duetId: duet.id }
       });
     }
 
