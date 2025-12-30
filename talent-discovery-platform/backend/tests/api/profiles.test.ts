@@ -1,11 +1,15 @@
 import request from 'supertest';
-import { app } from '../../src/index';
-import { randomString } from '../helpers';
+import { getTestApp, randomString } from '../helpers';
 
 describe('Profile API', () => {
+  let app: any;
   let authToken: string;
   let userId: string;
   let username: string;
+
+  beforeAll(async () => {
+    app = await getTestApp();
+  });
 
   beforeEach(async () => {
     const timestamp = Date.now();
@@ -13,7 +17,7 @@ describe('Profile API', () => {
     username = `testuser_${timestamp}`;
 
     const registerRes = await request(app)
-      .post('/api/auth/register')
+      .post('/api/v1/auth/register')
       .send({
         email,
         username,
@@ -23,13 +27,13 @@ describe('Profile API', () => {
       });
 
     authToken = registerRes.body.token;
-    userId = registerRes.body.user.id;
+    userId = registerRes.body.user?.id;
   });
 
-  describe('GET /api/profiles/:username', () => {
+  describe('GET /api/v1/profiles/:username', () => {
     it('should get public profile by username', async () => {
       const res = await request(app)
-        .get(`/api/profiles/${username}`);
+        .get(`/api/v1/profiles/${username}`);
 
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('user');
@@ -39,16 +43,16 @@ describe('Profile API', () => {
 
     it('should return 404 for non-existent username', async () => {
       const res = await request(app)
-        .get('/api/profiles/nonexistent_user_12345');
+        .get('/api/v1/profiles/nonexistent_user_12345');
 
       expect(res.status).toBe(404);
     });
   });
 
-  describe('PUT /api/profiles/me', () => {
+  describe('PUT /api/v1/profiles/me', () => {
     it('should update own profile', async () => {
       const res = await request(app)
-        .put('/api/profiles/me')
+        .put('/api/v1/profiles/me')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           bio: 'Updated bio text',
@@ -62,7 +66,7 @@ describe('Profile API', () => {
 
     it('should update display name', async () => {
       const res = await request(app)
-        .put('/api/profiles/me')
+        .put('/api/v1/profiles/me')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           displayName: 'My Stage Name'
@@ -74,7 +78,7 @@ describe('Profile API', () => {
 
     it('should reject update without authentication', async () => {
       const res = await request(app)
-        .put('/api/profiles/me')
+        .put('/api/v1/profiles/me')
         .send({
           bio: 'Updated bio'
         });
@@ -83,10 +87,10 @@ describe('Profile API', () => {
     });
   });
 
-  describe('PUT /api/profiles/me/privacy', () => {
+  describe('PUT /api/v1/profiles/me/privacy', () => {
     it('should update privacy settings', async () => {
       const res = await request(app)
-        .put('/api/profiles/me/privacy')
+        .put('/api/v1/profiles/me/privacy')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           showEmail: false,
@@ -99,10 +103,10 @@ describe('Profile API', () => {
     });
   });
 
-  describe('PUT /api/profiles/me/social-links', () => {
+  describe('PUT /api/v1/profiles/me/social-links', () => {
     it('should update social links', async () => {
       const res = await request(app)
-        .put('/api/profiles/me/social-links')
+        .put('/api/v1/profiles/me/social-links')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           website: 'https://example.com',
@@ -116,7 +120,7 @@ describe('Profile API', () => {
 
     it('should validate URL format', async () => {
       const res = await request(app)
-        .put('/api/profiles/me/social-links')
+        .put('/api/v1/profiles/me/social-links')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           website: 'not-a-valid-url'
@@ -127,10 +131,10 @@ describe('Profile API', () => {
     });
   });
 
-  describe('PUT /api/profiles/me/banner-settings', () => {
+  describe('PUT /api/v1/profiles/me/banner-settings', () => {
     it('should update banner to solid color', async () => {
       const res = await request(app)
-        .put('/api/profiles/me/banner-settings')
+        .put('/api/v1/profiles/me/banner-settings')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           bannerSettings: {
@@ -146,7 +150,7 @@ describe('Profile API', () => {
 
     it('should update banner to metallic style', async () => {
       const res = await request(app)
-        .put('/api/profiles/me/banner-settings')
+        .put('/api/v1/profiles/me/banner-settings')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           bannerSettings: {

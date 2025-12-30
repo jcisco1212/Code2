@@ -1,17 +1,21 @@
 import request from 'supertest';
-import { app } from '../../src/index';
-import { randomString } from '../helpers';
+import { getTestApp, randomString } from '../helpers';
 
 describe('Reports API', () => {
+  let app: any;
   let authToken: string;
   let userId: string;
+
+  beforeAll(async () => {
+    app = await getTestApp();
+  });
 
   beforeEach(async () => {
     const timestamp = Date.now();
     const email = `test_${timestamp}_${randomString(5)}@example.com`;
 
     const registerRes = await request(app)
-      .post('/api/auth/register')
+      .post('/api/v1/auth/register')
       .send({
         email,
         username: `testuser_${timestamp}`,
@@ -21,13 +25,13 @@ describe('Reports API', () => {
       });
 
     authToken = registerRes.body.token;
-    userId = registerRes.body.user.id;
+    userId = registerRes.body.user?.id;
   });
 
-  describe('POST /api/reports', () => {
+  describe('POST /api/v1/reports', () => {
     it('should require authentication', async () => {
       const res = await request(app)
-        .post('/api/reports')
+        .post('/api/v1/reports')
         .send({
           targetId: '00000000-0000-0000-0000-000000000000',
           targetType: 'video',
@@ -39,7 +43,7 @@ describe('Reports API', () => {
 
     it('should require valid targetType', async () => {
       const res = await request(app)
-        .post('/api/reports')
+        .post('/api/v1/reports')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           targetId: '00000000-0000-0000-0000-000000000000',
@@ -52,7 +56,7 @@ describe('Reports API', () => {
 
     it('should require valid report type', async () => {
       const res = await request(app)
-        .post('/api/reports')
+        .post('/api/v1/reports')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           targetId: '00000000-0000-0000-0000-000000000000',
@@ -65,7 +69,7 @@ describe('Reports API', () => {
 
     it('should return 404 for non-existent target', async () => {
       const res = await request(app)
-        .post('/api/reports')
+        .post('/api/v1/reports')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           targetId: '00000000-0000-0000-0000-000000000000',
@@ -98,17 +102,17 @@ describe('Reports API', () => {
     });
   });
 
-  describe('GET /api/reports/my-reports', () => {
+  describe('GET /api/v1/reports/my-reports', () => {
     it('should require authentication', async () => {
       const res = await request(app)
-        .get('/api/reports/my-reports');
+        .get('/api/v1/reports/my-reports');
 
       expect(res.status).toBe(401);
     });
 
     it('should return empty reports for new user', async () => {
       const res = await request(app)
-        .get('/api/reports/my-reports')
+        .get('/api/v1/reports/my-reports')
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(res.status).toBe(200);
@@ -118,7 +122,7 @@ describe('Reports API', () => {
 
     it('should support pagination', async () => {
       const res = await request(app)
-        .get('/api/reports/my-reports')
+        .get('/api/v1/reports/my-reports')
         .set('Authorization', `Bearer ${authToken}`)
         .query({ page: 1, limit: 10 });
 

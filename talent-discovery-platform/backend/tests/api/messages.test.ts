@@ -1,12 +1,16 @@
 import request from 'supertest';
-import { app } from '../../src/index';
-import { randomString } from '../helpers';
+import { getTestApp, randomString } from '../helpers';
 
 describe('Messages API', () => {
+  let app: any;
   let authToken: string;
   let userId: string;
   let otherUserToken: string;
   let otherUserId: string;
+
+  beforeAll(async () => {
+    app = await getTestApp();
+  });
 
   beforeEach(async () => {
     const timestamp = Date.now();
@@ -14,7 +18,7 @@ describe('Messages API', () => {
     // Create first user
     const email1 = `test_${timestamp}_${randomString(5)}@example.com`;
     const registerRes1 = await request(app)
-      .post('/api/auth/register')
+      .post('/api/v1/auth/register')
       .send({
         email: email1,
         username: `testuser1_${timestamp}`,
@@ -24,12 +28,12 @@ describe('Messages API', () => {
       });
 
     authToken = registerRes1.body.token;
-    userId = registerRes1.body.user.id;
+    userId = registerRes1.body.user?.id;
 
     // Create second user
     const email2 = `test2_${timestamp}_${randomString(5)}@example.com`;
     const registerRes2 = await request(app)
-      .post('/api/auth/register')
+      .post('/api/v1/auth/register')
       .send({
         email: email2,
         username: `testuser2_${timestamp}`,
@@ -39,20 +43,20 @@ describe('Messages API', () => {
       });
 
     otherUserToken = registerRes2.body.token;
-    otherUserId = registerRes2.body.user.id;
+    otherUserId = registerRes2.body.user?.id;
   });
 
-  describe('GET /api/messages/conversations', () => {
+  describe('GET /api/v1/messages/conversations', () => {
     it('should require authentication', async () => {
       const res = await request(app)
-        .get('/api/messages/conversations');
+        .get('/api/v1/messages/conversations');
 
       expect(res.status).toBe(401);
     });
 
     it('should return empty conversations for new user', async () => {
       const res = await request(app)
-        .get('/api/messages/conversations')
+        .get('/api/v1/messages/conversations')
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(res.status).toBe(200);
@@ -61,10 +65,10 @@ describe('Messages API', () => {
     });
   });
 
-  describe('POST /api/messages', () => {
+  describe('POST /api/v1/messages', () => {
     it('should require authentication', async () => {
       const res = await request(app)
-        .post('/api/messages')
+        .post('/api/v1/messages')
         .send({
           receiverId: otherUserId,
           content: 'Hello!'
@@ -75,7 +79,7 @@ describe('Messages API', () => {
 
     it('should send message to another user', async () => {
       const res = await request(app)
-        .post('/api/messages')
+        .post('/api/v1/messages')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           receiverId: otherUserId,
@@ -90,7 +94,7 @@ describe('Messages API', () => {
 
     it('should reject empty message', async () => {
       const res = await request(app)
-        .post('/api/messages')
+        .post('/api/v1/messages')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           receiverId: otherUserId,
@@ -102,7 +106,7 @@ describe('Messages API', () => {
 
     it('should reject message to non-existent user', async () => {
       const res = await request(app)
-        .post('/api/messages')
+        .post('/api/v1/messages')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           receiverId: '00000000-0000-0000-0000-000000000000',
@@ -113,10 +117,10 @@ describe('Messages API', () => {
     });
   });
 
-  describe('GET /api/messages/:conversationId', () => {
+  describe('GET /api/v1/messages/:conversationId', () => {
     it('should require authentication', async () => {
       const res = await request(app)
-        .get('/api/messages/some-conversation-id');
+        .get('/api/v1/messages/some-conversation-id');
 
       expect(res.status).toBe(401);
     });
@@ -126,7 +130,7 @@ describe('Messages API', () => {
     it('should create conversation when sending first message', async () => {
       // Send a message
       const sendRes = await request(app)
-        .post('/api/messages')
+        .post('/api/v1/messages')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           receiverId: otherUserId,
@@ -137,7 +141,7 @@ describe('Messages API', () => {
 
       // Check conversations
       const convRes = await request(app)
-        .get('/api/messages/conversations')
+        .get('/api/v1/messages/conversations')
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(convRes.status).toBe(200);

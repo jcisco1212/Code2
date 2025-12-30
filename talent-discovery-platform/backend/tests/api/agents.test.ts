@@ -1,13 +1,17 @@
 import request from 'supertest';
-import { app } from '../../src/index';
-import { randomString } from '../helpers';
+import { getTestApp, randomString } from '../helpers';
 
 describe('Agent API', () => {
+  let app: any;
   let agentToken: string;
   let agentId: string;
   let talentToken: string;
   let talentId: string;
   let talentUsername: string;
+
+  beforeAll(async () => {
+    app = await getTestApp();
+  });
 
   beforeEach(async () => {
     const timestamp = Date.now();
@@ -15,7 +19,7 @@ describe('Agent API', () => {
     // Create an agent user (would normally need admin to upgrade role)
     const agentEmail = `agent_${timestamp}_${randomString(5)}@example.com`;
     const agentRegisterRes = await request(app)
-      .post('/api/auth/register')
+      .post('/api/v1/auth/register')
       .send({
         email: agentEmail,
         username: `agent_${timestamp}`,
@@ -25,13 +29,13 @@ describe('Agent API', () => {
       });
 
     agentToken = agentRegisterRes.body.token;
-    agentId = agentRegisterRes.body.user.id;
+    agentId = agentRegisterRes.body.user?.id;
 
     // Create a talent user
     const talentEmail = `talent_${timestamp}_${randomString(5)}@example.com`;
     talentUsername = `talent_${timestamp}`;
     const talentRegisterRes = await request(app)
-      .post('/api/auth/register')
+      .post('/api/v1/auth/register')
       .send({
         email: talentEmail,
         username: talentUsername,
@@ -41,14 +45,14 @@ describe('Agent API', () => {
       });
 
     talentToken = talentRegisterRes.body.token;
-    talentId = talentRegisterRes.body.user.id;
+    talentId = talentRegisterRes.body.user?.id;
   });
 
-  describe('GET /api/agents/discover', () => {
+  describe('GET /api/v1/agents/discover', () => {
     it('should return 401 for non-agent users', async () => {
       // Regular user should not access agent endpoints
       const res = await request(app)
-        .get('/api/agents/discover')
+        .get('/api/v1/agents/discover')
         .set('Authorization', `Bearer ${talentToken}`);
 
       expect(res.status).toBe(403);
@@ -56,26 +60,26 @@ describe('Agent API', () => {
 
     it('should return 401 without authentication', async () => {
       const res = await request(app)
-        .get('/api/agents/discover');
+        .get('/api/v1/agents/discover');
 
       expect(res.status).toBe(401);
     });
   });
 
-  describe('GET /api/agents/dashboard/stats', () => {
+  describe('GET /api/v1/agents/dashboard/stats', () => {
     it('should return 403 for non-agent users', async () => {
       const res = await request(app)
-        .get('/api/agents/dashboard/stats')
+        .get('/api/v1/agents/dashboard/stats')
         .set('Authorization', `Bearer ${talentToken}`);
 
       expect(res.status).toBe(403);
     });
   });
 
-  describe('POST /api/agents/bookmarks', () => {
+  describe('POST /api/v1/agents/bookmarks', () => {
     it('should return 403 for non-agent users', async () => {
       const res = await request(app)
-        .post('/api/agents/bookmarks')
+        .post('/api/v1/agents/bookmarks')
         .set('Authorization', `Bearer ${talentToken}`)
         .send({ talentId });
 
@@ -83,10 +87,10 @@ describe('Agent API', () => {
     });
   });
 
-  describe('GET /api/agents/bookmarks', () => {
+  describe('GET /api/v1/agents/bookmarks', () => {
     it('should return 403 for non-agent users', async () => {
       const res = await request(app)
-        .get('/api/agents/bookmarks')
+        .get('/api/v1/agents/bookmarks')
         .set('Authorization', `Bearer ${talentToken}`);
 
       expect(res.status).toBe(403);

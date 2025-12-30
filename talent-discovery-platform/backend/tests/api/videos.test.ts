@@ -1,17 +1,21 @@
 import request from 'supertest';
-import { app } from '../../src/index';
-import { randomString } from '../helpers';
+import { getTestApp, randomString } from '../helpers';
 
 describe('Videos API', () => {
+  let app: any;
   let authToken: string;
   let userId: string;
+
+  beforeAll(async () => {
+    app = await getTestApp();
+  });
 
   beforeEach(async () => {
     const timestamp = Date.now();
     const email = `test_${timestamp}_${randomString(5)}@example.com`;
 
     const registerRes = await request(app)
-      .post('/api/auth/register')
+      .post('/api/v1/auth/register')
       .send({
         email,
         username: `testuser_${timestamp}`,
@@ -21,13 +25,13 @@ describe('Videos API', () => {
       });
 
     authToken = registerRes.body.token;
-    userId = registerRes.body.user.id;
+    userId = registerRes.body.user?.id;
   });
 
-  describe('GET /api/videos', () => {
+  describe('GET /api/v1/videos', () => {
     it('should return a list of public videos', async () => {
       const res = await request(app)
-        .get('/api/videos')
+        .get('/api/v1/videos')
         .query({ page: 1, limit: 10 });
 
       expect(res.status).toBe(200);
@@ -37,7 +41,7 @@ describe('Videos API', () => {
 
     it('should support pagination', async () => {
       const res = await request(app)
-        .get('/api/videos')
+        .get('/api/v1/videos')
         .query({ page: 1, limit: 5 });
 
       expect(res.status).toBe(200);
@@ -49,26 +53,26 @@ describe('Videos API', () => {
 
     it('should filter by category', async () => {
       const res = await request(app)
-        .get('/api/videos')
+        .get('/api/v1/videos')
         .query({ categoryId: 'some-category-id' });
 
       expect(res.status).toBe(200);
     });
   });
 
-  describe('GET /api/videos/:id', () => {
+  describe('GET /api/v1/videos/:id', () => {
     it('should return 404 for non-existent video', async () => {
       const res = await request(app)
-        .get('/api/videos/00000000-0000-0000-0000-000000000000');
+        .get('/api/v1/videos/00000000-0000-0000-0000-000000000000');
 
       expect(res.status).toBe(404);
     });
   });
 
-  describe('GET /api/videos/trending', () => {
+  describe('GET /api/v1/videos/trending', () => {
     it('should return trending videos', async () => {
       const res = await request(app)
-        .get('/api/videos/trending');
+        .get('/api/v1/videos/trending');
 
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('videos');
@@ -76,26 +80,26 @@ describe('Videos API', () => {
     });
   });
 
-  describe('POST /api/videos/:id/like', () => {
+  describe('POST /api/v1/videos/:id/like', () => {
     it('should require authentication', async () => {
       const res = await request(app)
-        .post('/api/videos/some-video-id/like');
+        .post('/api/v1/videos/some-video-id/like');
 
       expect(res.status).toBe(401);
     });
   });
 
-  describe('GET /api/videos/feed', () => {
+  describe('GET /api/v1/videos/feed', () => {
     it('should require authentication', async () => {
       const res = await request(app)
-        .get('/api/videos/feed');
+        .get('/api/v1/videos/feed');
 
       expect(res.status).toBe(401);
     });
 
     it('should return personalized feed when authenticated', async () => {
       const res = await request(app)
-        .get('/api/videos/feed')
+        .get('/api/v1/videos/feed')
         .set('Authorization', `Bearer ${authToken}`);
 
       expect([200, 404]).toContain(res.status);

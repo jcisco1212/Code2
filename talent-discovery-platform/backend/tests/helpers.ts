@@ -1,5 +1,103 @@
-import { Express } from 'express';
+import express, { Application, Express } from 'express';
+import cors from 'cors';
 import request from 'supertest';
+
+let testApp: Application | null = null;
+let dbInitialized = false;
+
+/**
+ * Initialize database for tests
+ */
+async function initializeDatabase(): Promise<void> {
+  if (dbInitialized) return;
+
+  try {
+    // Set test environment
+    process.env.NODE_ENV = 'test';
+
+    // Import and connect to database
+    const { sequelize } = await import('../src/config/database');
+    await sequelize.authenticate();
+
+    // Import and connect to Redis (with mock if not available)
+    try {
+      const { redis } = await import('../src/config/redis');
+      await redis.ping();
+    } catch (redisError) {
+      // Redis might not be available in test environment, continue without it
+      console.log('Redis not available for tests, continuing without it');
+    }
+
+    dbInitialized = true;
+  } catch (error) {
+    console.error('Failed to initialize test database:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get or create test Express app (without starting server)
+ */
+export async function getTestApp(): Promise<Application> {
+  if (testApp) {
+    return testApp;
+  }
+
+  // Initialize database first
+  await initializeDatabase();
+
+  const app = express();
+
+  // Basic middleware
+  app.use(cors());
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+  // Import routes dynamically (after database is initialized)
+  const authRoutes = (await import('../src/routes/auth')).default;
+  const userRoutes = (await import('../src/routes/users')).default;
+  const videoRoutes = (await import('../src/routes/videos')).default;
+  const profileRoutes = (await import('../src/routes/profiles')).default;
+  const commentRoutes = (await import('../src/routes/comments')).default;
+  const followRoutes = (await import('../src/routes/follows')).default;
+  const likeRoutes = (await import('../src/routes/likes')).default;
+  const categoryRoutes = (await import('../src/routes/categories')).default;
+  const agentRoutes = (await import('../src/routes/agents')).default;
+  const reportRoutes = (await import('../src/routes/reports')).default;
+  const messageRoutes = (await import('../src/routes/messages')).default;
+
+  // Mount routes with /api/v1 prefix
+  app.use('/api/v1/auth', authRoutes);
+  app.use('/api/v1/users', userRoutes);
+  app.use('/api/v1/videos', videoRoutes);
+  app.use('/api/v1/profiles', profileRoutes);
+  app.use('/api/v1/comments', commentRoutes);
+  app.use('/api/v1/follows', followRoutes);
+  app.use('/api/v1/likes', likeRoutes);
+  app.use('/api/v1/categories', categoryRoutes);
+  app.use('/api/v1/agents', agentRoutes);
+  app.use('/api/v1/reports', reportRoutes);
+  app.use('/api/v1/messages', messageRoutes);
+
+  // 404 handler
+  app.use((req, res) => {
+    res.status(404).json({
+      error: 'Not Found',
+      message: `Route ${req.method} ${req.path} not found`
+    });
+  });
+
+  // Error handler
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('Test error:', err.message);
+    res.status(err.status || 500).json({
+      message: err.message || 'Internal server error'
+    });
+  });
+
+  testApp = app;
+  return app;
+}
 
 /**
  * Test helper utilities for API testing
@@ -39,7 +137,7 @@ export async function createTestUser(
   const registerData = { ...defaultData, ...userData };
 
   const registerRes = await request(app)
-    .post('/api/auth/register')
+    .post('/api/v1/auth/register')
     .send(registerData);
 
   if (registerRes.status !== 201) {
@@ -60,12 +158,12 @@ export async function createTestUser(
  */
 export async function loginTestUser(
   app: Express,
-  email: string,
+  identifier: string,
   password: string
 ): Promise<string> {
   const res = await request(app)
-    .post('/api/auth/login')
-    .send({ email, password });
+    .post('/api/v1/auth/login')
+    .send({ identifier, password });
 
   if (res.status !== 200) {
     throw new Error(`Failed to login: ${JSON.stringify(res.body)}`);
@@ -88,11 +186,11 @@ export function authRequest(app: Express, token: string) {
 }
 
 /**
- * Clean up test data
+ * Clean up test user
  */
 export async function cleanupTestUser(app: Express, token: string): Promise<void> {
   try {
-    await authRequest(app, token).delete('/api/users/me');
+    await authRequest(app, token).delete('/api/v1/users/me');
   } catch (error) {
     // Ignore cleanup errors
   }

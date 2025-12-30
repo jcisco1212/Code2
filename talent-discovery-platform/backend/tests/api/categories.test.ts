@@ -1,11 +1,17 @@
 import request from 'supertest';
-import { app } from '../../src/index';
+import { getTestApp } from '../helpers';
 
 describe('Categories API', () => {
-  describe('GET /api/categories', () => {
+  let app: any;
+
+  beforeAll(async () => {
+    app = await getTestApp();
+  });
+
+  describe('GET /api/v1/categories', () => {
     it('should return list of categories', async () => {
       const res = await request(app)
-        .get('/api/categories');
+        .get('/api/v1/categories');
 
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('categories');
@@ -14,26 +20,26 @@ describe('Categories API', () => {
 
     it('should support pagination', async () => {
       const res = await request(app)
-        .get('/api/categories')
+        .get('/api/v1/categories')
         .query({ page: 1, limit: 5 });
 
       expect(res.status).toBe(200);
     });
   });
 
-  describe('GET /api/categories/:id', () => {
+  describe('GET /api/v1/categories/:id', () => {
     it('should return 404 for non-existent category', async () => {
       const res = await request(app)
-        .get('/api/categories/00000000-0000-0000-0000-000000000000');
+        .get('/api/v1/categories/00000000-0000-0000-0000-000000000000');
 
       expect(res.status).toBe(404);
     });
   });
 
-  describe('GET /api/categories/slug/:slug', () => {
+  describe('GET /api/v1/categories/slug/:slug', () => {
     it('should return 404 for non-existent slug', async () => {
       const res = await request(app)
-        .get('/api/categories/slug/nonexistent-category-slug');
+        .get('/api/v1/categories/slug/nonexistent-category-slug');
 
       expect(res.status).toBe(404);
     });
@@ -42,7 +48,7 @@ describe('Categories API', () => {
   describe('Category structure', () => {
     it('should have expected fields in category', async () => {
       const res = await request(app)
-        .get('/api/categories');
+        .get('/api/v1/categories');
 
       expect(res.status).toBe(200);
       if (res.body.categories.length > 0) {
