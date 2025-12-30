@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const router = Router();
 
-// Agent Dashboard - Get talent discovery feed
+// Agent Dashboard - Get talent discovery feed with advanced filters
 router.get(
   '/discover',
   authenticate as RequestHandler,
@@ -19,43 +19,107 @@ router.get(
       const {
         page = 1,
         limit = 20,
+        search,
         category,
         minScore,
         maxAge,
         minAge,
-        region,
-        sortBy = 'trendingScore'
+        gender,
+        ethnicity,
+        hairColor,
+        location,
+        sortBy = 'aiScore'
       } = req.query;
 
       const offset = (Number(page) - 1) * Number(limit);
+      const agentId = req.userId!;
 
-      // Build video filter
+      // Build user filter for talent search
+      const userWhere: any = {
+        role: { [Op.in]: [UserRole.CREATOR, UserRole.USER] }
+      };
+
+      // Search by name
+      if (search) {
+        userWhere[Op.or] = [
+          { username: { [Op.iLike]: `%${search}%` } },
+          { displayName: { [Op.iLike]: `%${search}%` } },
+          { firstName: { [Op.iLike]: `%${search}%` } },
+          { lastName: { [Op.iLike]: `%${search}%` } }
+        ];
+      }
+
+      // Filter by gender
+      if (gender && gender !== 'all') {
+        userWhere.gender = gender;
+      }
+
+      // Filter by ethnicity
+      if (ethnicity && ethnicity !== 'all') {
+        userWhere.ethnicity = { [Op.iLike]: `%${ethnicity}%` };
+      }
+
+      // Filter by hair color
+      if (hairColor && hairColor !== 'all') {
+        userWhere.hairColor = hairColor;
+      }
+
+      // Filter by location
+      if (location) {
+        userWhere.location = { [Op.iLike]: `%${location}%` };
+      }
+
+      // Filter by age range (calculate from dateOfBirth)
+      if (minAge || maxAge) {
+        const today = new Date();
+        if (minAge) {
+          const maxBirthDate = new Date(today.getFullYear() - Number(minAge), today.getMonth(), today.getDate());
+          userWhere.dateOfBirth = { ...userWhere.dateOfBirth, [Op.lte]: maxBirthDate };
+        }
+        if (maxAge) {
+          const minBirthDate = new Date(today.getFullYear() - Number(maxAge) - 1, today.getMonth(), today.getDate());
+          userWhere.dateOfBirth = { ...userWhere.dateOfBirth, [Op.gte]: minBirthDate };
+        }
+      }
+
+      // Filter by talent category
+      if (category && category !== 'all') {
+        userWhere.talentCategories = { [Op.contains]: [category] };
+      }
+
+      // Get bookmarked talent IDs
+      const bookmarks = await AgentBookmark.findAll({
+        where: { agentId },
+        attributes: ['talentId']
+      });
+      const bookmarkedIds = bookmarks.map(b => b.talentId);
+
+      // Build video filter for minimum score
       const videoWhere: any = {
         status: VideoStatus.READY,
         visibility: VideoVisibility.PUBLIC
       };
 
-      if (category) {
-        videoWhere.categoryId = category;
-      }
-
       if (minScore) {
         videoWhere.aiPerformanceScore = { [Op.gte]: Number(minScore) };
       }
 
-      // Build user filter
-      const userWhere: any = {
-        role: { [Op.in]: [UserRole.CREATOR, UserRole.USER] }
-      };
-
-      if (region) {
-        userWhere.location = { [Op.iLike]: `%${region}%` };
+      // Determine sort order
+      let order: any[];
+      switch (sortBy) {
+        case 'followers':
+          order = [[literal('(SELECT COUNT(*) FROM follows WHERE follows.following_id = "user".id)'), 'DESC']];
+          break;
+        case 'recent':
+          order = [['createdAt', 'DESC']];
+          break;
+        case 'aiScore':
+        default:
+          order = [['aiPerformanceScore', 'DESC'], ['trendingScore', 'DESC']];
+          break;
       }
 
       // Get videos with user data
-      const validSortFields = ['trendingScore', 'aiPerformanceScore', 'views', 'likes', 'createdAt'];
-      const sortField = validSortFields.includes(sortBy as string) ? sortBy : 'trendingScore';
-
       const { count, rows } = await Video.findAndCountAll({
         where: videoWhere,
         include: [
@@ -63,25 +127,103 @@ router.get(
             model: User,
             as: 'user',
             where: userWhere,
-            attributes: ['id', 'username', 'firstName', 'lastName', 'avatarUrl', 'bio', 'talentCategories', 'location', 'dateOfBirth']
+            attributes: ['id', 'username', 'displayName', 'firstName', 'lastName', 'avatarUrl', 'bio', 'talentCategories', 'location', 'dateOfBirth', 'gender', 'ethnicity', 'hairColor']
+          },
+          {
+            model: Category,
+            as: 'category',
+            attributes: ['id', 'name']
           }
         ],
-        order: [[sortField as string, 'DESC']],
-        limit: Number(limit),
-        offset,
+        order,
+        limit: Number(limit) * 3, // Get more to filter duplicates
+        offset: 0,
         distinct: true
       });
 
+      // Group by user (one entry per talent) and calculate stats
+      const seenUsers = new Set<string>();
+      const talents: any[] = [];
+
+      for (const video of rows) {
+        const user = (video as any).user;
+        if (!user || seenUsers.has(user.id)) continue;
+
+        seenUsers.add(user.id);
+
+        // Calculate age from dateOfBirth
+        let age = null;
+        if (user.dateOfBirth) {
+          const birth = new Date(user.dateOfBirth);
+          const today = new Date();
+          age = today.getFullYear() - birth.getFullYear();
+          const monthDiff = today.getMonth() - birth.getMonth();
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+            age--;
+          }
+        }
+
+        // Get follower count
+        const followersCount = await Follow.count({
+          where: { followingId: user.id }
+        });
+
+        // Get video count
+        const videoCount = await Video.count({
+          where: { userId: user.id, status: VideoStatus.READY }
+        });
+
+        // Get top skills from talent categories
+        const topSkills: string[] = [];
+        if (user.talentCategories && user.talentCategories.length > 0) {
+          const categoryNames = await Category.findAll({
+            where: { id: { [Op.in]: user.talentCategories } },
+            attributes: ['name']
+          });
+          topSkills.push(...categoryNames.map((c: any) => c.name).slice(0, 3));
+        }
+
+        talents.push({
+          id: user.id,
+          username: user.username,
+          displayName: user.displayName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username,
+          avatarUrl: user.avatarUrl,
+          category: (video as any).category?.name || 'Talent',
+          aiScore: Math.round(Number(video.aiPerformanceScore) || 0),
+          followers: followersCount,
+          videos: videoCount,
+          isBookmarked: bookmarkedIds.includes(user.id),
+          bio: user.bio || '',
+          topSkills,
+          location: user.location,
+          age,
+          gender: user.gender,
+          ethnicity: user.ethnicity,
+          hairColor: user.hairColor
+        });
+
+        if (talents.length >= Number(limit)) break;
+      }
+
+      // Sort talents based on sortBy
+      if (sortBy === 'followers') {
+        talents.sort((a, b) => b.followers - a.followers);
+      } else if (sortBy === 'aiScore') {
+        talents.sort((a, b) => b.aiScore - a.aiScore);
+      }
+
+      // Get total unique talent count (approximate)
+      const totalUsers = await User.count({
+        where: userWhere
+      });
+
       res.json({
-        videos: rows.map(v => ({
-          ...v.toPublicJSON(),
-          user: (v as any).user
-        })),
+        talents,
         pagination: {
           page: Number(page),
           limit: Number(limit),
-          total: count,
-          pages: Math.ceil(count / Number(limit))
+          total: totalUsers,
+          pages: Math.ceil(totalUsers / Number(limit))
         }
       });
     } catch (error) {

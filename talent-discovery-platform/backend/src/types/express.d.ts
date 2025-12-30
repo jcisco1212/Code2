@@ -1,5 +1,5 @@
 import UserModel from '../models/User';
-import { SocialLinks, EmbedLinks, UserRole, Gender, ArtistType, PrivacySettings, NotificationSettings, BannerSettings } from '../models/User';
+import { SocialLinks, EmbedLinks, UserRole, Gender, ArtistType, HairColor, PrivacySettings, NotificationSettings, BannerSettings } from '../models/User';
 
 declare global {
   namespace Express {
@@ -33,6 +33,7 @@ declare global {
       gender: Gender | null;
       dateOfBirth: Date | null;
       ethnicity: string | null;
+      hairColor: HairColor | null;
       photoGallery: string[] | null;
       artistType: ArtistType | null;
       genre: string | null;

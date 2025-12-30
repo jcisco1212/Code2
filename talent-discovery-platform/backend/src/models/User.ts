@@ -22,6 +22,18 @@ export enum ArtistType {
   BAND = 'band'
 }
 
+export enum HairColor {
+  BLACK = 'black',
+  BROWN = 'brown',
+  BLONDE = 'blonde',
+  RED = 'red',
+  AUBURN = 'auburn',
+  GRAY = 'gray',
+  WHITE = 'white',
+  BALD = 'bald',
+  OTHER = 'other'
+}
+
 export interface SocialLinks {
   website?: string;
   imdb?: string;
@@ -99,6 +111,7 @@ interface UserAttributes {
   gender: Gender | null;
   dateOfBirth: Date | null;
   ethnicity: string | null;
+  hairColor: HairColor | null;
   photoGallery: string[] | null;
   artistType: ArtistType | null;
   genre: string | null;
@@ -114,7 +127,7 @@ interface UserCreationAttributes extends Optional<UserAttributes,
   'id' | 'displayName' | 'firstName' | 'lastName' | 'bio' | 'avatarUrl' | 'bannerUrl' |
   'location' | 'socialLinks' | 'embedLinks' | 'agencyName' | 'role' | 'isVerified' | 'isActive' | 'twoFactorEnabled' |
   'twoFactorSecret' | 'emailVerified' | 'emailVerificationToken' | 'passwordResetToken' |
-  'passwordResetExpires' | 'lastLogin' | 'gender' | 'dateOfBirth' | 'ethnicity' | 'photoGallery' |
+  'passwordResetExpires' | 'lastLogin' | 'gender' | 'dateOfBirth' | 'ethnicity' | 'hairColor' | 'photoGallery' |
   'artistType' | 'genre' | 'talentCategories' | 'privacySettings' | 'notificationSettings' | 'bannerSettings' | 'createdAt' | 'updatedAt'
 > {}
 
@@ -147,6 +160,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   declare gender: Gender | null;
   declare dateOfBirth: Date | null;
   declare ethnicity: string | null;
+  declare hairColor: HairColor | null;
   declare photoGallery: string[] | null;
   declare artistType: ArtistType | null;
   declare genre: string | null;
@@ -207,6 +221,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       age: privacy.showAge ? this.age : null,
       dateOfBirth: privacy.showDateOfBirth ? this.dateOfBirth : null,
       ethnicity: privacy.showEthnicity ? this.ethnicity : null,
+      hairColor: this.hairColor,
       email: privacy.showEmail ? this.email : undefined,
       photoGallery: this.photoGallery,
       artistType: this.artistType,
@@ -240,6 +255,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       age: this.age,
       dateOfBirth: this.dateOfBirth,
       ethnicity: this.ethnicity,
+      hairColor: this.hairColor,
       photoGallery: this.photoGallery,
       artistType: this.artistType,
       genre: this.genre,
@@ -392,6 +408,11 @@ User.init(
       type: DataTypes.STRING(100),
       allowNull: true
     },
+    hairColor: {
+      type: DataTypes.ENUM('black', 'brown', 'blonde', 'red', 'auburn', 'gray', 'white', 'bald', 'other'),
+      allowNull: true,
+      field: 'hair_color'
+    },
     photoGallery: {
       type: DataTypes.ARRAY(DataTypes.STRING(500)),
       allowNull: true,
@@ -468,6 +489,7 @@ User.init(
       { fields: ['role'] },
       { fields: ['gender'] },
       { fields: ['ethnicity'] },
+      { fields: ['hair_color'] },
       { fields: ['location'] },
       { fields: ['artist_type'] },
       { fields: ['genre'] }
