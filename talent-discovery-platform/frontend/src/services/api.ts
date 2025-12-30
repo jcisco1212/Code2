@@ -680,3 +680,15 @@ export const featuresAPI = {
   bulkToggle: (flagIds: string[], isEnabled: boolean) =>
     api.put('/features/bulk-toggle', { flagIds, isEnabled })
 };
+
+export const reportsAPI = {
+  createReport: (data: {
+    targetId: string;
+    targetType: 'video' | 'comment' | 'user';
+    type: string;
+    description?: string;
+  }) =>
+    api.post('/reports', data),
+  getMyReports: (params?: { page?: number; limit?: number }) =>
+    api.get('/reports/my-reports', { params })
+};

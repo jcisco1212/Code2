@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { videosAPI, savedVideosAPI, socialAPI, getUploadUrl } from '../services/api';
-import { EyeIcon, HeartIcon, ShareIcon, BookmarkIcon, EnvelopeIcon, ChatBubbleLeftIcon, LinkIcon, XMarkIcon, CodeBracketIcon } from '@heroicons/react/24/outline';
+import { videosAPI, savedVideosAPI, socialAPI, reportsAPI, getUploadUrl } from '../services/api';
+import { EyeIcon, HeartIcon, ShareIcon, BookmarkIcon, EnvelopeIcon, ChatBubbleLeftIcon, LinkIcon, XMarkIcon, CodeBracketIcon, FlagIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 import Comments from '../components/video/Comments';
@@ -77,6 +77,10 @@ const Watch: React.FC = () => {
   const [relatedVideos, setRelatedVideos] = useState<RelatedVideo[]>([]);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showEmbedModal, setShowEmbedModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportType, setReportType] = useState('');
+  const [reportDescription, setReportDescription] = useState('');
+  const [reportSubmitting, setReportSubmitting] = useState(false);
   const [viewRecorded, setViewRecorded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const sessionIdRef = useRef<string>(generateSessionId());
@@ -258,6 +262,50 @@ const Watch: React.FC = () => {
     setShowShareModal(false);
   };
 
+  const handleReportSubmit = async () => {
+    if (!video?.id || !reportType) return;
+
+    if (!isAuthenticated) {
+      toast.error('Please log in to report');
+      navigate('/login');
+      return;
+    }
+
+    setReportSubmitting(true);
+    try {
+      await reportsAPI.createReport({
+        targetId: video.id,
+        targetType: 'video',
+        type: reportType,
+        description: reportDescription || undefined
+      });
+      toast.success('Report submitted successfully. We will review it shortly.');
+      setShowReportModal(false);
+      setReportType('');
+      setReportDescription('');
+    } catch (err: any) {
+      if (err.response?.data?.message?.includes('already reported')) {
+        toast.error('You have already reported this video');
+      } else {
+        toast.error('Failed to submit report. Please try again.');
+      }
+    } finally {
+      setReportSubmitting(false);
+    }
+  };
+
+  const reportTypes = [
+    { value: 'spam', label: 'Spam', description: 'Misleading or repetitive content' },
+    { value: 'harassment', label: 'Harassment', description: 'Bullying or targeting individuals' },
+    { value: 'hate_speech', label: 'Hate Speech', description: 'Attacks based on identity' },
+    { value: 'violence', label: 'Violence', description: 'Graphic or violent content' },
+    { value: 'sexual_content', label: 'Sexual Content', description: 'Inappropriate sexual material' },
+    { value: 'copyright', label: 'Copyright', description: 'Unauthorized use of content' },
+    { value: 'misinformation', label: 'Misinformation', description: 'False or misleading information' },
+    { value: 'impersonation', label: 'Impersonation', description: 'Pretending to be someone else' },
+    { value: 'other', label: 'Other', description: 'Other policy violation' }
+  ];
+
   const formatViews = (count: number | null | undefined) => {
     if (count == null) return '0';
     if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
@@ -401,6 +449,15 @@ const Watch: React.FC = () => {
               >
                 <CodeBracketIcon className="w-5 h-5" />
                 <span className="hidden sm:inline">Embed</span>
+              </button>
+
+              <button
+                onClick={() => setShowReportModal(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+                title="Report video"
+              >
+                <FlagIcon className="w-5 h-5" />
+                <span className="hidden sm:inline">Report</span>
               </button>
             </div>
           </div>
@@ -629,6 +686,95 @@ const Watch: React.FC = () => {
           videoTitle={video.title}
           onClose={() => setShowEmbedModal(false)}
         />
+      )}
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md mx-4 max-h-[85vh] overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Report Video</h3>
+              <button
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportType('');
+                  setReportDescription('');
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-4 flex-1 overflow-y-auto">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Why are you reporting this video? Select a reason below.
+              </p>
+
+              <div className="space-y-2 mb-4">
+                {reportTypes.map((type) => (
+                  <button
+                    key={type.value}
+                    onClick={() => setReportType(type.value)}
+                    className={`w-full p-3 rounded-lg border text-left transition-colors ${
+                      reportType === type.value
+                        ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <p className={`font-medium ${
+                      reportType === type.value
+                        ? 'text-red-700 dark:text-red-400'
+                        : 'text-gray-900 dark:text-white'
+                    }`}>
+                      {type.label}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{type.description}</p>
+                  </button>
+                ))}
+              </div>
+
+              {reportType && (
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Additional details (optional)
+                  </label>
+                  <textarea
+                    value={reportDescription}
+                    onChange={(e) => setReportDescription(e.target.value)}
+                    placeholder="Provide any additional context..."
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white resize-none focus:ring-2 focus:ring-red-500"
+                    rows={3}
+                    maxLength={1000}
+                  />
+                  <p className="text-xs text-gray-500 mt-1 text-right">
+                    {reportDescription.length}/1000
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+              <button
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportType('');
+                  setReportDescription('');
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReportSubmit}
+                disabled={!reportType || reportSubmitting}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {reportSubmitting ? 'Submitting...' : 'Submit Report'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

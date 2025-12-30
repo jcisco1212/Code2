@@ -74,6 +74,7 @@ const Messages: React.FC = () => {
   const [searchParams] = useSearchParams();
   const newUserId = searchParams.get('user');
   const roomParam = searchParams.get('room');
+  const shareUrl = searchParams.get('share');
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -103,6 +104,13 @@ const Messages: React.FC = () => {
   const [copiedInvite, setCopiedInvite] = useState(false);
   const [joinCode, setJoinCode] = useState('');
   const [showJoinRoom, setShowJoinRoom] = useState(false);
+
+  // Share functionality state
+  const [showShareModal, setShowShareModal] = useState(!!shareUrl);
+  const [shareSearchQuery, setShareSearchQuery] = useState('');
+  const [shareSearchResults, setShareSearchResults] = useState<User[]>([]);
+  const [shareSearching, setShareSearching] = useState(false);
+  const [pendingShareUrl, setPendingShareUrl] = useState(shareUrl || '');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -174,6 +182,58 @@ const Messages: React.FC = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, roomMessages]);
+
+  // Handle share URL parameter
+  useEffect(() => {
+    if (shareUrl) {
+      setShowShareModal(true);
+      setPendingShareUrl(shareUrl);
+    }
+  }, [shareUrl]);
+
+  // Search users for sharing
+  useEffect(() => {
+    const searchUsers = async () => {
+      if (!shareSearchQuery.trim() || shareSearchQuery.length < 2) {
+        setShareSearchResults([]);
+        return;
+      }
+
+      setShareSearching(true);
+      try {
+        const response = await usersAPI.search(shareSearchQuery);
+        const users = (response.data.users || []).filter((u: any) => u.id !== user?.id);
+        setShareSearchResults(users.map((u: any) => ({
+          id: u.id,
+          username: u.username,
+          displayName: u.displayName || `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.username,
+          avatarUrl: u.avatarUrl
+        })));
+      } catch (err) {
+        console.error('Failed to search users:', err);
+      } finally {
+        setShareSearching(false);
+      }
+    };
+
+    const debounce = setTimeout(searchUsers, 300);
+    return () => clearTimeout(debounce);
+  }, [shareSearchQuery, user?.id]);
+
+  // Handle selecting a user to share with
+  const handleShareWithUser = (selectedUser: User) => {
+    setShowShareModal(false);
+    setShareSearchQuery('');
+    setShareSearchResults([]);
+
+    // Navigate to messages with this user and prefill message
+    setNewChatUser(selectedUser);
+    setSelectedConversation(null);
+    setMessages([]);
+    setNewMessage(pendingShareUrl);
+    setPendingShareUrl('');
+    navigate('/messages', { replace: true });
+  };
 
   const fetchConversations = async () => {
     try {
@@ -964,6 +1024,125 @@ const Messages: React.FC = () => {
             >
               Done
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Share to User Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md mx-4 max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Send to User</h3>
+              <button
+                onClick={() => {
+                  setShowShareModal(false);
+                  setShareSearchQuery('');
+                  setShareSearchResults([]);
+                  setPendingShareUrl('');
+                  navigate('/messages', { replace: true });
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Share URL Preview */}
+            {pendingShareUrl && (
+              <div className="mb-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Sharing:</p>
+                <p className="text-sm text-gray-900 dark:text-white truncate">{pendingShareUrl}</p>
+              </div>
+            )}
+
+            {/* User Search Input */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Search for a user
+              </label>
+              <input
+                type="text"
+                value={shareSearchQuery}
+                onChange={e => setShareSearchQuery(e.target.value)}
+                placeholder="Type username or name..."
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                autoFocus
+              />
+            </div>
+
+            {/* Search Results */}
+            <div className="flex-1 overflow-y-auto min-h-[200px]">
+              {shareSearching ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-indigo-600"></div>
+                </div>
+              ) : shareSearchResults.length > 0 ? (
+                <div className="space-y-2">
+                  {shareSearchResults.map(u => (
+                    <button
+                      key={u.id}
+                      onClick={() => handleShareWithUser(u)}
+                      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
+                    >
+                      {u.avatarUrl ? (
+                        <img
+                          src={getUploadUrl(u.avatarUrl) || '/default-avatar.png'}
+                          alt={u.displayName}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-medium">
+                          {u.displayName?.charAt(0) || '?'}
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">{u.displayName}</p>
+                        <p className="text-sm text-gray-500">@{u.username}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : shareSearchQuery.length >= 2 ? (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  No users found
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <p>Type at least 2 characters to search</p>
+                  <p className="text-sm mt-2">Search by username or name</p>
+                </div>
+              )}
+            </div>
+
+            {/* Recent Conversations */}
+            {conversations.length > 0 && shareSearchQuery.length < 2 && (
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Recent conversations</p>
+                <div className="space-y-2 max-h-[150px] overflow-y-auto">
+                  {conversations.slice(0, 5).map(conv => (
+                    <button
+                      key={conv.conversationId}
+                      onClick={() => handleShareWithUser(conv.otherUser)}
+                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
+                    >
+                      {conv.otherUser.avatarUrl ? (
+                        <img
+                          src={getUploadUrl(conv.otherUser.avatarUrl) || '/default-avatar.png'}
+                          alt={conv.otherUser.displayName}
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
+                          {conv.otherUser.displayName?.charAt(0) || '?'}
+                        </div>
+                      )}
+                      <span className="text-sm text-gray-900 dark:text-white">{conv.otherUser.displayName}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
