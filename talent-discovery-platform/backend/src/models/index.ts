@@ -23,6 +23,7 @@ import Duet, { DuetLayout, DuetStatus } from './Duet';
 import WatchParty, { WatchPartyStatus } from './WatchParty';
 import WatchPartyParticipant from './WatchPartyParticipant';
 import FeatureFlag, { FeatureCategory } from './FeatureFlag';
+import AgentProfileView from './AgentProfileView';
 
 // User associations
 User.hasMany(Video, { foreignKey: 'userId', as: 'videos' });
@@ -173,6 +174,12 @@ Video.hasMany(WatchParty, { foreignKey: 'videoId', as: 'watchParties' });
 FeatureFlag.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
 FeatureFlag.belongsTo(User, { foreignKey: 'updatedBy', as: 'updater' });
 
+// AgentProfileView associations
+AgentProfileView.belongsTo(User, { foreignKey: 'agentId', as: 'agent' });
+AgentProfileView.belongsTo(User, { foreignKey: 'talentId', as: 'talent' });
+User.hasMany(AgentProfileView, { foreignKey: 'agentId', as: 'agentProfileViews' });
+User.hasMany(AgentProfileView, { foreignKey: 'talentId', as: 'viewedByAgents' });
+
 export {
   User,
   UserRole,
@@ -220,7 +227,8 @@ export {
   WatchPartyStatus,
   WatchPartyParticipant,
   FeatureFlag,
-  FeatureCategory
+  FeatureCategory,
+  AgentProfileView
 };
 
 export default {
@@ -248,5 +256,6 @@ export default {
   Duet,
   WatchParty,
   WatchPartyParticipant,
-  FeatureFlag
+  FeatureFlag,
+  AgentProfileView
 };

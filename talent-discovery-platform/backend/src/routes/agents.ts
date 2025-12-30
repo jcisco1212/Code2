@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction, RequestHandler } from 'express
 import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validate';
 import { authenticate, requireAgent } from '../middleware/auth';
-import { User, UserRole, Video, VideoStatus, VideoVisibility, AgentBookmark, Message, Notification, NotificationType, Follow } from '../models';
+import { User, UserRole, Video, VideoStatus, VideoVisibility, AgentBookmark, Message, Notification, NotificationType, Follow, AgentProfileView, Category } from '../models';
 import { NotFoundError, ForbiddenError, BadRequestError } from '../middleware/errorHandler';
 import { Op, fn, col, literal } from 'sequelize';
 import { v4 as uuidv4 } from 'uuid';
@@ -498,6 +498,331 @@ router.get(
           categories: categoryStats
         }
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// ========================
+// Agent Dashboard Endpoints
+// ========================
+
+// Get dashboard stats
+router.get(
+  '/dashboard/stats',
+  authenticate as RequestHandler,
+  requireAgent as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const agentId = req.userId!;
+      const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+      // Get total unique talents discovered (viewed)
+      const talentsDiscovered = await AgentProfileView.count({
+        where: { agentId },
+        distinct: true,
+        col: 'talentId'
+      });
+
+      // Get talents discovered this week
+      const talentsDiscoveredThisWeek = await AgentProfileView.count({
+        where: {
+          agentId,
+          viewedAt: { [Op.gte]: oneWeekAgo }
+        },
+        distinct: true,
+        col: 'talentId'
+      });
+
+      // Get total bookmarks
+      const bookmarkedCount = await AgentBookmark.count({
+        where: { agentId }
+      });
+
+      // Get bookmarks this week
+      const bookmarksThisWeek = await AgentBookmark.count({
+        where: {
+          agentId,
+          createdAt: { [Op.gte]: oneWeekAgo }
+        }
+      });
+
+      // Get total messages sent
+      const messagesSent = await Message.count({
+        where: {
+          senderId: agentId,
+          isAgentMessage: true
+        }
+      });
+
+      // Get messages sent this week
+      const messagesSentThisWeek = await Message.count({
+        where: {
+          senderId: agentId,
+          isAgentMessage: true,
+          createdAt: { [Op.gte]: oneWeekAgo }
+        }
+      });
+
+      // Get profile views (views on the agent's own profile)
+      const { VideoView } = await import('../models');
+      const agent = await User.findByPk(agentId);
+
+      // For agents, we'll show total views on their bookmarked talents' videos as "Talent Views"
+      const bookmarkedTalentIds = await AgentBookmark.findAll({
+        where: { agentId },
+        attributes: ['talentId']
+      });
+
+      const talentIds = bookmarkedTalentIds.map(b => b.talentId);
+
+      let totalTalentViews = 0;
+      let talentViewsThisWeek = 0;
+
+      if (talentIds.length > 0) {
+        const videoViewsResult = await Video.sum('viewsCount', {
+          where: { userId: { [Op.in]: talentIds } }
+        });
+        totalTalentViews = videoViewsResult || 0;
+
+        // Approximate weekly change based on video count growth
+        const recentVideos = await Video.count({
+          where: {
+            userId: { [Op.in]: talentIds },
+            createdAt: { [Op.gte]: oneWeekAgo }
+          }
+        });
+        talentViewsThisWeek = recentVideos * 50; // Estimate
+      }
+
+      res.json({
+        stats: {
+          talentsDiscovered: {
+            total: talentsDiscovered,
+            change: talentsDiscoveredThisWeek,
+            label: 'Talents Discovered'
+          },
+          bookmarked: {
+            total: bookmarkedCount,
+            change: bookmarksThisWeek,
+            label: 'Bookmarked'
+          },
+          messagesSent: {
+            total: messagesSent,
+            change: messagesSentThisWeek,
+            label: 'Messages Sent'
+          },
+          talentViews: {
+            total: totalTalentViews,
+            change: talentViewsThisWeek,
+            label: 'Talent Views'
+          }
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Get trending talents for dashboard
+router.get(
+  '/dashboard/trending',
+  authenticate as RequestHandler,
+  requireAgent as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { limit = 4 } = req.query;
+      const agentId = req.userId!;
+
+      // Get bookmarked talent IDs for this agent
+      const bookmarks = await AgentBookmark.findAll({
+        where: { agentId },
+        attributes: ['talentId']
+      });
+      const bookmarkedIds = bookmarks.map(b => b.talentId);
+
+      // Get trending talents based on video performance
+      const trendingVideos = await Video.findAll({
+        where: {
+          status: VideoStatus.READY,
+          visibility: VideoVisibility.PUBLIC,
+          aiPerformanceScore: { [Op.not]: null }
+        },
+        include: [
+          {
+            model: User,
+            as: 'user',
+            where: {
+              role: { [Op.in]: [UserRole.CREATOR, UserRole.USER] }
+            },
+            attributes: ['id', 'username', 'displayName', 'firstName', 'lastName', 'avatarUrl', 'talentCategories']
+          },
+          {
+            model: Category,
+            as: 'category',
+            attributes: ['id', 'name']
+          }
+        ],
+        order: [
+          ['aiPerformanceScore', 'DESC'],
+          ['trendingScore', 'DESC']
+        ],
+        limit: Number(limit) * 2 // Get more to filter out duplicates
+      });
+
+      // Group by user and take top video per user
+      const seenUsers = new Set<string>();
+      const trendingTalents = [];
+
+      for (const video of trendingVideos) {
+        const user = (video as any).user;
+        if (!user || seenUsers.has(user.id)) continue;
+
+        seenUsers.add(user.id);
+
+        // Get follower count for this user
+        const followersCount = await Follow.count({
+          where: { followingId: user.id }
+        });
+
+        // Get video count for this user
+        const videoCount = await Video.count({
+          where: { userId: user.id, status: VideoStatus.READY }
+        });
+
+        trendingTalents.push({
+          id: user.id,
+          username: user.username,
+          displayName: user.displayName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username,
+          avatarUrl: user.avatarUrl,
+          category: (video as any).category?.name || 'Talent',
+          aiScore: Math.round(Number(video.aiPerformanceScore) || 0),
+          followers: followersCount,
+          videos: videoCount,
+          isBookmarked: bookmarkedIds.includes(user.id)
+        });
+
+        if (trendingTalents.length >= Number(limit)) break;
+      }
+
+      res.json({ trendingTalents });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Get recently viewed profiles
+router.get(
+  '/dashboard/recently-viewed',
+  authenticate as RequestHandler,
+  requireAgent as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { limit = 5 } = req.query;
+      const agentId = req.userId!;
+
+      // Get bookmarked talent IDs for this agent
+      const bookmarks = await AgentBookmark.findAll({
+        where: { agentId },
+        attributes: ['talentId']
+      });
+      const bookmarkedIds = bookmarks.map(b => b.talentId);
+
+      // Get recently viewed profiles
+      const recentViews = await AgentProfileView.findAll({
+        where: { agentId },
+        include: [
+          {
+            model: User,
+            as: 'talent',
+            attributes: ['id', 'username', 'displayName', 'firstName', 'lastName', 'avatarUrl', 'talentCategories']
+          }
+        ],
+        order: [['viewedAt', 'DESC']],
+        limit: Number(limit) * 2 // Get more to filter duplicates
+      });
+
+      // Deduplicate by talent ID, keeping most recent
+      const seenTalents = new Set<string>();
+      const recentlyViewed = [];
+
+      for (const view of recentViews) {
+        const talent = (view as any).talent;
+        if (!talent || seenTalents.has(talent.id)) continue;
+
+        seenTalents.add(talent.id);
+
+        // Get their top video's AI score
+        const topVideo = await Video.findOne({
+          where: {
+            userId: talent.id,
+            status: VideoStatus.READY,
+            aiPerformanceScore: { [Op.not]: null }
+          },
+          include: [{
+            model: Category,
+            as: 'category',
+            attributes: ['name']
+          }],
+          order: [['aiPerformanceScore', 'DESC']]
+        });
+
+        // Get follower count
+        const followersCount = await Follow.count({
+          where: { followingId: talent.id }
+        });
+
+        recentlyViewed.push({
+          id: talent.id,
+          username: talent.username,
+          displayName: talent.displayName || `${talent.firstName || ''} ${talent.lastName || ''}`.trim() || talent.username,
+          avatarUrl: talent.avatarUrl,
+          category: (topVideo as any)?.category?.name || 'Talent',
+          aiScore: topVideo ? Math.round(Number(topVideo.aiPerformanceScore) || 0) : 0,
+          followers: followersCount,
+          isBookmarked: bookmarkedIds.includes(talent.id)
+        });
+
+        if (recentlyViewed.length >= Number(limit)) break;
+      }
+
+      res.json({ recentlyViewed });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Track profile view (called when agent views a talent's profile)
+router.post(
+  '/view/:talentId',
+  authenticate as RequestHandler,
+  requireAgent as RequestHandler,
+  validate([
+    param('talentId').isUUID().withMessage('Valid talent ID required')
+  ]),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { talentId } = req.params;
+      const agentId = req.userId!;
+
+      // Verify talent exists
+      const talent = await User.findByPk(talentId);
+      if (!talent) {
+        throw new NotFoundError('User not found');
+      }
+
+      // Create profile view record
+      await AgentProfileView.create({
+        agentId,
+        talentId,
+        viewedAt: new Date()
+      });
+
+      res.status(201).json({ success: true, message: 'Profile view recorded' });
     } catch (error) {
       next(error);
     }

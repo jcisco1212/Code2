@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { usersAPI, socialAPI, getUploadUrl } from '../services/api';
+import api, { usersAPI, socialAPI, getUploadUrl } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -89,6 +89,16 @@ const Profile: React.FC = () => {
       const response = await usersAPI.getUser(username!);
       setProfile(response.data.user);
       setFollowing(response.data.user.isFollowing);
+
+      // Track profile view for agents
+      if (currentUser?.role === 'agent' && response.data.user.id !== currentUser?.id) {
+        try {
+          await api.post(`/agents/view/${response.data.user.id}`);
+        } catch (viewError) {
+          // Silently fail - don't disrupt the profile view
+          console.debug('Could not record profile view');
+        }
+      }
     } catch (err: any) {
       toast.error('Failed to load profile');
       navigate('/');
