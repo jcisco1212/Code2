@@ -1,5 +1,5 @@
 import UserModel from '../models/User';
-import { SocialLinks, UserRole, Gender, ArtistType, PrivacySettings, NotificationSettings } from '../models/User';
+import { SocialLinks, EmbedLinks, UserRole, Gender, ArtistType, PrivacySettings, NotificationSettings } from '../models/User';
 
 declare global {
   namespace Express {
@@ -17,6 +17,7 @@ declare global {
       bannerUrl: string | null;
       location: string | null;
       socialLinks: SocialLinks | null;
+      embedLinks: EmbedLinks | null;
       agencyName: string | null;
       role: UserRole;
       isVerified: boolean;

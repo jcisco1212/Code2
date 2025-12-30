@@ -280,8 +280,8 @@ router.put(
         return;
       }
 
-      // Filter to only allowed keys
-      const allowedKeys = ['website', 'imdb', 'instagram', 'twitter', 'tiktok', 'youtube', 'linkedin', 'spotify', 'soundcloud', 'agency'];
+      // Filter to only allowed keys (removed embed platforms)
+      const allowedKeys = ['website', 'imdb', 'twitter', 'linkedin', 'agency'];
       const filteredLinks: Record<string, string> = {};
 
       for (const key of allowedKeys) {
@@ -298,6 +298,46 @@ router.put(
       res.json({
         message: 'Social links updated',
         socialLinks: user.socialLinks
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Update embed links (for embedded media from external platforms)
+router.put(
+  '/me/embed-links',
+  authenticate as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = req.user!;
+      const { embedLinks } = req.body;
+
+      // Validate that embedLinks is an object
+      if (typeof embedLinks !== 'object' || embedLinks === null) {
+        res.status(400).json({ error: 'Invalid embed links data' });
+        return;
+      }
+
+      // Filter to only allowed keys
+      const allowedKeys = ['spotify', 'soundcloud', 'youtube', 'instagram', 'tiktok'];
+      const filteredLinks: Record<string, string> = {};
+
+      for (const key of allowedKeys) {
+        if (embedLinks[key] !== undefined && embedLinks[key] !== '') {
+          filteredLinks[key] = String(embedLinks[key]).trim();
+        }
+      }
+
+      await user.update({ embedLinks: filteredLinks });
+
+      // Clear cache
+      await cacheDelete(`user:${user.id}`);
+
+      res.json({
+        message: 'Embed links updated',
+        embedLinks: user.embedLinks
       });
     } catch (error) {
       next(error);

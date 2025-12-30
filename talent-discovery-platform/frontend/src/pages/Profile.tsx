@@ -7,14 +7,17 @@ import toast from 'react-hot-toast';
 interface SocialLinks {
   website?: string;
   imdb?: string;
-  instagram?: string;
   twitter?: string;
-  tiktok?: string;
-  youtube?: string;
   linkedin?: string;
+  agency?: string;
+}
+
+interface EmbedLinks {
   spotify?: string;
   soundcloud?: string;
-  agency?: string;
+  youtube?: string;
+  instagram?: string;
+  tiktok?: string;
 }
 
 interface UserProfile {
@@ -33,6 +36,7 @@ interface UserProfile {
   createdAt: string;
   location?: string;
   socialLinks?: SocialLinks;
+  embedLinks?: EmbedLinks;
   photoGallery?: string[];
   age?: number | null;
   dateOfBirth?: string | null;
@@ -154,6 +158,67 @@ const Profile: React.FC = () => {
       year: 'numeric',
       month: 'long'
     });
+  };
+
+  // Helper functions to convert URLs to embed format
+  const getSpotifyEmbedUrl = (url: string): string | null => {
+    // Handle Spotify URLs like https://open.spotify.com/track/..., /album/..., /playlist/..., /artist/...
+    const match = url.match(/open\.spotify\.com\/(track|album|playlist|artist)\/([a-zA-Z0-9]+)/);
+    if (match) {
+      return `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0`;
+    }
+    return null;
+  };
+
+  const getSoundCloudEmbedUrl = (url: string): string | null => {
+    // SoundCloud requires oEmbed API, but we can use the widget directly with the URL
+    return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
+  };
+
+  const getYouTubeEmbedUrl = (url: string): string | null => {
+    // Handle various YouTube URL formats
+    let videoId: string | null = null;
+
+    // youtu.be/VIDEO_ID
+    const shortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
+    if (shortMatch) videoId = shortMatch[1];
+
+    // youtube.com/watch?v=VIDEO_ID
+    const watchMatch = url.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/);
+    if (watchMatch) videoId = watchMatch[1];
+
+    // youtube.com/embed/VIDEO_ID
+    const embedMatch = url.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/);
+    if (embedMatch) videoId = embedMatch[1];
+
+    // youtube.com/playlist?list=PLAYLIST_ID
+    const playlistMatch = url.match(/youtube\.com\/playlist\?list=([a-zA-Z0-9_-]+)/);
+    if (playlistMatch) {
+      return `https://www.youtube.com/embed/videoseries?list=${playlistMatch[1]}`;
+    }
+
+    if (videoId) {
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    return null;
+  };
+
+  const getInstagramEmbedUrl = (url: string): string | null => {
+    // Handle Instagram post/reel URLs
+    const match = url.match(/instagram\.com\/(p|reel)\/([a-zA-Z0-9_-]+)/);
+    if (match) {
+      return `https://www.instagram.com/${match[1]}/${match[2]}/embed`;
+    }
+    return null;
+  };
+
+  const getTikTokEmbedUrl = (url: string): string | null => {
+    // TikTok embeds require the video ID
+    const match = url.match(/tiktok\.com\/@[^\/]+\/video\/(\d+)/);
+    if (match) {
+      return `https://www.tiktok.com/embed/v2/${match[1]}`;
+    }
+    return null;
   };
 
   if (loading) {
@@ -307,6 +372,89 @@ const Profile: React.FC = () => {
               {profile.bio && (
                 <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
                   <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{profile.bio}</p>
+                </div>
+              )}
+
+              {/* Embedded Media Section */}
+              {profile.embedLinks && Object.values(profile.embedLinks).some(v => v) && (
+                <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Featured Media</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Spotify Embed */}
+                    {profile.embedLinks.spotify && getSpotifyEmbedUrl(profile.embedLinks.spotify) && (
+                      <div className="rounded-lg overflow-hidden bg-gray-900">
+                        <iframe
+                          src={getSpotifyEmbedUrl(profile.embedLinks.spotify)!}
+                          width="100%"
+                          height="152"
+                          frameBorder="0"
+                          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                          loading="lazy"
+                          title="Spotify"
+                        ></iframe>
+                      </div>
+                    )}
+
+                    {/* SoundCloud Embed */}
+                    {profile.embedLinks.soundcloud && (
+                      <div className="rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
+                        <iframe
+                          width="100%"
+                          height="166"
+                          scrolling="no"
+                          frameBorder="no"
+                          allow="autoplay"
+                          src={getSoundCloudEmbedUrl(profile.embedLinks.soundcloud)!}
+                          title="SoundCloud"
+                        ></iframe>
+                      </div>
+                    )}
+
+                    {/* YouTube Embed */}
+                    {profile.embedLinks.youtube && getYouTubeEmbedUrl(profile.embedLinks.youtube) && (
+                      <div className="aspect-video rounded-lg overflow-hidden bg-black md:col-span-2">
+                        <iframe
+                          width="100%"
+                          height="100%"
+                          src={getYouTubeEmbedUrl(profile.embedLinks.youtube)!}
+                          title="YouTube"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        ></iframe>
+                      </div>
+                    )}
+
+                    {/* Instagram Embed */}
+                    {profile.embedLinks.instagram && getInstagramEmbedUrl(profile.embedLinks.instagram) && (
+                      <div className="rounded-lg overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                        <iframe
+                          src={getInstagramEmbedUrl(profile.embedLinks.instagram)!}
+                          width="100%"
+                          height="450"
+                          frameBorder="0"
+                          scrolling="no"
+                          allowTransparency={true}
+                          title="Instagram"
+                        ></iframe>
+                      </div>
+                    )}
+
+                    {/* TikTok Embed */}
+                    {profile.embedLinks.tiktok && getTikTokEmbedUrl(profile.embedLinks.tiktok) && (
+                      <div className="rounded-lg overflow-hidden bg-black">
+                        <iframe
+                          src={getTikTokEmbedUrl(profile.embedLinks.tiktok)!}
+                          width="100%"
+                          height="450"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          title="TikTok"
+                        ></iframe>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -581,17 +729,6 @@ const Profile: React.FC = () => {
                           <span className="text-gray-700 dark:text-gray-200 font-medium">IMDB</span>
                         </a>
                       )}
-                      {profile.socialLinks.instagram && (
-                        <a
-                          href={profile.socialLinks.instagram}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-3 p-3 bg-pink-50 dark:bg-pink-900/30 rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/50 transition-colors"
-                        >
-                          <span className="text-xl">📷</span>
-                          <span className="text-gray-700 dark:text-gray-200 font-medium">Instagram</span>
-                        </a>
-                      )}
                       {profile.socialLinks.twitter && (
                         <a
                           href={profile.socialLinks.twitter}
@@ -603,28 +740,6 @@ const Profile: React.FC = () => {
                           <span className="text-gray-700 dark:text-gray-200 font-medium">Twitter / X</span>
                         </a>
                       )}
-                      {profile.socialLinks.tiktok && (
-                        <a
-                          href={profile.socialLinks.tiktok}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                        >
-                          <span className="text-xl">🎵</span>
-                          <span className="text-gray-700 dark:text-gray-200 font-medium">TikTok</span>
-                        </a>
-                      )}
-                      {profile.socialLinks.youtube && (
-                        <a
-                          href={profile.socialLinks.youtube}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-3 p-3 bg-red-50 dark:bg-red-900/30 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
-                        >
-                          <span className="text-xl">▶️</span>
-                          <span className="text-gray-700 dark:text-gray-200 font-medium">YouTube</span>
-                        </a>
-                      )}
                       {profile.socialLinks.linkedin && (
                         <a
                           href={profile.socialLinks.linkedin}
@@ -634,28 +749,6 @@ const Profile: React.FC = () => {
                         >
                           <span className="text-xl">💼</span>
                           <span className="text-gray-700 dark:text-gray-200 font-medium">LinkedIn</span>
-                        </a>
-                      )}
-                      {profile.socialLinks.spotify && (
-                        <a
-                          href={profile.socialLinks.spotify}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/30 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors"
-                        >
-                          <span className="text-xl">🎧</span>
-                          <span className="text-gray-700 dark:text-gray-200 font-medium">Spotify</span>
-                        </a>
-                      )}
-                      {profile.socialLinks.soundcloud && (
-                        <a
-                          href={profile.socialLinks.soundcloud}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-900/30 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors"
-                        >
-                          <span className="text-xl">☁️</span>
-                          <span className="text-gray-700 dark:text-gray-200 font-medium">SoundCloud</span>
                         </a>
                       )}
                       {profile.socialLinks.agency && (

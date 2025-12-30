@@ -255,7 +255,9 @@ export const profileAPI = {
   updatePrivacySettings: (settings: any) =>
     api.put('/profiles/me/privacy', { settings }),
   updateSocialLinks: (socialLinks: any) =>
-    api.put('/profiles/me/social-links', { socialLinks })
+    api.put('/profiles/me/social-links', { socialLinks }),
+  updateEmbedLinks: (embedLinks: any) =>
+    api.put('/profiles/me/embed-links', { embedLinks })
 };
 
 export const socialAPI = {

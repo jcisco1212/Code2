@@ -145,7 +145,11 @@ const AdminCategories: React.FC = () => {
       setShowModal(false);
       fetchCategories();
     } catch (err: any) {
-      toast.error(err.response?.data?.error?.message || 'Failed to save category');
+      const errorMessage = err.response?.data?.error?.message
+        || err.response?.data?.error
+        || err.response?.data?.message
+        || 'Failed to save category';
+      toast.error(typeof errorMessage === 'string' ? errorMessage : 'Failed to save category');
     }
   };
 

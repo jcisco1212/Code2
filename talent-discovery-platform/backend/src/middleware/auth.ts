@@ -26,7 +26,7 @@ export const authenticate: RequestHandler = async (
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({ error: 'Authentication required' });
+      res.status(401).json({ error: { message: 'Authentication required' } });
       return;
     }
 
@@ -38,12 +38,12 @@ export const authenticate: RequestHandler = async (
     const user = await User.findByPk(decoded.userId);
 
     if (!user) {
-      res.status(401).json({ error: 'User not found' });
+      res.status(401).json({ error: { message: 'User not found' } });
       return;
     }
 
     if (!user.isActive) {
-      res.status(403).json({ error: 'Account is disabled' });
+      res.status(403).json({ error: { message: 'Account is disabled' } });
       return;
     }
 
@@ -52,15 +52,15 @@ export const authenticate: RequestHandler = async (
     next();
   } catch (error: any) {
     if (error.name === 'TokenExpiredError') {
-      res.status(401).json({ error: 'Token expired' });
+      res.status(401).json({ error: { message: 'Token expired' } });
       return;
     }
     if (error.name === 'JsonWebTokenError') {
-      res.status(401).json({ error: 'Invalid token' });
+      res.status(401).json({ error: { message: 'Invalid token' } });
       return;
     }
     logger.error('Authentication error:', error);
-    res.status(500).json({ error: 'Authentication failed' });
+    res.status(500).json({ error: { message: 'Authentication failed' } });
   }
 };
 
@@ -101,12 +101,12 @@ export const requireRole = (...roles: UserRole[]): RequestHandler => {
   return (req: Request, res: Response, next: NextFunction): void => {
     const authReq = req as AuthRequest;
     if (!authReq.user) {
-      res.status(401).json({ error: 'Authentication required' });
+      res.status(401).json({ error: { message: 'Authentication required' } });
       return;
     }
 
     if (!roles.includes(authReq.user.role)) {
-      res.status(403).json({ error: 'Insufficient permissions' });
+      res.status(403).json({ error: { message: 'Insufficient permissions. Required role: ' + roles.join(' or ') } });
       return;
     }
 
@@ -122,12 +122,12 @@ export const requireVerifiedEmail: RequestHandler = (
 ): void => {
   const authReq = req as AuthRequest;
   if (!authReq.user) {
-    res.status(401).json({ error: 'Authentication required' });
+    res.status(401).json({ error: { message: 'Authentication required' } });
     return;
   }
 
   if (!authReq.user.emailVerified) {
-    res.status(403).json({ error: 'Email verification required' });
+    res.status(403).json({ error: { message: 'Email verification required' } });
     return;
   }
 
@@ -142,12 +142,12 @@ export const requireAgent: RequestHandler = (
 ): void => {
   const authReq = req as AuthRequest;
   if (!authReq.user) {
-    res.status(401).json({ error: 'Authentication required' });
+    res.status(401).json({ error: { message: 'Authentication required' } });
     return;
   }
 
   if (authReq.user.role !== UserRole.AGENT) {
-    res.status(403).json({ error: 'Agent access required' });
+    res.status(403).json({ error: { message: 'Agent access required' } });
     return;
   }
 
@@ -162,12 +162,12 @@ export const requireAdmin: RequestHandler = (
 ): void => {
   const authReq = req as AuthRequest;
   if (!authReq.user) {
-    res.status(401).json({ error: 'Authentication required' });
+    res.status(401).json({ error: { message: 'Authentication required' } });
     return;
   }
 
   if (authReq.user.role !== UserRole.ADMIN && authReq.user.role !== UserRole.SUPER_ADMIN) {
-    res.status(403).json({ error: 'Admin access required' });
+    res.status(403).json({ error: { message: 'Admin access required' } });
     return;
   }
 
@@ -182,12 +182,12 @@ export const requireSuperAdmin: RequestHandler = (
 ): void => {
   const authReq = req as AuthRequest;
   if (!authReq.user) {
-    res.status(401).json({ error: 'Authentication required' });
+    res.status(401).json({ error: { message: 'Authentication required' } });
     return;
   }
 
   if (authReq.user.role !== UserRole.SUPER_ADMIN) {
-    res.status(403).json({ error: 'Super Admin access required' });
+    res.status(403).json({ error: { message: 'Super Admin access required' } });
     return;
   }
 
@@ -202,12 +202,12 @@ export const requireModeratorOrAdmin: RequestHandler = (
 ): void => {
   const authReq = req as AuthRequest;
   if (!authReq.user) {
-    res.status(401).json({ error: 'Authentication required' });
+    res.status(401).json({ error: { message: 'Authentication required' } });
     return;
   }
 
   if (authReq.user.role !== UserRole.ADMIN && authReq.user.role !== UserRole.SUPER_ADMIN) {
-    res.status(403).json({ error: 'Admin access required' });
+    res.status(403).json({ error: { message: 'Admin access required' } });
     return;
   }
 

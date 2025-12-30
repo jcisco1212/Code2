@@ -25,14 +25,17 @@ export enum ArtistType {
 export interface SocialLinks {
   website?: string;
   imdb?: string;
-  instagram?: string;
   twitter?: string;
-  tiktok?: string;
-  youtube?: string;
   linkedin?: string;
+  agency?: string;
+}
+
+export interface EmbedLinks {
   spotify?: string;
   soundcloud?: string;
-  agency?: string;
+  youtube?: string;
+  instagram?: string;
+  tiktok?: string;
 }
 
 export interface PrivacySettings {
@@ -71,6 +74,7 @@ interface UserAttributes {
   bannerUrl: string | null;
   location: string | null;
   socialLinks: SocialLinks | null;
+  embedLinks: EmbedLinks | null;
   agencyName: string | null;
   role: UserRole;
   isVerified: boolean;
@@ -98,7 +102,7 @@ interface UserAttributes {
 
 interface UserCreationAttributes extends Optional<UserAttributes,
   'id' | 'displayName' | 'firstName' | 'lastName' | 'bio' | 'avatarUrl' | 'bannerUrl' |
-  'location' | 'socialLinks' | 'agencyName' | 'role' | 'isVerified' | 'isActive' | 'twoFactorEnabled' |
+  'location' | 'socialLinks' | 'embedLinks' | 'agencyName' | 'role' | 'isVerified' | 'isActive' | 'twoFactorEnabled' |
   'twoFactorSecret' | 'emailVerified' | 'emailVerificationToken' | 'passwordResetToken' |
   'passwordResetExpires' | 'lastLogin' | 'gender' | 'dateOfBirth' | 'ethnicity' | 'photoGallery' |
   'artistType' | 'genre' | 'talentCategories' | 'privacySettings' | 'notificationSettings' | 'createdAt' | 'updatedAt'
@@ -117,6 +121,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   declare bannerUrl: string | null;
   declare location: string | null;
   declare socialLinks: SocialLinks | null;
+  declare embedLinks: EmbedLinks | null;
   declare agencyName: string | null;
   declare role: UserRole;
   declare isVerified: boolean;
@@ -184,6 +189,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       bio: this.bio,
       location: privacy.showLocation ? this.location : null,
       socialLinks: this.socialLinks,
+      embedLinks: this.embedLinks,
       isVerified: this.isVerified,
       gender: privacy.showGender ? this.gender : null,
       age: privacy.showAge ? this.age : null,
@@ -215,6 +221,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       bio: this.bio,
       location: this.location,
       socialLinks: this.socialLinks,
+      embedLinks: this.embedLinks,
       isVerified: this.isVerified,
       gender: this.gender,
       age: this.age,
@@ -297,6 +304,12 @@ User.init(
       allowNull: true,
       defaultValue: null,
       field: 'social_links'
+    },
+    embedLinks: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: null,
+      field: 'embed_links'
     },
     agencyName: {
       type: DataTypes.STRING(255),

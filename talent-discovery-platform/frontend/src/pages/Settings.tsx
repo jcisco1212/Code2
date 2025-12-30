@@ -18,11 +18,12 @@ import {
   PhotoIcon,
   TrashIcon,
   PlusIcon,
-  HomeIcon
+  HomeIcon,
+  PlayIcon
 } from '@heroicons/react/24/outline';
 import { getUploadUrl } from '../services/api';
 
-type SettingsTab = 'profile' | 'photos' | 'account' | 'notifications' | 'privacy' | 'appearance' | 'links' | 'security' | 'blocked';
+type SettingsTab = 'profile' | 'photos' | 'account' | 'notifications' | 'privacy' | 'appearance' | 'links' | 'embeds' | 'security' | 'blocked';
 
 // Helper to normalize URLs - adds https:// if missing
 const normalizeUrl = (url: string): string => {
@@ -114,18 +115,22 @@ const Settings: React.FC = () => {
     showGender: true
   });
 
-  // Social links
+  // Social links (for profile links that redirect to external sites)
   const [socialLinks, setSocialLinks] = useState({
     website: '',
     imdb: '',
-    instagram: '',
     twitter: '',
-    tiktok: '',
-    youtube: '',
     linkedin: '',
+    agency: ''
+  });
+
+  // Embed links (for embedded media displayed on profile)
+  const [embedLinks, setEmbedLinks] = useState({
     spotify: '',
     soundcloud: '',
-    agency: ''
+    youtube: '',
+    instagram: '',
+    tiktok: ''
   });
 
   // 2FA state
@@ -168,14 +173,19 @@ const Settings: React.FC = () => {
         setSocialLinks({
           website: user.socialLinks.website || '',
           imdb: user.socialLinks.imdb || '',
-          instagram: user.socialLinks.instagram || '',
           twitter: user.socialLinks.twitter || '',
-          tiktok: user.socialLinks.tiktok || '',
-          youtube: user.socialLinks.youtube || '',
           linkedin: user.socialLinks.linkedin || '',
-          spotify: user.socialLinks.spotify || '',
-          soundcloud: user.socialLinks.soundcloud || '',
           agency: user.socialLinks.agency || ''
+        });
+      }
+      // Initialize embed links from user data
+      if (user.embedLinks) {
+        setEmbedLinks({
+          spotify: user.embedLinks.spotify || '',
+          soundcloud: user.embedLinks.soundcloud || '',
+          youtube: user.embedLinks.youtube || '',
+          instagram: user.embedLinks.instagram || '',
+          tiktok: user.embedLinks.tiktok || ''
         });
       }
       // Set 2FA status
@@ -476,19 +486,34 @@ const Settings: React.FC = () => {
       const normalizedLinks = {
         website: normalizeUrl(socialLinks.website),
         imdb: normalizeUrl(socialLinks.imdb),
-        instagram: normalizeUrl(socialLinks.instagram),
         twitter: normalizeUrl(socialLinks.twitter),
-        tiktok: normalizeUrl(socialLinks.tiktok),
-        youtube: normalizeUrl(socialLinks.youtube),
         linkedin: normalizeUrl(socialLinks.linkedin),
-        spotify: normalizeUrl(socialLinks.spotify),
-        soundcloud: normalizeUrl(socialLinks.soundcloud),
         agency: normalizeUrl(socialLinks.agency)
       };
       await profileAPI.updateSocialLinks(normalizedLinks);
       toast.success('Social links saved');
     } catch (err: any) {
       toast.error('Failed to save social links');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEmbedLinksSave = async () => {
+    setSaving(true);
+    try {
+      // Normalize all URLs before saving
+      const normalizedLinks = {
+        spotify: normalizeUrl(embedLinks.spotify),
+        soundcloud: normalizeUrl(embedLinks.soundcloud),
+        youtube: normalizeUrl(embedLinks.youtube),
+        instagram: normalizeUrl(embedLinks.instagram),
+        tiktok: normalizeUrl(embedLinks.tiktok)
+      };
+      await profileAPI.updateEmbedLinks(normalizedLinks);
+      toast.success('Embed links saved');
+    } catch (err: any) {
+      toast.error('Failed to save embed links');
     } finally {
       setSaving(false);
     }
@@ -549,6 +574,7 @@ const Settings: React.FC = () => {
     { id: 'profile' as SettingsTab, name: 'Profile', icon: UserCircleIcon },
     { id: 'photos' as SettingsTab, name: 'Photo Gallery', icon: PhotoIcon },
     { id: 'links' as SettingsTab, name: 'Social Links', icon: LinkIcon },
+    { id: 'embeds' as SettingsTab, name: 'Media Embeds', icon: PlayIcon },
     { id: 'account' as SettingsTab, name: 'Account', icon: KeyIcon },
     { id: 'security' as SettingsTab, name: 'Security', icon: LockClosedIcon },
     { id: 'notifications' as SettingsTab, name: 'Notifications', icon: BellIcon },
@@ -1194,23 +1220,6 @@ const Settings: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Instagram */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Instagram
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">📷</span>
-                      <input
-                        type="text"
-                        value={socialLinks.instagram}
-                        onChange={e => setSocialLinks(prev => ({ ...prev, instagram: e.target.value }))}
-                        placeholder="instagram.com/username"
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                      />
-                    </div>
-                  </div>
-
                   {/* Twitter / X */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -1223,40 +1232,6 @@ const Settings: React.FC = () => {
                         value={socialLinks.twitter}
                         onChange={e => setSocialLinks(prev => ({ ...prev, twitter: e.target.value }))}
                         placeholder="twitter.com/username"
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* TikTok */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      TikTok
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🎵</span>
-                      <input
-                        type="text"
-                        value={socialLinks.tiktok}
-                        onChange={e => setSocialLinks(prev => ({ ...prev, tiktok: e.target.value }))}
-                        placeholder="tiktok.com/@username"
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* YouTube */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      YouTube
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">▶️</span>
-                      <input
-                        type="text"
-                        value={socialLinks.youtube}
-                        onChange={e => setSocialLinks(prev => ({ ...prev, youtube: e.target.value }))}
-                        placeholder="youtube.com/@channel"
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
@@ -1279,42 +1254,8 @@ const Settings: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Spotify */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Spotify
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🎧</span>
-                      <input
-                        type="text"
-                        value={socialLinks.spotify}
-                        onChange={e => setSocialLinks(prev => ({ ...prev, spotify: e.target.value }))}
-                        placeholder="open.spotify.com/artist/..."
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* SoundCloud */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      SoundCloud
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">☁️</span>
-                      <input
-                        type="text"
-                        value={socialLinks.soundcloud}
-                        onChange={e => setSocialLinks(prev => ({ ...prev, soundcloud: e.target.value }))}
-                        placeholder="soundcloud.com/username"
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                      />
-                    </div>
-                  </div>
-
                   {/* Agency / Management */}
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Agency / Management
                     </label>
@@ -1337,6 +1278,128 @@ const Settings: React.FC = () => {
                   className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
                 >
                   {saving ? 'Saving...' : 'Save Social Links'}
+                </button>
+              </div>
+            )}
+
+            {/* Media Embeds Tab */}
+            {activeTab === 'embeds' && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Media Embeds</h2>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
+                    Add links to your content on music and video platforms. These will be embedded directly on your profile so visitors can watch/listen without leaving the site.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Spotify */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Spotify (Track, Album, Playlist, or Artist)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🎧</span>
+                      <input
+                        type="text"
+                        value={embedLinks.spotify}
+                        onChange={e => setEmbedLinks(prev => ({ ...prev, spotify: e.target.value }))}
+                        placeholder="https://open.spotify.com/track/... or /album/... or /playlist/..."
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Paste a Spotify link to embed a music player on your profile
+                    </p>
+                  </div>
+
+                  {/* SoundCloud */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      SoundCloud (Track or Playlist)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">☁️</span>
+                      <input
+                        type="text"
+                        value={embedLinks.soundcloud}
+                        onChange={e => setEmbedLinks(prev => ({ ...prev, soundcloud: e.target.value }))}
+                        placeholder="https://soundcloud.com/username/track-name"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Paste a SoundCloud link to embed an audio player on your profile
+                    </p>
+                  </div>
+
+                  {/* YouTube */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      YouTube (Video or Playlist)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">▶️</span>
+                      <input
+                        type="text"
+                        value={embedLinks.youtube}
+                        onChange={e => setEmbedLinks(prev => ({ ...prev, youtube: e.target.value }))}
+                        placeholder="https://youtube.com/watch?v=... or https://youtu.be/..."
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Paste a YouTube video or playlist link to embed on your profile
+                    </p>
+                  </div>
+
+                  {/* Instagram */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Instagram (Post or Reel)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">📷</span>
+                      <input
+                        type="text"
+                        value={embedLinks.instagram}
+                        onChange={e => setEmbedLinks(prev => ({ ...prev, instagram: e.target.value }))}
+                        placeholder="https://instagram.com/p/... or /reel/..."
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Paste an Instagram post or reel link to embed on your profile
+                    </p>
+                  </div>
+
+                  {/* TikTok */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      TikTok (Video)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🎵</span>
+                      <input
+                        type="text"
+                        value={embedLinks.tiktok}
+                        onChange={e => setEmbedLinks(prev => ({ ...prev, tiktok: e.target.value }))}
+                        placeholder="https://tiktok.com/@username/video/..."
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Paste a TikTok video link to embed on your profile
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleEmbedLinksSave}
+                  disabled={saving}
+                  className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                >
+                  {saving ? 'Saving...' : 'Save Media Embeds'}
                 </button>
               </div>
             )}
