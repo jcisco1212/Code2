@@ -257,7 +257,9 @@ export const profileAPI = {
   updateSocialLinks: (socialLinks: any) =>
     api.put('/profiles/me/social-links', { socialLinks }),
   updateEmbedLinks: (embedLinks: any) =>
-    api.put('/profiles/me/embed-links', { embedLinks })
+    api.put('/profiles/me/embed-links', { embedLinks }),
+  updateBannerSettings: (bannerSettings: any) =>
+    api.put('/profiles/me/banner-settings', { bannerSettings })
 };
 
 export const socialAPI = {

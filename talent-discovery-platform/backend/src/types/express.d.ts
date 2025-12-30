@@ -1,5 +1,5 @@
 import UserModel from '../models/User';
-import { SocialLinks, EmbedLinks, UserRole, Gender, ArtistType, PrivacySettings, NotificationSettings } from '../models/User';
+import { SocialLinks, EmbedLinks, UserRole, Gender, ArtistType, PrivacySettings, NotificationSettings, BannerSettings } from '../models/User';
 
 declare global {
   namespace Express {
@@ -39,6 +39,7 @@ declare global {
       talentCategories: string[] | null;
       privacySettings: PrivacySettings | null;
       notificationSettings: NotificationSettings | null;
+      bannerSettings: BannerSettings | null;
       createdAt: Date;
       updatedAt: Date;
       comparePassword(candidatePassword: string): Promise<boolean>;

@@ -20,6 +20,12 @@ interface EmbedLinks {
   tiktok?: string;
 }
 
+interface BannerSettings {
+  type: 'image' | 'color' | 'metal';
+  color?: string;
+  metalStyle?: 'gold' | 'silver' | 'bronze' | 'chrome' | 'rose-gold' | 'platinum';
+}
+
 interface UserProfile {
   id: string;
   username: string;
@@ -27,6 +33,7 @@ interface UserProfile {
   bio: string | null;
   avatarUrl: string | null;
   bannerUrl: string | null;
+  bannerSettings?: BannerSettings;
   role: string;
   isVerified: boolean;
   followersCount: number;
@@ -250,26 +257,56 @@ const Profile: React.FC = () => {
     );
   }
 
+  // Metal gradient definitions for banner
+  const metalGradients: Record<string, string> = {
+    gold: 'linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c)',
+    silver: 'linear-gradient(135deg, #C0C0C0, #E8E8E8, #A8A8A8, #F5F5F5, #909090)',
+    bronze: 'linear-gradient(135deg, #CD7F32, #E6A55A, #8B5A2B, #D4A76A, #6B4423)',
+    chrome: 'linear-gradient(135deg, #D4D4D4, #FFFFFF, #8C8C8C, #F0F0F0, #606060)',
+    'rose-gold': 'linear-gradient(135deg, #B76E79, #EACDD2, #9E6B73, #F5E1E5, #8B5A5A)',
+    platinum: 'linear-gradient(135deg, #E5E4E2, #FFFFFF, #C0C0C0, #F5F5F5, #A0A0A0)'
+  };
+
+  // Determine banner background
+  const getBannerStyle = () => {
+    const settings = profile.bannerSettings;
+    if (!settings || settings.type === 'image') {
+      // Default gradient for image type when no image is set
+      return { background: 'linear-gradient(to right, #4f46e5, #9333ea, #ec4899)' };
+    }
+    if (settings.type === 'color' && settings.color) {
+      return { background: settings.color };
+    }
+    if (settings.type === 'metal' && settings.metalStyle) {
+      return { background: metalGradients[settings.metalStyle] || metalGradients.gold };
+    }
+    return { background: 'linear-gradient(to right, #4f46e5, #9333ea, #ec4899)' };
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Hero Banner Section */}
       <div className="relative">
-        {/* Banner Image */}
-        <div className="h-64 md:h-80 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 relative overflow-hidden">
-          {profile.bannerUrl ? (
+        {/* Banner */}
+        <div
+          className="h-64 md:h-80 relative overflow-hidden"
+          style={getBannerStyle()}
+        >
+          {/* Show image if type is image and bannerUrl exists */}
+          {(!profile.bannerSettings || profile.bannerSettings.type === 'image') && profile.bannerUrl ? (
             <img
               src={getUploadUrl(profile.bannerUrl) || ''}
               alt="Banner"
               className="w-full h-full object-cover"
             />
-          ) : (
+          ) : (!profile.bannerSettings || profile.bannerSettings.type === 'image') && !profile.bannerUrl ? (
             <div className="absolute inset-0 opacity-30">
               <div className="absolute inset-0" style={{
                 backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'
               }}></div>
             </div>
-          )}
-          <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+          ) : null}
+          <div className="absolute inset-0 bg-black bg-opacity-10"></div>
         </div>
 
         {/* Profile Info Overlay */}

@@ -133,6 +133,31 @@ const Settings: React.FC = () => {
     tiktok: ''
   });
 
+  // Banner settings
+  type BannerType = 'image' | 'color' | 'metal';
+  type MetalStyle = 'gold' | 'silver' | 'bronze' | 'chrome' | 'rose-gold' | 'platinum';
+
+  const [bannerSettings, setBannerSettings] = useState<{
+    type: BannerType;
+    color: string;
+    metalStyle: MetalStyle;
+  }>({
+    type: 'image',
+    color: '#6366F1',
+    metalStyle: 'gold'
+  });
+  const [savingBanner, setSavingBanner] = useState(false);
+
+  // Metal gradient definitions
+  const metalGradients: Record<MetalStyle, string> = {
+    gold: 'linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c)',
+    silver: 'linear-gradient(135deg, #C0C0C0, #E8E8E8, #A8A8A8, #F5F5F5, #909090)',
+    bronze: 'linear-gradient(135deg, #CD7F32, #E6A55A, #8B5A2B, #D4A76A, #6B4423)',
+    chrome: 'linear-gradient(135deg, #D4D4D4, #FFFFFF, #8C8C8C, #F0F0F0, #606060)',
+    'rose-gold': 'linear-gradient(135deg, #B76E79, #EACDD2, #9E6B73, #F5E1E5, #8B5A5A)',
+    platinum: 'linear-gradient(135deg, #E5E4E2, #FFFFFF, #C0C0C0, #F5F5F5, #A0A0A0)'
+  };
+
   // 2FA state
   const [twoFAEnabled, setTwoFAEnabled] = useState(false);
   const [twoFASetup, setTwoFASetup] = useState<{ qrCode: string; secret: string } | null>(null);
@@ -186,6 +211,14 @@ const Settings: React.FC = () => {
           youtube: user.embedLinks.youtube || '',
           instagram: user.embedLinks.instagram || '',
           tiktok: user.embedLinks.tiktok || ''
+        });
+      }
+      // Initialize banner settings from user data
+      if (user.bannerSettings) {
+        setBannerSettings({
+          type: user.bannerSettings.type || 'image',
+          color: user.bannerSettings.color || '#6366F1',
+          metalStyle: user.bannerSettings.metalStyle || 'gold'
         });
       }
       // Set 2FA status
@@ -398,6 +431,37 @@ const Settings: React.FC = () => {
       if (bannerInputRef.current) {
         bannerInputRef.current.value = '';
       }
+    }
+  };
+
+  const handleBannerSettingsSave = async () => {
+    setSavingBanner(true);
+    try {
+      const settingsToSave: {
+        type: BannerType;
+        color?: string;
+        metalStyle?: MetalStyle;
+      } = {
+        type: bannerSettings.type
+      };
+
+      if (bannerSettings.type === 'color') {
+        settingsToSave.color = bannerSettings.color;
+      } else if (bannerSettings.type === 'metal') {
+        settingsToSave.metalStyle = bannerSettings.metalStyle;
+      }
+
+      await profileAPI.updateBannerSettings(settingsToSave);
+
+      if (refreshUser) {
+        await refreshUser();
+      }
+
+      toast.success('Banner settings updated!');
+    } catch (err: any) {
+      toast.error(err.response?.data?.error?.message || 'Failed to update banner settings');
+    } finally {
+      setSavingBanner(false);
     }
   };
 
@@ -666,33 +730,65 @@ const Settings: React.FC = () => {
                 <div className="border-t dark:border-gray-700 pt-6">
                   <h3 className="font-medium text-gray-900 dark:text-white mb-2">Profile Banner</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    Add a custom banner image to your profile. Recommended size: 1920x400 pixels.
+                    Choose a banner style for your profile.
                   </p>
-                  <div className="relative w-full h-32 rounded-lg overflow-hidden bg-gradient-to-r from-indigo-400 to-purple-500">
-                    {uploadingBanner ? (
+
+                  {/* Banner Type Selector */}
+                  <div className="flex gap-2 mb-4">
+                    {(['image', 'color', 'metal'] as const).map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setBannerSettings(prev => ({ ...prev, type }))}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          bannerSettings.type === type
+                            ? 'bg-indigo-600 text-white'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                        }`}
+                      >
+                        {type === 'image' ? 'Image' : type === 'color' ? 'Solid Color' : 'Metallic'}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Banner Preview */}
+                  <div
+                    className="relative w-full h-32 rounded-lg overflow-hidden"
+                    style={{
+                      background: bannerSettings.type === 'color'
+                        ? bannerSettings.color
+                        : bannerSettings.type === 'metal'
+                        ? metalGradients[bannerSettings.metalStyle]
+                        : 'linear-gradient(to right, #818cf8, #a855f7)'
+                    }}
+                  >
+                    {uploadingBanner || savingBanner ? (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                         <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
                       </div>
-                    ) : user?.bannerUrl ? (
+                    ) : bannerSettings.type === 'image' && user?.bannerUrl ? (
                       <img
                         src={getUploadUrl(user.bannerUrl) || ''}
                         alt="Profile Banner"
                         className="w-full h-full object-cover"
                       />
-                    ) : (
+                    ) : bannerSettings.type === 'image' ? (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <span className="text-white/80 text-sm">No banner image set</span>
                       </div>
+                    ) : null}
+
+                    {bannerSettings.type === 'image' && (
+                      <button
+                        type="button"
+                        onClick={() => bannerInputRef.current?.click()}
+                        disabled={uploadingBanner}
+                        className="absolute bottom-2 right-2 flex items-center gap-2 px-3 py-1.5 bg-black/50 hover:bg-black/70 text-white text-sm rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        <CameraIcon className="w-4 h-4" />
+                        {user?.bannerUrl ? 'Change Image' : 'Upload Image'}
+                      </button>
                     )}
-                    <button
-                      type="button"
-                      onClick={() => bannerInputRef.current?.click()}
-                      disabled={uploadingBanner}
-                      className="absolute bottom-2 right-2 flex items-center gap-2 px-3 py-1.5 bg-black/50 hover:bg-black/70 text-white text-sm rounded-lg transition-colors disabled:opacity-50"
-                    >
-                      <CameraIcon className="w-4 h-4" />
-                      {user?.bannerUrl ? 'Change Banner' : 'Add Banner'}
-                    </button>
                     <input
                       ref={bannerInputRef}
                       type="file"
@@ -701,6 +797,93 @@ const Settings: React.FC = () => {
                       className="hidden"
                     />
                   </div>
+
+                  {/* Color Picker for Solid Color */}
+                  {bannerSettings.type === 'color' && (
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Choose Color
+                      </label>
+                      <div className="flex items-center gap-4">
+                        <input
+                          type="color"
+                          value={bannerSettings.color}
+                          onChange={(e) => setBannerSettings(prev => ({ ...prev, color: e.target.value }))}
+                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-300 dark:border-gray-600"
+                        />
+                        <input
+                          type="text"
+                          value={bannerSettings.color}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^#[0-9A-Fa-f]{0,6}$/.test(value)) {
+                              setBannerSettings(prev => ({ ...prev, color: value }));
+                            }
+                          }}
+                          placeholder="#6366F1"
+                          className="w-28 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono"
+                        />
+                        {/* Quick color presets */}
+                        <div className="flex gap-2">
+                          {['#6366F1', '#EC4899', '#10B981', '#F59E0B', '#3B82F6', '#8B5CF6'].map((color) => (
+                            <button
+                              key={color}
+                              type="button"
+                              onClick={() => setBannerSettings(prev => ({ ...prev, color }))}
+                              className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-600 shadow-sm hover:scale-110 transition-transform"
+                              style={{ backgroundColor: color }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Metal Style Selector */}
+                  {bannerSettings.type === 'metal' && (
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Choose Metal Style
+                      </label>
+                      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                        {(['gold', 'silver', 'bronze', 'chrome', 'rose-gold', 'platinum'] as const).map((style) => (
+                          <button
+                            key={style}
+                            type="button"
+                            onClick={() => setBannerSettings(prev => ({ ...prev, metalStyle: style }))}
+                            className={`relative h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                              bannerSettings.metalStyle === style
+                                ? 'border-indigo-500 ring-2 ring-indigo-500 ring-offset-2 dark:ring-offset-gray-800'
+                                : 'border-gray-200 dark:border-gray-600 hover:border-gray-400'
+                            }`}
+                            style={{ background: metalGradients[style] }}
+                          >
+                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-xs font-medium text-gray-800 bg-white/70 px-2 py-0.5 rounded capitalize">
+                              {style.replace('-', ' ')}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Save Button for non-image types */}
+                  {bannerSettings.type !== 'image' && (
+                    <button
+                      type="button"
+                      onClick={handleBannerSettingsSave}
+                      disabled={savingBanner}
+                      className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                    >
+                      {savingBanner ? 'Saving...' : 'Save Banner Style'}
+                    </button>
+                  )}
+
+                  {bannerSettings.type === 'image' && (
+                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                      Recommended size: 1920x400 pixels. Max 10MB. JPG, PNG, or WebP.
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

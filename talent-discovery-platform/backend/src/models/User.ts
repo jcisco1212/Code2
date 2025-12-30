@@ -61,6 +61,15 @@ export interface NotificationSettings {
   pushMessages: boolean;
 }
 
+export type BannerType = 'image' | 'color' | 'metal';
+export type MetalStyle = 'gold' | 'silver' | 'bronze' | 'chrome' | 'rose-gold' | 'platinum';
+
+export interface BannerSettings {
+  type: BannerType;
+  color?: string; // Hex color for solid color banners
+  metalStyle?: MetalStyle; // Style for metallic banners
+}
+
 interface UserAttributes {
   id: string;
   email: string;
@@ -96,6 +105,7 @@ interface UserAttributes {
   talentCategories: string[] | null;
   privacySettings: PrivacySettings | null;
   notificationSettings: NotificationSettings | null;
+  bannerSettings: BannerSettings | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -105,7 +115,7 @@ interface UserCreationAttributes extends Optional<UserAttributes,
   'location' | 'socialLinks' | 'embedLinks' | 'agencyName' | 'role' | 'isVerified' | 'isActive' | 'twoFactorEnabled' |
   'twoFactorSecret' | 'emailVerified' | 'emailVerificationToken' | 'passwordResetToken' |
   'passwordResetExpires' | 'lastLogin' | 'gender' | 'dateOfBirth' | 'ethnicity' | 'photoGallery' |
-  'artistType' | 'genre' | 'talentCategories' | 'privacySettings' | 'notificationSettings' | 'createdAt' | 'updatedAt'
+  'artistType' | 'genre' | 'talentCategories' | 'privacySettings' | 'notificationSettings' | 'bannerSettings' | 'createdAt' | 'updatedAt'
 > {}
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
@@ -143,6 +153,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   declare talentCategories: string[] | null;
   declare privacySettings: PrivacySettings | null;
   declare notificationSettings: NotificationSettings | null;
+  declare bannerSettings: BannerSettings | null;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 
@@ -186,6 +197,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       role: this.role,
       avatarUrl: this.avatarUrl,
       bannerUrl: this.bannerUrl,
+      bannerSettings: this.bannerSettings,
       bio: this.bio,
       location: privacy.showLocation ? this.location : null,
       socialLinks: this.socialLinks,
@@ -218,6 +230,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       twoFactorEnabled: this.twoFactorEnabled,
       avatarUrl: this.avatarUrl,
       bannerUrl: this.bannerUrl,
+      bannerSettings: this.bannerSettings,
       bio: this.bio,
       location: this.location,
       socialLinks: this.socialLinks,
@@ -427,6 +440,14 @@ User.init(
         pushMessages: true
       },
       field: 'notification_settings'
+    },
+    bannerSettings: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: {
+        type: 'image'
+      },
+      field: 'banner_settings'
     },
     createdAt: {
       type: DataTypes.DATE,

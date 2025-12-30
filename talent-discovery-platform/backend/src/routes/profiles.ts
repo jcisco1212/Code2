@@ -345,6 +345,71 @@ router.put(
   }
 );
 
+// Update banner settings
+router.put(
+  '/me/banner-settings',
+  authenticate as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const user = req.user!;
+      const { bannerSettings } = req.body;
+
+      // Validate that bannerSettings is an object
+      if (typeof bannerSettings !== 'object' || bannerSettings === null) {
+        res.status(400).json({ error: { message: 'Invalid banner settings data' } });
+        return;
+      }
+
+      // Validate type
+      const allowedTypes = ['image', 'color', 'metal'];
+      if (!bannerSettings.type || !allowedTypes.includes(bannerSettings.type)) {
+        res.status(400).json({ error: { message: 'Invalid banner type. Must be: image, color, or metal' } });
+        return;
+      }
+
+      // Build filtered settings
+      const filteredSettings: {
+        type: 'image' | 'color' | 'metal';
+        color?: string;
+        metalStyle?: string;
+      } = {
+        type: bannerSettings.type
+      };
+
+      // Validate color for color type
+      if (bannerSettings.type === 'color') {
+        if (!bannerSettings.color || !/^#[0-9A-Fa-f]{6}$/.test(bannerSettings.color)) {
+          res.status(400).json({ error: { message: 'Invalid color format. Must be hex color (e.g., #FF5500)' } });
+          return;
+        }
+        filteredSettings.color = bannerSettings.color;
+      }
+
+      // Validate metalStyle for metal type
+      if (bannerSettings.type === 'metal') {
+        const allowedMetalStyles = ['gold', 'silver', 'bronze', 'chrome', 'rose-gold', 'platinum'];
+        if (!bannerSettings.metalStyle || !allowedMetalStyles.includes(bannerSettings.metalStyle)) {
+          res.status(400).json({ error: { message: 'Invalid metal style. Must be: gold, silver, bronze, chrome, rose-gold, or platinum' } });
+          return;
+        }
+        filteredSettings.metalStyle = bannerSettings.metalStyle;
+      }
+
+      await user.update({ bannerSettings: filteredSettings });
+
+      // Clear cache
+      await cacheDelete(`user:${user.id}`);
+
+      res.json({
+        message: 'Banner settings updated',
+        bannerSettings: user.bannerSettings
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 // Update notification settings
 router.put(
   '/me/notifications',
