@@ -62,21 +62,10 @@ export default defineConfig({
     },
   ],
 
-  /* Run your local dev server before starting the tests */
-  webServer: [
-    {
-      command: 'cd ../backend && npm run dev',
-      url: 'http://localhost:4000/health',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
-    },
-    {
-      command: 'cd ../frontend && npm start',
-      url: 'http://localhost:3001',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
-    },
-  ],
+  /* Web servers disabled - start backend and frontend manually before running tests:
+   * Backend: cd ../backend && npm run dev
+   * Frontend: cd ../frontend && npm start
+   */
 
   /* Timeout for each test */
   timeout: 60000,
