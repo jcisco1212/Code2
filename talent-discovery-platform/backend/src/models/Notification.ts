@@ -17,7 +17,10 @@ export enum NotificationType {
   DUET = 'duet',
   WATCH_PARTY = 'watch_party',
   ACHIEVEMENT = 'achievement',
-  CHALLENGE = 'challenge'
+  CHALLENGE = 'challenge',
+  REPORT_SUBMITTED = 'report_submitted',
+  REPORT_RECEIVED = 'report_received',
+  REPORT_REVIEWED = 'report_reviewed'
 }
 
 interface NotificationAttributes {

@@ -2,7 +2,8 @@ import { Router, Request, Response, NextFunction, RequestHandler } from 'express
 import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validate';
 import { authenticate, requireRole, requireModeratorOrAdmin, requireSuperAdmin, AuthRequest } from '../middleware/auth';
-import { User, UserRole, Video, VideoStatus, Comment, CommentStatus, Report, ReportStatus, Category } from '../models';
+import { User, UserRole, Video, VideoStatus, Comment, CommentStatus, Report, ReportStatus, Category, Notification } from '../models';
+import { NotificationType } from '../models/Notification';
 import { NotFoundError, ForbiddenError } from '../middleware/errorHandler';
 import { Op, fn, col, literal } from 'sequelize';
 import { cacheDelete, cacheDeletePattern } from '../config/redis';
@@ -653,6 +654,29 @@ router.put(
         resolution,
         reviewedBy: req.userId,
         reviewedAt: new Date()
+      });
+
+      // Notify the reporter about the status update
+      const statusMessages: Record<string, string> = {
+        [ReportStatus.RESOLVED]: 'has been reviewed and resolved. Thank you for helping keep our community safe.',
+        [ReportStatus.DISMISSED]: 'has been reviewed. After investigation, no action was taken.',
+        [ReportStatus.REVIEWING]: 'is currently being reviewed by our moderation team.'
+      };
+
+      const statusMessage = statusMessages[status] || 'has been updated.';
+
+      await Notification.create({
+        userId: report.reporterId,
+        type: NotificationType.REPORT_REVIEWED,
+        title: 'Report Status Updated',
+        message: `Your report ${statusMessage}`,
+        data: {
+          reportId: report.id,
+          targetId: report.targetId,
+          targetType: report.targetType,
+          status,
+          resolution: resolution || null
+        }
       });
 
       logAudit('REPORT_REVIEWED', req.userId!, {
