@@ -201,6 +201,54 @@ const Complaints: React.FC = () => {
     }
   };
 
+  // Quick action: Remove content AND suspend user (combined action)
+  const handleRemoveAndSuspend = async () => {
+    if (!selectedReport) return;
+    if (selectedReport.targetType !== 'video') return;
+
+    setProcessing(selectedReport.id);
+    try {
+      // Step 1: Get video details to find owner
+      let userIdToSuspend = null;
+      try {
+        const videoRes = await api.get(`/videos/${selectedReport.targetId}`);
+        userIdToSuspend = videoRes.data.video?.userId;
+      } catch (e) {
+        console.error('Could not fetch video owner');
+      }
+
+      // Step 2: Remove the video
+      await api.put(`/admin/videos/${selectedReport.targetId}/moderate`, {
+        action: 'remove',
+        reason: `Removed due to report: ${getReasonLabel(selectedReport.type)}`
+      });
+
+      // Step 3: Suspend the user if we found them
+      if (userIdToSuspend) {
+        await api.put(`/admin/users/${userIdToSuspend}/status`, {
+          isActive: false,
+          reason: `Suspended due to report: ${getReasonLabel(selectedReport.type)}`
+        });
+      }
+
+      // Step 4: Resolve the report
+      await api.put(`/admin/reports/${selectedReport.id}/review`, {
+        status: 'resolved',
+        resolution: 'Video removed and user account suspended'
+      });
+
+      toast.success('Video removed and user suspended');
+      fetchReports();
+      setSelectedReport(null);
+      setResolution('');
+    } catch (error) {
+      console.error('Remove and suspend failed:', error);
+      toast.error('Failed to complete action');
+    } finally {
+      setProcessing(null);
+    }
+  };
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'video':
@@ -522,6 +570,16 @@ const Complaints: React.FC = () => {
                 >
                   {processing === selectedReport.id ? 'Processing...' : 'False Report'}
                 </button>
+                {selectedReport.targetType === 'video' && (
+                  <button
+                    onClick={handleRemoveAndSuspend}
+                    disabled={processing === selectedReport.id}
+                    className="col-span-2 p-2 text-sm bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 rounded-lg
+                             hover:bg-red-200 dark:hover:bg-red-500/30 transition-colors disabled:opacity-50 font-semibold"
+                  >
+                    {processing === selectedReport.id ? 'Processing...' : 'Remove Video & Suspend User'}
+                  </button>
+                )}
               </div>
             </div>
 
