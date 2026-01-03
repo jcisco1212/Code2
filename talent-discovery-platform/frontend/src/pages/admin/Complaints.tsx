@@ -17,7 +17,8 @@ import {
 
 interface Report {
   id: string;
-  type: 'video' | 'user' | 'comment';
+  type: string;  // Report reason type (spam, violence, etc.)
+  targetType: 'video' | 'user' | 'comment';  // Content type being reported
   reason: string;
   description: string;
   status: 'pending' | 'reviewing' | 'resolved' | 'dismissed';
@@ -35,21 +36,21 @@ const Complaints: React.FC = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'reviewing' | 'resolved' | 'dismissed'>('pending');
-  const [typeFilter, setTypeFilter] = useState<'all' | 'video' | 'user' | 'comment'>('all');
+  const [targetTypeFilter, setTargetTypeFilter] = useState<'all' | 'video' | 'user' | 'comment'>('all');
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [resolution, setResolution] = useState('');
   const [processing, setProcessing] = useState<string | null>(null);
 
   useEffect(() => {
     fetchReports();
-  }, [filter, typeFilter]);
+  }, [filter, targetTypeFilter]);
 
   const fetchReports = async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       if (filter !== 'all') params.append('status', filter);
-      if (typeFilter !== 'all') params.append('type', typeFilter);
+      if (targetTypeFilter !== 'all') params.append('targetType', targetTypeFilter);
 
       const response = await api.get(`/admin/reports?${params.toString()}`);
       setReports(response.data.reports || []);
@@ -157,9 +158,9 @@ const Complaints: React.FC = () => {
           {(['all', 'video', 'user', 'comment'] as const).map((type) => (
             <button
               key={type}
-              onClick={() => setTypeFilter(type)}
+              onClick={() => setTargetTypeFilter(type)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all capitalize
-                        ${typeFilter === type
+                        ${targetTypeFilter === type
                           ? 'bg-primary-500 text-white shadow-lg'
                           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10'
                         }`}
@@ -195,23 +196,23 @@ const Complaints: React.FC = () => {
                 <div className="flex items-start gap-4">
                   {/* Type Icon */}
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center
-                                ${report.type === 'video' ? 'bg-purple-500/20 text-purple-600' :
-                                  report.type === 'user' ? 'bg-blue-500/20 text-blue-600' :
+                                ${report.targetType === 'video' ? 'bg-purple-500/20 text-purple-600' :
+                                  report.targetType === 'user' ? 'bg-blue-500/20 text-blue-600' :
                                   'bg-green-500/20 text-green-600'}`}>
-                    {getTypeIcon(report.type)}
+                    {getTypeIcon(report.targetType)}
                   </div>
 
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-semibold text-gray-900 dark:text-white capitalize">
-                        {report.type} Report
+                        {getReasonLabel(report.type)} Report
                       </span>
                       {getStatusBadge(report.status)}
                     </div>
 
                     <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                      <span className="font-medium text-red-600 dark:text-red-400">
-                        {getReasonLabel(report.reason)}
+                      <span className="font-medium text-primary-600 dark:text-primary-400 capitalize">
+                        Reported {report.targetType}
                       </span>
                     </div>
 
@@ -243,17 +244,37 @@ const Complaints: React.FC = () => {
 
                 {/* Actions */}
                 <div className="flex flex-col gap-2">
-                  {report.type === 'video' && (
+                  {/* View Content Link */}
+                  {report.targetType === 'video' && (
                     <Link
                       to={`/watch/${report.targetId}`}
                       target="_blank"
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-white/10
-                               text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium
-                               hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 dark:bg-purple-500/20
+                               text-purple-700 dark:text-purple-300 rounded-lg text-sm font-medium
+                               hover:bg-purple-200 dark:hover:bg-purple-500/30 transition-colors"
                     >
-                      <EyeIcon className="w-4 h-4" />
-                      View
+                      <FilmIcon className="w-4 h-4" />
+                      View Video
                     </Link>
+                  )}
+                  {report.targetType === 'user' && (
+                    <Link
+                      to={`/profile/${report.targetId}`}
+                      target="_blank"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 dark:bg-blue-500/20
+                               text-blue-700 dark:text-blue-300 rounded-lg text-sm font-medium
+                               hover:bg-blue-200 dark:hover:bg-blue-500/30 transition-colors"
+                    >
+                      <UserIcon className="w-4 h-4" />
+                      View User
+                    </Link>
+                  )}
+                  {report.targetType === 'comment' && (
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-green-100 dark:bg-green-500/20
+                               text-green-700 dark:text-green-300 rounded-lg text-sm font-medium">
+                      <ChatBubbleLeftIcon className="w-4 h-4" />
+                      Comment
+                    </span>
                   )}
 
                   {report.status === 'pending' && (
@@ -295,15 +316,36 @@ const Complaints: React.FC = () => {
 
             <div className="mb-4 p-4 bg-gray-50 dark:bg-white/5 rounded-xl">
               <div className="flex items-center gap-2 mb-2">
-                <span className="font-medium text-gray-900 dark:text-white capitalize">
-                  {selectedReport.type} Report
+                <span className="font-medium text-gray-900 dark:text-white">
+                  {getReasonLabel(selectedReport.type)} Report
                 </span>
-                <span className="text-red-600 dark:text-red-400 text-sm">
-                  {getReasonLabel(selectedReport.reason)}
+                <span className="text-primary-600 dark:text-primary-400 text-sm capitalize">
+                  ({selectedReport.targetType})
                 </span>
               </div>
               {selectedReport.description && (
                 <p className="text-sm text-gray-600 dark:text-gray-400">"{selectedReport.description}"</p>
+              )}
+              {/* Link to view reported content */}
+              {selectedReport.targetType === 'video' && (
+                <Link
+                  to={`/watch/${selectedReport.targetId}`}
+                  target="_blank"
+                  className="inline-flex items-center gap-1.5 mt-3 text-sm text-purple-600 dark:text-purple-400 hover:underline"
+                >
+                  <EyeIcon className="w-4 h-4" />
+                  View reported video
+                </Link>
+              )}
+              {selectedReport.targetType === 'user' && (
+                <Link
+                  to={`/profile/${selectedReport.targetId}`}
+                  target="_blank"
+                  className="inline-flex items-center gap-1.5 mt-3 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  <EyeIcon className="w-4 h-4" />
+                  View reported user profile
+                </Link>
               )}
             </div>
 
