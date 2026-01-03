@@ -90,6 +90,11 @@ export const getVideo = async (req: AuthRequest, res: Response, next: NextFuncti
       throw new NotFoundError('Video not found');
     }
 
+    // Check if video has been deleted/removed
+    if (video.status === VideoStatus.DELETED) {
+      throw new NotFoundError('This video has been removed');
+    }
+
     // Check visibility
     if (video.visibility === VideoVisibility.PRIVATE && video.userId !== req.userId) {
       throw new NotFoundError('Video not found');
