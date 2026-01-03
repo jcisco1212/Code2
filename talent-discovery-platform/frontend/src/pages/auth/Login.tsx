@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
-import { SparklesIcon, EnvelopeIcon, LockClosedIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon, EnvelopeIcon, LockClosedIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 
 const Login: React.FC = () => {
   const [identifier, setIdentifier] = useState('');
@@ -85,7 +85,7 @@ const Login: React.FC = () => {
           {isSuspended && (
             <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
               <div className="flex items-start gap-3">
-                <ExclamationTriangleIcon className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <ExclamationCircleIcon className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                 <div>
                   <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">
                     Account Suspended
