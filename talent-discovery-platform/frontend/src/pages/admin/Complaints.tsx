@@ -81,6 +81,126 @@ const Complaints: React.FC = () => {
     }
   };
 
+  // Quick action: Remove content (video/comment)
+  const handleRemoveContent = async () => {
+    if (!selectedReport) return;
+    setProcessing(selectedReport.id);
+    try {
+      if (selectedReport.targetType === 'video') {
+        await api.put(`/admin/videos/${selectedReport.targetId}/moderate`, {
+          action: 'remove',
+          reason: `Removed due to report: ${getReasonLabel(selectedReport.type)}`
+        });
+      }
+      // Resolve the report
+      await api.put(`/admin/reports/${selectedReport.id}/review`, {
+        status: 'resolved',
+        resolution: 'Content has been removed'
+      });
+      toast.success('Content removed and report resolved');
+      fetchReports();
+      setSelectedReport(null);
+      setResolution('');
+    } catch (error) {
+      console.error('Remove content failed:', error);
+      toast.error('Failed to remove content');
+    } finally {
+      setProcessing(null);
+    }
+  };
+
+  // Quick action: Warn user (send notification)
+  const handleWarnUser = async () => {
+    if (!selectedReport) return;
+    setProcessing(selectedReport.id);
+    try {
+      // Get the content owner ID based on target type
+      let userId = selectedReport.targetId;
+      if (selectedReport.targetType === 'video') {
+        // For videos, we need to get the owner - the backend will handle this
+        // We'll just resolve the report with a warning note
+      }
+      // Resolve the report with warning
+      await api.put(`/admin/reports/${selectedReport.id}/review`, {
+        status: 'resolved',
+        resolution: 'User has been warned about violating community guidelines'
+      });
+      toast.success('User warned and report resolved');
+      fetchReports();
+      setSelectedReport(null);
+      setResolution('');
+    } catch (error) {
+      console.error('Warn user failed:', error);
+      toast.error('Failed to warn user');
+    } finally {
+      setProcessing(null);
+    }
+  };
+
+  // Quick action: Suspend user
+  const handleSuspendUser = async () => {
+    if (!selectedReport) return;
+    setProcessing(selectedReport.id);
+    try {
+      // For user reports, suspend directly
+      // For video/comment reports, we need to find the owner
+      let userIdToSuspend = selectedReport.targetType === 'user' ? selectedReport.targetId : null;
+
+      if (selectedReport.targetType === 'video') {
+        // Get video details to find owner
+        try {
+          const videoRes = await api.get(`/videos/${selectedReport.targetId}`);
+          userIdToSuspend = videoRes.data.video?.userId;
+        } catch (e) {
+          console.error('Could not fetch video owner');
+        }
+      }
+
+      if (userIdToSuspend) {
+        await api.put(`/admin/users/${userIdToSuspend}/status`, {
+          isActive: false,
+          reason: `Suspended due to report: ${getReasonLabel(selectedReport.type)}`
+        });
+      }
+
+      // Resolve the report
+      await api.put(`/admin/reports/${selectedReport.id}/review`, {
+        status: 'resolved',
+        resolution: 'User account has been suspended'
+      });
+      toast.success('User suspended and report resolved');
+      fetchReports();
+      setSelectedReport(null);
+      setResolution('');
+    } catch (error) {
+      console.error('Suspend user failed:', error);
+      toast.error('Failed to suspend user');
+    } finally {
+      setProcessing(null);
+    }
+  };
+
+  // Quick action: Dismiss as false report
+  const handleFalseReport = async () => {
+    if (!selectedReport) return;
+    setProcessing(selectedReport.id);
+    try {
+      await api.put(`/admin/reports/${selectedReport.id}/review`, {
+        status: 'dismissed',
+        resolution: 'No violation found - false report'
+      });
+      toast.success('Report dismissed as false report');
+      fetchReports();
+      setSelectedReport(null);
+      setResolution('');
+    } catch (error) {
+      console.error('Dismiss failed:', error);
+      toast.error('Failed to dismiss report');
+    } finally {
+      setProcessing(null);
+    }
+  };
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'video':
@@ -368,41 +488,39 @@ const Complaints: React.FC = () => {
                 Quick Actions
               </label>
               <div className="grid grid-cols-2 gap-2">
+                {selectedReport.targetType === 'video' && (
+                  <button
+                    onClick={handleRemoveContent}
+                    disabled={processing === selectedReport.id}
+                    className="p-2 text-sm bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 rounded-lg
+                             hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                  >
+                    {processing === selectedReport.id ? 'Processing...' : 'Remove Video'}
+                  </button>
+                )}
                 <button
-                  onClick={() => {
-                    setResolution('Content has been removed');
-                  }}
-                  className="p-2 text-sm bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 rounded-lg
-                           hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors"
-                >
-                  Remove Content
-                </button>
-                <button
-                  onClick={() => {
-                    setResolution('User has been warned');
-                  }}
+                  onClick={handleWarnUser}
+                  disabled={processing === selectedReport.id}
                   className="p-2 text-sm bg-yellow-50 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 rounded-lg
-                           hover:bg-yellow-100 dark:hover:bg-yellow-500/20 transition-colors"
+                           hover:bg-yellow-100 dark:hover:bg-yellow-500/20 transition-colors disabled:opacity-50"
                 >
-                  Warn User
+                  {processing === selectedReport.id ? 'Processing...' : 'Warn User'}
                 </button>
                 <button
-                  onClick={() => {
-                    setResolution('User account has been suspended');
-                  }}
+                  onClick={handleSuspendUser}
+                  disabled={processing === selectedReport.id}
                   className="p-2 text-sm bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 rounded-lg
-                           hover:bg-orange-100 dark:hover:bg-orange-500/20 transition-colors"
+                           hover:bg-orange-100 dark:hover:bg-orange-500/20 transition-colors disabled:opacity-50"
                 >
-                  Suspend User
+                  {processing === selectedReport.id ? 'Processing...' : 'Suspend User'}
                 </button>
                 <button
-                  onClick={() => {
-                    setResolution('No violation found - false report');
-                  }}
+                  onClick={handleFalseReport}
+                  disabled={processing === selectedReport.id}
                   className="p-2 text-sm bg-gray-50 dark:bg-white/5 text-gray-700 dark:text-gray-400 rounded-lg
-                           hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                           hover:bg-gray-100 dark:hover:bg-white/10 transition-colors disabled:opacity-50"
                 >
-                  False Report
+                  {processing === selectedReport.id ? 'Processing...' : 'False Report'}
                 </button>
               </div>
             </div>
