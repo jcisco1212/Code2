@@ -58,6 +58,16 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
+    // Handle 403 - Account disabled/suspended
+    if (error.response?.status === 403) {
+      const errorMessage = (error.response?.data as any)?.error?.message || '';
+      if (errorMessage === 'Account is disabled') {
+        store.dispatch(clearAuth());
+        window.location.href = '/login?suspended=true';
+        return Promise.reject(error);
+      }
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
