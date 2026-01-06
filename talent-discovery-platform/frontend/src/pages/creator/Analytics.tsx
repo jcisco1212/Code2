@@ -11,7 +11,6 @@ import {
   UserGroupIcon,
   PlayIcon,
   SparklesIcon,
-  BoltIcon,
   ArrowTrendingUpIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
@@ -315,7 +314,7 @@ const Analytics: React.FC = () => {
               {/* Improvement Tips */}
               <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl p-4">
                 <h3 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <BoltIcon className="w-5 h-5 text-yellow-500" />
+                  <span className="text-yellow-500">💡</span>
                   Tips to Improve
                 </h3>
                 <ul className="space-y-2">
