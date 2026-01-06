@@ -25,6 +25,18 @@ const genreOptions = [
   'Soul', 'Funk', 'Gospel', 'Alternative', 'Indie', 'World Music', 'Other'
 ];
 
+// Agent type options
+const agentTypeOptions = [
+  { value: 'talent_agent', label: 'Talent Agent/Manager' },
+  { value: 'music_producer', label: 'Music Producer' },
+  { value: 'ar_rep', label: 'A&R Representative' },
+  { value: 'booking_agent', label: 'Booking Agent' },
+  { value: 'label_exec', label: 'Label Executive' },
+  { value: 'entertainment_lawyer', label: 'Entertainment Lawyer' },
+  { value: 'publicist', label: 'Publicist/PR' },
+  { value: 'other', label: 'Other Industry Professional' }
+];
+
 // Country options
 const countryOptions = [
   'United States', 'Canada', 'United Kingdom', 'Australia', 'Germany',
@@ -64,7 +76,12 @@ const Register: React.FC = () => {
     location: '',
     artistType: '',
     genre: '',
-    talentCategory: ''
+    talentCategory: '',
+    // Agent-specific fields
+    agentType: '',
+    agentCompanyName: '',
+    agentLicenseNumber: '',
+    agentLinkedIn: ''
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -249,6 +266,18 @@ const Register: React.FC = () => {
       return;
     }
 
+    // Agent-specific validation
+    if (defaultRole === 'agent') {
+      if (!formData.agentLinkedIn) {
+        toast.error('LinkedIn profile is required for agent verification');
+        return;
+      }
+      if (!formData.agentLinkedIn.includes('linkedin.com')) {
+        toast.error('Please enter a valid LinkedIn URL');
+        return;
+      }
+    }
+
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
       return;
@@ -275,7 +304,11 @@ const Register: React.FC = () => {
         artistType: artistType || undefined,
         genre: genre || undefined,
         talentCategories: talentCategory ? [talentCategory] : undefined,
-        role: defaultRole === 'agent' ? 'agent' : 'creator'
+        role: defaultRole === 'agent' ? 'agent' : 'creator',
+        // Agent-specific fields
+        agentCompanyName: defaultRole === 'agent' ? formData.agentCompanyName || undefined : undefined,
+        agentLicenseNumber: defaultRole === 'agent' ? formData.agentLicenseNumber || undefined : undefined,
+        agentLinkedIn: defaultRole === 'agent' ? formData.agentLinkedIn || undefined : undefined
       });
       toast.success('Account created! Please check your email to verify your account.');
       navigate('/login');
@@ -623,6 +656,87 @@ const Register: React.FC = () => {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Agent Info (only for agents) */}
+            {defaultRole === 'agent' && (
+              <div className="pt-4 border-t border-gray-200/50 dark:border-white/10">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center text-xs">💼</span>
+                  Professional Information
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                  This information helps us verify your professional status. Your application will be reviewed before approval.
+                </p>
+
+                <div>
+                  <label htmlFor="agentType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Professional Role *
+                  </label>
+                  <select
+                    id="agentType"
+                    name="agentType"
+                    value={formData.agentType}
+                    onChange={handleChange}
+                    className={selectStyles}
+                    required
+                  >
+                    <option value="">Select your role</option>
+                    {agentTypeOptions.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="mt-4">
+                  <label htmlFor="agentCompanyName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Company/Agency Name
+                  </label>
+                  <input
+                    id="agentCompanyName"
+                    name="agentCompanyName"
+                    type="text"
+                    value={formData.agentCompanyName}
+                    onChange={handleChange}
+                    placeholder="e.g., Creative Artists Agency"
+                    className={inputStyles}
+                  />
+                </div>
+
+                <div className="mt-4">
+                  <label htmlFor="agentLicenseNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    License/Registration Number
+                  </label>
+                  <input
+                    id="agentLicenseNumber"
+                    name="agentLicenseNumber"
+                    type="text"
+                    value={formData.agentLicenseNumber}
+                    onChange={handleChange}
+                    placeholder="If applicable"
+                    className={inputStyles}
+                  />
+                </div>
+
+                <div className="mt-4">
+                  <label htmlFor="agentLinkedIn" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    LinkedIn Profile *
+                  </label>
+                  <input
+                    id="agentLinkedIn"
+                    name="agentLinkedIn"
+                    type="url"
+                    value={formData.agentLinkedIn}
+                    onChange={handleChange}
+                    placeholder="https://linkedin.com/in/yourprofile"
+                    className={inputStyles}
+                    required
+                  />
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Required for verification purposes
+                  </p>
+                </div>
               </div>
             )}
 

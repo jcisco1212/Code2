@@ -122,6 +122,8 @@ interface UserAttributes {
   agentApprovedBy: string | null;
   agentCompanyName: string | null;
   agentLicenseNumber: string | null;
+  agentLinkedIn: string | null;
+  agentType: string | null;
   // New fields
   gender: Gender | null;
   dateOfBirth: Date | null;
@@ -143,7 +145,7 @@ interface UserCreationAttributes extends Optional<UserAttributes,
   'location' | 'socialLinks' | 'embedLinks' | 'agencyName' | 'role' | 'isVerified' | 'isActive' | 'twoFactorEnabled' |
   'twoFactorSecret' | 'emailVerified' | 'emailVerificationToken' | 'passwordResetToken' |
   'passwordResetExpires' | 'lastLogin' | 'country' | 'deletedAt' |
-  'agentApprovalStatus' | 'agentApprovalNotes' | 'agentApprovedAt' | 'agentApprovedBy' | 'agentCompanyName' | 'agentLicenseNumber' |
+  'agentApprovalStatus' | 'agentApprovalNotes' | 'agentApprovedAt' | 'agentApprovedBy' | 'agentCompanyName' | 'agentLicenseNumber' | 'agentLinkedIn' | 'agentType' |
   'gender' | 'dateOfBirth' | 'ethnicity' | 'hairColor' | 'photoGallery' |
   'artistType' | 'genre' | 'talentCategories' | 'privacySettings' | 'notificationSettings' | 'bannerSettings' | 'createdAt' | 'updatedAt'
 > {}
@@ -182,6 +184,8 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   declare agentApprovedBy: string | null;
   declare agentCompanyName: string | null;
   declare agentLicenseNumber: string | null;
+  declare agentLinkedIn: string | null;
+  declare agentType: string | null;
   // New fields
   declare gender: Gender | null;
   declare dateOfBirth: Date | null;
@@ -459,6 +463,16 @@ User.init(
       type: DataTypes.STRING(100),
       allowNull: true,
       field: 'agent_license_number'
+    },
+    agentLinkedIn: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      field: 'agent_linkedin'
+    },
+    agentType: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      field: 'agent_type'
     },
     // New demographic and profile fields
     gender: {

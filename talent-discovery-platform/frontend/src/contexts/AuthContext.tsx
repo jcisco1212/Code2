@@ -24,6 +24,11 @@ interface RegisterData {
   genre?: string;
   talentCategories?: string[];
   role?: string;
+  // Agent-specific fields
+  agentType?: string;
+  agentCompanyName?: string;
+  agentLicenseNumber?: string;
+  agentLinkedIn?: string;
 }
 
 interface AuthContextType {

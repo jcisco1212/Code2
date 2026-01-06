@@ -51,8 +51,10 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
       genre,
       talentCategories,
       // Agent-specific fields
+      agentType,
       agentCompanyName,
-      agentLicenseNumber
+      agentLicenseNumber,
+      agentLinkedIn
     } = req.body;
 
     // Check if email already exists
@@ -97,8 +99,10 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
       talentCategories: talentCategories || null,
       // Agent-specific fields (only set for agent registrations)
       agentApprovalStatus: isAgent ? AgentApprovalStatus.PENDING : null,
+      agentType: isAgent ? (agentType || null) : null,
       agentCompanyName: isAgent ? (agentCompanyName || null) : null,
-      agentLicenseNumber: isAgent ? (agentLicenseNumber || null) : null
+      agentLicenseNumber: isAgent ? (agentLicenseNumber || null) : null,
+      agentLinkedIn: isAgent ? (agentLinkedIn || null) : null
     });
 
     // Send verification email (don't await to not block response)

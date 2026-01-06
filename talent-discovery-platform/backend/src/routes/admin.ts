@@ -1566,7 +1566,7 @@ router.get('/agents/pending',
         },
         attributes: [
           'id', 'username', 'email', 'displayName', 'firstName', 'lastName',
-          'country', 'location', 'agentCompanyName', 'agentLicenseNumber',
+          'country', 'location', 'agentType', 'agentCompanyName', 'agentLicenseNumber', 'agentLinkedIn',
           'createdAt'
         ],
         order: [['createdAt', 'ASC']]
@@ -1603,7 +1603,7 @@ router.get('/agents',
         where: whereClause,
         attributes: [
           'id', 'username', 'email', 'displayName', 'firstName', 'lastName',
-          'country', 'location', 'agentCompanyName', 'agentLicenseNumber',
+          'country', 'location', 'agentType', 'agentCompanyName', 'agentLicenseNumber', 'agentLinkedIn',
           'agentApprovalStatus', 'agentApprovalNotes', 'agentApprovedAt',
           'createdAt', 'isActive'
         ],

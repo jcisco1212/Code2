@@ -15,6 +15,8 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS agent_approved_at TIMESTAMP WITH TIME
 ALTER TABLE users ADD COLUMN IF NOT EXISTS agent_approved_by UUID;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS agent_company_name VARCHAR(255);
 ALTER TABLE users ADD COLUMN IF NOT EXISTS agent_license_number VARCHAR(100);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS agent_linkedin VARCHAR(500);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS agent_type VARCHAR(50);
 
 -- Create indexes for efficient querying
 CREATE INDEX IF NOT EXISTS idx_users_agent_approval_status ON users(agent_approval_status);
