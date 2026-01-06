@@ -25,6 +25,21 @@ const genreOptions = [
   'Soul', 'Funk', 'Gospel', 'Alternative', 'Indie', 'World Music', 'Other'
 ];
 
+// Country options
+const countryOptions = [
+  'United States', 'Canada', 'United Kingdom', 'Australia', 'Germany',
+  'France', 'Spain', 'Italy', 'Netherlands', 'Belgium', 'Sweden', 'Norway',
+  'Denmark', 'Finland', 'Ireland', 'Switzerland', 'Austria', 'Portugal',
+  'Poland', 'Czech Republic', 'Greece', 'Hungary', 'Romania', 'Bulgaria',
+  'Croatia', 'Slovakia', 'Slovenia', 'Estonia', 'Latvia', 'Lithuania',
+  'Japan', 'South Korea', 'China', 'India', 'Singapore', 'Malaysia',
+  'Thailand', 'Vietnam', 'Philippines', 'Indonesia', 'Taiwan', 'Hong Kong',
+  'Brazil', 'Mexico', 'Argentina', 'Colombia', 'Chile', 'Peru', 'Venezuela',
+  'South Africa', 'Nigeria', 'Kenya', 'Egypt', 'Morocco', 'Ghana',
+  'New Zealand', 'Israel', 'United Arab Emirates', 'Saudi Arabia', 'Turkey',
+  'Russia', 'Ukraine', 'Other'
+];
+
 interface Category {
   id: string;
   name: string;
@@ -45,6 +60,7 @@ const Register: React.FC = () => {
     gender: '',
     dateOfBirth: '',
     ethnicity: '',
+    country: '',
     location: '',
     artistType: '',
     genre: '',
@@ -167,6 +183,10 @@ const Register: React.FC = () => {
       newErrors.ethnicity = 'Ethnicity is required';
     }
 
+    if (touched.country && !formData.country) {
+      newErrors.country = 'Country is required';
+    }
+
     setErrors(newErrors);
   }, [formData, touched]);
 
@@ -192,10 +212,11 @@ const Register: React.FC = () => {
       confirmPassword: true,
       gender: true,
       dateOfBirth: true,
-      ethnicity: true
+      ethnicity: true,
+      country: true
     });
 
-    const { firstName, lastName, username, email, password, confirmPassword, gender, dateOfBirth, ethnicity, location, artistType, genre, talentCategory } = formData;
+    const { firstName, lastName, username, email, password, confirmPassword, gender, dateOfBirth, ethnicity, country, location, artistType, genre, talentCategory } = formData;
 
     // Validate all fields
     const usernameError = validateUsername(username);
@@ -223,6 +244,11 @@ const Register: React.FC = () => {
       return;
     }
 
+    if (!country) {
+      toast.error('Please select your country');
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
       return;
@@ -244,6 +270,7 @@ const Register: React.FC = () => {
         gender,
         dateOfBirth,
         ethnicity,
+        country,
         location: location || undefined,
         artistType: artistType || undefined,
         genre: genre || undefined,
@@ -286,7 +313,7 @@ const Register: React.FC = () => {
 
   const inputErrorStyles = 'border-red-400 dark:border-red-500/50 focus:ring-red-500/50';
 
-  const selectStyles = `${inputStyles} appearance-none bg-no-repeat bg-right pr-10`;
+  const selectStyles = `${inputStyles} appearance-none bg-no-repeat bg-right pr-10 text-gray-900 dark:text-white [&>option]:text-gray-900 [&>option]:bg-white dark:[&>option]:bg-gray-800 dark:[&>option]:text-white`;
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
@@ -494,8 +521,31 @@ const Register: React.FC = () => {
               </div>
 
               <div className="mt-4">
+                <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Country *
+                </label>
+                <select
+                  id="country"
+                  name="country"
+                  value={formData.country}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`${selectStyles} ${errors.country && touched.country ? inputErrorStyles : ''}`}
+                  required
+                >
+                  <option value="">Select your country</option>
+                  {countryOptions.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+                {errors.country && touched.country && (
+                  <p className="mt-1 text-sm text-red-500">{errors.country}</p>
+                )}
+              </div>
+
+              <div className="mt-4">
                 <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Location
+                  City/State
                 </label>
                 <input
                   id="location"

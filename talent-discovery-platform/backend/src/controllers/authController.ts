@@ -44,6 +44,7 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
       gender,
       dateOfBirth,
       ethnicity,
+      country,
       location,
       // Music-specific fields
       artistType,
@@ -82,6 +83,7 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
       gender: gender || null,
       dateOfBirth: dateOfBirth || null,
       ethnicity: ethnicity || null,
+      country: country || null,
       location: location || null,
       // Music-specific fields
       artistType: artistType || null,

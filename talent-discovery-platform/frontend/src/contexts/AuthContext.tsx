@@ -18,6 +18,7 @@ interface RegisterData {
   gender?: string;
   dateOfBirth?: string;
   ethnicity?: string;
+  country?: string;
   location?: string;
   artistType?: string;
   genre?: string;
