@@ -9,7 +9,8 @@ import {
   ChartBarIcon,
   ShieldCheckIcon,
   SparklesIcon,
-  CpuChipIcon
+  CpuChipIcon,
+  ArrowTrendingUpIcon
 } from '@heroicons/react/24/outline';
 
 interface Stats {
@@ -75,6 +76,13 @@ const AdminDashboard: React.FC = () => {
       icon: ChartBarIcon,
       description: 'Generate and export user analytics',
       color: 'from-purple-500 to-purple-600'
+    },
+    {
+      to: '/admin/user-analytics',
+      label: 'User Analytics',
+      icon: ArrowTrendingUpIcon,
+      description: 'Track user growth, retention & geography',
+      color: 'from-teal-500 to-teal-600'
     },
     {
       to: '/admin/ai-moderation',

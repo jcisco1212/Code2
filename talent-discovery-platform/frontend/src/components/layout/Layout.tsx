@@ -106,6 +106,7 @@ const Layout: React.FC = () => {
   const adminNavigation = (user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'moderator')
     ? [
         { name: 'Admin Panel', href: '/admin', icon: Cog6ToothIcon },
+        { name: 'User Analytics', href: '/admin/user-analytics', icon: ChartBarIcon },
         { name: 'Features', href: '/admin/features', icon: Cog6ToothIcon },
         { name: 'Announcements', href: '/admin/announcements', icon: MegaphoneIcon },
         { name: 'Audit Logs', href: '/admin/audit-logs', icon: DocumentIcon }

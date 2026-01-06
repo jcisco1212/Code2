@@ -1130,6 +1130,378 @@ router.get(
   }
 );
 
+// === User Analytics ===
+
+// Get user growth analytics (new users, deleted accounts by period)
+router.get(
+  '/analytics/users',
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { period = 'month', startDate, endDate } = req.query;
+
+      // Calculate date ranges based on period
+      const now = new Date();
+      let periodStart: Date;
+      let periodEnd: Date = endDate ? new Date(endDate as string) : now;
+
+      if (startDate) {
+        periodStart = new Date(startDate as string);
+      } else {
+        // Default ranges based on period
+        switch (period) {
+          case 'day':
+            periodStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30);
+            break;
+          case 'week':
+            periodStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 84); // 12 weeks
+            break;
+          case 'month':
+            periodStart = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+            break;
+          case 'quarter':
+            periodStart = new Date(now.getFullYear() - 2, 0, 1);
+            break;
+          case 'year':
+            periodStart = new Date(now.getFullYear() - 5, 0, 1);
+            break;
+          default:
+            periodStart = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+        }
+      }
+
+      // Get new users grouped by period
+      let dateFormat: string;
+      let groupByClause: string;
+
+      switch (period) {
+        case 'day':
+          dateFormat = 'YYYY-MM-DD';
+          groupByClause = "TO_CHAR(created_at, 'YYYY-MM-DD')";
+          break;
+        case 'week':
+          dateFormat = 'IYYY-IW';
+          groupByClause = "TO_CHAR(created_at, 'IYYY-IW')";
+          break;
+        case 'month':
+          dateFormat = 'YYYY-MM';
+          groupByClause = "TO_CHAR(created_at, 'YYYY-MM')";
+          break;
+        case 'quarter':
+          dateFormat = 'YYYY-Q';
+          groupByClause = "TO_CHAR(created_at, 'YYYY') || '-Q' || TO_CHAR(created_at, 'Q')";
+          break;
+        case 'year':
+          dateFormat = 'YYYY';
+          groupByClause = "TO_CHAR(created_at, 'YYYY')";
+          break;
+        default:
+          dateFormat = 'YYYY-MM';
+          groupByClause = "TO_CHAR(created_at, 'YYYY-MM')";
+      }
+
+      // New users by period
+      const newUsersQuery = await User.findAll({
+        attributes: [
+          [literal(groupByClause), 'period'],
+          [fn('COUNT', col('id')), 'count']
+        ],
+        where: {
+          createdAt: {
+            [Op.gte]: periodStart,
+            [Op.lte]: periodEnd
+          }
+        },
+        group: [literal(groupByClause)],
+        order: [[literal(groupByClause), 'ASC']],
+        raw: true
+      });
+
+      // Deleted users by period
+      const deletedUsersQuery = await User.findAll({
+        attributes: [
+          [literal(groupByClause.replace(/created_at/g, 'deleted_at')), 'period'],
+          [fn('COUNT', col('id')), 'count']
+        ],
+        where: {
+          deletedAt: {
+            [Op.gte]: periodStart,
+            [Op.lte]: periodEnd,
+            [Op.ne]: null
+          }
+        },
+        group: [literal(groupByClause.replace(/created_at/g, 'deleted_at'))],
+        order: [[literal(groupByClause.replace(/created_at/g, 'deleted_at')), 'ASC']],
+        raw: true
+      });
+
+      // Users by country
+      const usersByCountry = await User.findAll({
+        attributes: [
+          'country',
+          [fn('COUNT', col('id')), 'count']
+        ],
+        where: {
+          deletedAt: null,
+          country: { [Op.ne]: null }
+        },
+        group: ['country'],
+        order: [[literal('count'), 'DESC']],
+        limit: 20,
+        raw: true
+      });
+
+      // Summary stats
+      const totalUsers = await User.count({ where: { deletedAt: null } });
+      const totalDeleted = await User.count({ where: { deletedAt: { [Op.ne]: null } } });
+      const newUsersInPeriod = await User.count({
+        where: {
+          createdAt: { [Op.gte]: periodStart, [Op.lte]: periodEnd }
+        }
+      });
+      const deletedInPeriod = await User.count({
+        where: {
+          deletedAt: { [Op.gte]: periodStart, [Op.lte]: periodEnd, [Op.ne]: null }
+        }
+      });
+
+      res.json({
+        summary: {
+          totalActiveUsers: totalUsers,
+          totalDeletedUsers: totalDeleted,
+          newUsersInPeriod,
+          deletedInPeriod,
+          netGrowth: newUsersInPeriod - deletedInPeriod
+        },
+        newUsers: newUsersQuery,
+        deletedUsers: deletedUsersQuery,
+        byCountry: usersByCountry,
+        period,
+        dateRange: {
+          start: periodStart.toISOString(),
+          end: periodEnd.toISOString()
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Export user analytics to CSV/Excel
+router.get(
+  '/analytics/users/export',
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { format = 'csv', period = 'month', startDate, endDate } = req.query;
+
+      const now = new Date();
+      let periodStart: Date;
+      let periodEnd: Date = endDate ? new Date(endDate as string) : now;
+
+      if (startDate) {
+        periodStart = new Date(startDate as string);
+      } else {
+        switch (period) {
+          case 'day':
+            periodStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30);
+            break;
+          case 'week':
+            periodStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 84);
+            break;
+          case 'month':
+            periodStart = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+            break;
+          case 'quarter':
+            periodStart = new Date(now.getFullYear() - 2, 0, 1);
+            break;
+          case 'year':
+            periodStart = new Date(now.getFullYear() - 5, 0, 1);
+            break;
+          default:
+            periodStart = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+        }
+      }
+
+      let groupByClause: string;
+      switch (period) {
+        case 'day':
+          groupByClause = "TO_CHAR(created_at, 'YYYY-MM-DD')";
+          break;
+        case 'week':
+          groupByClause = "TO_CHAR(created_at, 'IYYY-IW')";
+          break;
+        case 'month':
+          groupByClause = "TO_CHAR(created_at, 'YYYY-MM')";
+          break;
+        case 'quarter':
+          groupByClause = "TO_CHAR(created_at, 'YYYY') || '-Q' || TO_CHAR(created_at, 'Q')";
+          break;
+        case 'year':
+          groupByClause = "TO_CHAR(created_at, 'YYYY')";
+          break;
+        default:
+          groupByClause = "TO_CHAR(created_at, 'YYYY-MM')";
+      }
+
+      // Get data for all periods
+      const newUsersQuery = await User.findAll({
+        attributes: [
+          [literal(groupByClause), 'period'],
+          [fn('COUNT', col('id')), 'newUsers']
+        ],
+        where: {
+          createdAt: { [Op.gte]: periodStart, [Op.lte]: periodEnd }
+        },
+        group: [literal(groupByClause)],
+        order: [[literal(groupByClause), 'ASC']],
+        raw: true
+      }) as any[];
+
+      const deletedUsersQuery = await User.findAll({
+        attributes: [
+          [literal(groupByClause.replace(/created_at/g, 'deleted_at')), 'period'],
+          [fn('COUNT', col('id')), 'deletedUsers']
+        ],
+        where: {
+          deletedAt: { [Op.gte]: periodStart, [Op.lte]: periodEnd, [Op.ne]: null }
+        },
+        group: [literal(groupByClause.replace(/created_at/g, 'deleted_at'))],
+        order: [[literal(groupByClause.replace(/created_at/g, 'deleted_at')), 'ASC']],
+        raw: true
+      }) as any[];
+
+      // Merge data
+      const periodMap = new Map<string, { period: string; newUsers: number; deletedUsers: number; netGrowth: number }>();
+
+      newUsersQuery.forEach((row: any) => {
+        periodMap.set(row.period, {
+          period: row.period,
+          newUsers: parseInt(row.newUsers) || 0,
+          deletedUsers: 0,
+          netGrowth: parseInt(row.newUsers) || 0
+        });
+      });
+
+      deletedUsersQuery.forEach((row: any) => {
+        const existing = periodMap.get(row.period);
+        if (existing) {
+          existing.deletedUsers = parseInt(row.deletedUsers) || 0;
+          existing.netGrowth = existing.newUsers - existing.deletedUsers;
+        } else {
+          periodMap.set(row.period, {
+            period: row.period,
+            newUsers: 0,
+            deletedUsers: parseInt(row.deletedUsers) || 0,
+            netGrowth: -(parseInt(row.deletedUsers) || 0)
+          });
+        }
+      });
+
+      const reportData = Array.from(periodMap.values()).sort((a, b) => a.period.localeCompare(b.period));
+
+      // Get country breakdown
+      const countryData = await User.findAll({
+        attributes: [
+          'country',
+          [fn('COUNT', col('id')), 'totalUsers']
+        ],
+        where: {
+          deletedAt: null,
+          country: { [Op.ne]: null }
+        },
+        group: ['country'],
+        order: [[literal('totalUsers'), 'DESC']],
+        raw: true
+      }) as any[];
+
+      const timestamp = new Date().toISOString().split('T')[0];
+
+      if (format === 'excel' || format === 'xlsx') {
+        const workbook = new ExcelJS.Workbook();
+        workbook.creator = 'Get-Noticed Admin';
+        workbook.created = new Date();
+
+        // User Growth Sheet
+        const growthSheet = workbook.addWorksheet('User Growth');
+        growthSheet.columns = [
+          { header: 'Period', key: 'period', width: 15 },
+          { header: 'New Users', key: 'newUsers', width: 15 },
+          { header: 'Deleted Users', key: 'deletedUsers', width: 15 },
+          { header: 'Net Growth', key: 'netGrowth', width: 15 }
+        ];
+
+        growthSheet.getRow(1).font = { bold: true };
+        growthSheet.getRow(1).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF4F46E5' }
+        };
+        growthSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+
+        reportData.forEach(row => growthSheet.addRow(row));
+
+        // Add totals row
+        const totalNew = reportData.reduce((sum, r) => sum + r.newUsers, 0);
+        const totalDeleted = reportData.reduce((sum, r) => sum + r.deletedUsers, 0);
+        const totalRow = growthSheet.addRow({
+          period: 'TOTAL',
+          newUsers: totalNew,
+          deletedUsers: totalDeleted,
+          netGrowth: totalNew - totalDeleted
+        });
+        totalRow.font = { bold: true };
+
+        // Country Breakdown Sheet
+        const countrySheet = workbook.addWorksheet('By Country');
+        countrySheet.columns = [
+          { header: 'Country', key: 'country', width: 30 },
+          { header: 'Total Users', key: 'totalUsers', width: 15 }
+        ];
+
+        countrySheet.getRow(1).font = { bold: true };
+        countrySheet.getRow(1).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF4F46E5' }
+        };
+        countrySheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+
+        countryData.forEach((row: any) => countrySheet.addRow({
+          country: row.country || 'Unknown',
+          totalUsers: parseInt(row.totalUsers)
+        }));
+
+        const buffer = await workbook.xlsx.writeBuffer();
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=user-analytics-${timestamp}.xlsx`);
+        res.send(buffer);
+      } else {
+        // CSV format
+        const headers = ['Period', 'New Users', 'Deleted Users', 'Net Growth'];
+        const csvRows = [
+          headers.join(','),
+          ...reportData.map(row => `${row.period},${row.newUsers},${row.deletedUsers},${row.netGrowth}`)
+        ];
+
+        const csvContent = csvRows.join('\n');
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename=user-analytics-${timestamp}.csv`);
+        res.send(csvContent);
+      }
+
+      logAudit('USER_ANALYTICS_EXPORTED', req.userId!, { format, period });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 // === Dashboard Stats ===
 
 router.get(

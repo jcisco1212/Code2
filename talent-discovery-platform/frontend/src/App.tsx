@@ -75,6 +75,7 @@ import AdminAgentVerification from './pages/admin/AgentVerification';
 import AdminAnnouncements from './pages/admin/Announcements';
 import AdminAuditLogs from './pages/admin/AuditLogs';
 import AdminFeatureManagement from './pages/admin/FeatureManagement';
+import AdminUserAnalytics from './pages/admin/UserAnalytics';
 
 function App() {
   // Initialize Capacitor for native platforms
@@ -161,6 +162,7 @@ function App() {
               <Route path="admin/announcements" element={<AdminRoute><AdminAnnouncements /></AdminRoute>} />
               <Route path="admin/audit-logs" element={<AdminRoute><AdminAuditLogs /></AdminRoute>} />
               <Route path="admin/features" element={<AdminRoute><AdminFeatureManagement /></AdminRoute>} />
+              <Route path="admin/user-analytics" element={<AdminRoute><AdminUserAnalytics /></AdminRoute>} />
 
               {/* 404 */}
               <Route path="*" element={<Navigate to="/" replace />} />

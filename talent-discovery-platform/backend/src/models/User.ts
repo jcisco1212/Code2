@@ -107,6 +107,8 @@ interface UserAttributes {
   passwordResetToken: string | null;
   passwordResetExpires: Date | null;
   lastLogin: Date | null;
+  country: string | null;
+  deletedAt: Date | null;
   // New fields
   gender: Gender | null;
   dateOfBirth: Date | null;
@@ -127,7 +129,7 @@ interface UserCreationAttributes extends Optional<UserAttributes,
   'id' | 'displayName' | 'firstName' | 'lastName' | 'bio' | 'avatarUrl' | 'bannerUrl' |
   'location' | 'socialLinks' | 'embedLinks' | 'agencyName' | 'role' | 'isVerified' | 'isActive' | 'twoFactorEnabled' |
   'twoFactorSecret' | 'emailVerified' | 'emailVerificationToken' | 'passwordResetToken' |
-  'passwordResetExpires' | 'lastLogin' | 'gender' | 'dateOfBirth' | 'ethnicity' | 'hairColor' | 'photoGallery' |
+  'passwordResetExpires' | 'lastLogin' | 'country' | 'deletedAt' | 'gender' | 'dateOfBirth' | 'ethnicity' | 'hairColor' | 'photoGallery' |
   'artistType' | 'genre' | 'talentCategories' | 'privacySettings' | 'notificationSettings' | 'bannerSettings' | 'createdAt' | 'updatedAt'
 > {}
 
@@ -156,6 +158,8 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   declare passwordResetToken: string | null;
   declare passwordResetExpires: Date | null;
   declare lastLogin: Date | null;
+  declare country: string | null;
+  declare deletedAt: Date | null;
   // New fields
   declare gender: Gender | null;
   declare dateOfBirth: Date | null;
@@ -394,6 +398,15 @@ User.init(
       allowNull: true,
       field: 'last_login'
     },
+    country: {
+      type: DataTypes.STRING(100),
+      allowNull: true
+    },
+    deletedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'deleted_at'
+    },
     // New demographic and profile fields
     gender: {
       type: DataTypes.ENUM('male', 'female', 'other', 'prefer_not_to_say'),
@@ -491,6 +504,8 @@ User.init(
       { fields: ['ethnicity'] },
       { fields: ['hair_color'] },
       { fields: ['location'] },
+      { fields: ['country'] },
+      { fields: ['deleted_at'] },
       { fields: ['artist_type'] },
       { fields: ['genre'] }
     ],
