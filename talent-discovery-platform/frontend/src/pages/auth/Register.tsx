@@ -304,16 +304,16 @@ const Register: React.FC = () => {
 
   // Common input styles
   const inputStyles = `w-full px-4 py-3.5 rounded-xl
-    bg-white/50 dark:bg-white/5
-    border border-gray-200/50 dark:border-white/10
+    bg-white dark:bg-gray-800
+    border border-gray-300 dark:border-gray-600
     text-gray-900 dark:text-white
-    placeholder:text-gray-400 dark:placeholder:text-gray-500
+    placeholder:text-gray-500 dark:placeholder:text-gray-400
     focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500
-    backdrop-blur-sm transition-all`;
+    transition-all`;
 
   const inputErrorStyles = 'border-red-400 dark:border-red-500/50 focus:ring-red-500/50';
 
-  const selectStyles = `${inputStyles} appearance-none bg-no-repeat bg-right pr-10 text-gray-900 dark:text-white [&>option]:text-gray-900 [&>option]:bg-white dark:[&>option]:bg-gray-800 dark:[&>option]:text-white`;
+  const selectStyles = `${inputStyles} appearance-none bg-no-repeat bg-right pr-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-white`;
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">

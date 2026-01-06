@@ -1,4 +1,4 @@
-import User, { UserRole } from './User';
+import User, { UserRole, AgentApprovalStatus } from './User';
 import Video, { VideoStatus, VideoVisibility } from './Video';
 import Category from './Category';
 import Comment, { CommentStatus } from './Comment';
@@ -228,7 +228,8 @@ export {
   WatchPartyParticipant,
   FeatureFlag,
   FeatureCategory,
-  AgentProfileView
+  AgentProfileView,
+  AgentApprovalStatus
 };
 
 export default {

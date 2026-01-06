@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction, RequestHandler } from 'express
 import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validate';
 import { authenticate, requireRole, requireModeratorOrAdmin, requireSuperAdmin, AuthRequest } from '../middleware/auth';
-import { User, UserRole, Video, VideoStatus, Comment, CommentStatus, Report, ReportStatus, Category, Notification } from '../models';
+import { User, UserRole, Video, VideoStatus, Comment, CommentStatus, Report, ReportStatus, Category, Notification, AgentApprovalStatus } from '../models';
 import { NotificationType } from '../models/Notification';
 import { NotFoundError, ForbiddenError } from '../middleware/errorHandler';
 import { Op, fn, col, literal } from 'sequelize';
@@ -1542,6 +1542,195 @@ router.get(
         pendingVideos,
         newUsersToday,
         newVideosToday
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// ==========================================
+// AGENT APPROVAL MANAGEMENT
+// ==========================================
+
+// Get pending agent applications
+router.get('/agents/pending',
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const pendingAgents = await User.findAll({
+        where: {
+          role: 'agent',
+          agentApprovalStatus: AgentApprovalStatus.PENDING
+        },
+        attributes: [
+          'id', 'username', 'email', 'displayName', 'firstName', 'lastName',
+          'country', 'location', 'agentCompanyName', 'agentLicenseNumber',
+          'createdAt'
+        ],
+        order: [['createdAt', 'ASC']]
+      });
+
+      res.json({
+        success: true,
+        data: {
+          agents: pendingAgents,
+          count: pendingAgents.length
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Get all agents with their approval status
+router.get('/agents',
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { status, page = 1, limit = 20 } = req.query;
+      const offset = (Number(page) - 1) * Number(limit);
+
+      const whereClause: any = { role: 'agent' };
+      if (status && ['pending', 'approved', 'rejected'].includes(status as string)) {
+        whereClause.agentApprovalStatus = status;
+      }
+
+      const { rows: agents, count: total } = await User.findAndCountAll({
+        where: whereClause,
+        attributes: [
+          'id', 'username', 'email', 'displayName', 'firstName', 'lastName',
+          'country', 'location', 'agentCompanyName', 'agentLicenseNumber',
+          'agentApprovalStatus', 'agentApprovalNotes', 'agentApprovedAt',
+          'createdAt', 'isActive'
+        ],
+        order: [['createdAt', 'DESC']],
+        limit: Number(limit),
+        offset
+      });
+
+      res.json({
+        success: true,
+        data: {
+          agents,
+          pagination: {
+            total,
+            page: Number(page),
+            limit: Number(limit),
+            totalPages: Math.ceil(total / Number(limit))
+          }
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Approve an agent
+router.post('/agents/:agentId/approve',
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { agentId } = req.params;
+      const { notes } = req.body;
+      const authReq = req as AuthRequest;
+
+      const agent = await User.findOne({
+        where: { id: agentId, role: 'agent' }
+      });
+
+      if (!agent) {
+        res.status(404).json({
+          success: false,
+          error: { message: 'Agent not found' }
+        });
+        return;
+      }
+
+      if (agent.agentApprovalStatus === AgentApprovalStatus.APPROVED) {
+        res.status(400).json({
+          success: false,
+          error: { message: 'Agent is already approved' }
+        });
+        return;
+      }
+
+      await agent.update({
+        agentApprovalStatus: AgentApprovalStatus.APPROVED,
+        agentApprovalNotes: notes || null,
+        agentApprovedAt: new Date(),
+        agentApprovedBy: authReq.user?.id
+      });
+
+      // TODO: Send approval email to agent
+
+      res.json({
+        success: true,
+        message: 'Agent approved successfully',
+        data: {
+          agentId: agent.id,
+          username: agent.username,
+          approvalStatus: agent.agentApprovalStatus
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Reject an agent
+router.post('/agents/:agentId/reject',
+  authenticate as RequestHandler,
+  requireModeratorOrAdmin as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { agentId } = req.params;
+      const { notes } = req.body;
+      const authReq = req as AuthRequest;
+
+      if (!notes) {
+        res.status(400).json({
+          success: false,
+          error: { message: 'Rejection reason is required' }
+        });
+        return;
+      }
+
+      const agent = await User.findOne({
+        where: { id: agentId, role: 'agent' }
+      });
+
+      if (!agent) {
+        res.status(404).json({
+          success: false,
+          error: { message: 'Agent not found' }
+        });
+        return;
+      }
+
+      await agent.update({
+        agentApprovalStatus: AgentApprovalStatus.REJECTED,
+        agentApprovalNotes: notes,
+        agentApprovedAt: new Date(),
+        agentApprovedBy: authReq.user?.id
+      });
+
+      // TODO: Send rejection email to agent with reason
+
+      res.json({
+        success: true,
+        message: 'Agent application rejected',
+        data: {
+          agentId: agent.id,
+          username: agent.username,
+          approvalStatus: agent.agentApprovalStatus
+        }
       });
     } catch (error) {
       next(error);

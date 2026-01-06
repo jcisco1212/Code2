@@ -34,6 +34,12 @@ export enum HairColor {
   OTHER = 'other'
 }
 
+export enum AgentApprovalStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected'
+}
+
 export interface SocialLinks {
   website?: string;
   imdb?: string;
@@ -109,6 +115,13 @@ interface UserAttributes {
   lastLogin: Date | null;
   country: string | null;
   deletedAt: Date | null;
+  // Agent approval fields
+  agentApprovalStatus: AgentApprovalStatus | null;
+  agentApprovalNotes: string | null;
+  agentApprovedAt: Date | null;
+  agentApprovedBy: string | null;
+  agentCompanyName: string | null;
+  agentLicenseNumber: string | null;
   // New fields
   gender: Gender | null;
   dateOfBirth: Date | null;
@@ -129,7 +142,9 @@ interface UserCreationAttributes extends Optional<UserAttributes,
   'id' | 'displayName' | 'firstName' | 'lastName' | 'bio' | 'avatarUrl' | 'bannerUrl' |
   'location' | 'socialLinks' | 'embedLinks' | 'agencyName' | 'role' | 'isVerified' | 'isActive' | 'twoFactorEnabled' |
   'twoFactorSecret' | 'emailVerified' | 'emailVerificationToken' | 'passwordResetToken' |
-  'passwordResetExpires' | 'lastLogin' | 'country' | 'deletedAt' | 'gender' | 'dateOfBirth' | 'ethnicity' | 'hairColor' | 'photoGallery' |
+  'passwordResetExpires' | 'lastLogin' | 'country' | 'deletedAt' |
+  'agentApprovalStatus' | 'agentApprovalNotes' | 'agentApprovedAt' | 'agentApprovedBy' | 'agentCompanyName' | 'agentLicenseNumber' |
+  'gender' | 'dateOfBirth' | 'ethnicity' | 'hairColor' | 'photoGallery' |
   'artistType' | 'genre' | 'talentCategories' | 'privacySettings' | 'notificationSettings' | 'bannerSettings' | 'createdAt' | 'updatedAt'
 > {}
 
@@ -160,6 +175,13 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   declare lastLogin: Date | null;
   declare country: string | null;
   declare deletedAt: Date | null;
+  // Agent approval fields
+  declare agentApprovalStatus: AgentApprovalStatus | null;
+  declare agentApprovalNotes: string | null;
+  declare agentApprovedAt: Date | null;
+  declare agentApprovedBy: string | null;
+  declare agentCompanyName: string | null;
+  declare agentLicenseNumber: string | null;
   // New fields
   declare gender: Gender | null;
   declare dateOfBirth: Date | null;
@@ -406,6 +428,37 @@ User.init(
       type: DataTypes.DATE,
       allowNull: true,
       field: 'deleted_at'
+    },
+    // Agent approval fields
+    agentApprovalStatus: {
+      type: DataTypes.ENUM('pending', 'approved', 'rejected'),
+      allowNull: true,
+      field: 'agent_approval_status'
+    },
+    agentApprovalNotes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      field: 'agent_approval_notes'
+    },
+    agentApprovedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'agent_approved_at'
+    },
+    agentApprovedBy: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      field: 'agent_approved_by'
+    },
+    agentCompanyName: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      field: 'agent_company_name'
+    },
+    agentLicenseNumber: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      field: 'agent_license_number'
     },
     // New demographic and profile fields
     gender: {

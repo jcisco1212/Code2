@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { Op } from 'sequelize';
-import { User, UserRole } from '../models';
+import { User, UserRole, AgentApprovalStatus } from '../models';
 import { AuthRequest, JWTPayload } from '../middleware/auth';
 import { BadRequestError, UnauthorizedError, ConflictError } from '../middleware/errorHandler';
 import { redis } from '../config/redis';
@@ -49,7 +49,10 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
       // Music-specific fields
       artistType,
       genre,
-      talentCategories
+      talentCategories,
+      // Agent-specific fields
+      agentCompanyName,
+      agentLicenseNumber
     } = req.body;
 
     // Check if email already exists
@@ -70,6 +73,9 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
     // Create user - combine firstName and lastName into displayName
     const displayName = firstName && lastName ? `${firstName} ${lastName}` : username;
 
+    // Determine if this is an agent registration
+    const isAgent = role === 'agent' || role === UserRole.AGENT;
+
     const user = await User.create({
       email,
       username,
@@ -88,7 +94,11 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
       // Music-specific fields
       artistType: artistType || null,
       genre: genre || null,
-      talentCategories: talentCategories || null
+      talentCategories: talentCategories || null,
+      // Agent-specific fields (only set for agent registrations)
+      agentApprovalStatus: isAgent ? AgentApprovalStatus.PENDING : null,
+      agentCompanyName: isAgent ? (agentCompanyName || null) : null,
+      agentLicenseNumber: isAgent ? (agentLicenseNumber || null) : null
     });
 
     // Send verification email (don't await to not block response)
