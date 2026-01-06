@@ -112,6 +112,36 @@ const Register: React.FC = () => {
     return selectedCategory && musicSlugs.includes(selectedCategory.slug);
   };
 
+  // Helper to normalize LinkedIn URL
+  const normalizeLinkedInUrl = (input: string): string => {
+    if (!input) return '';
+    let value = input.trim();
+
+    // If it's already a full URL, return it
+    if (value.startsWith('https://www.linkedin.com/') || value.startsWith('https://linkedin.com/')) {
+      return value;
+    }
+    if (value.startsWith('www.linkedin.com/')) {
+      return `https://${value}`;
+    }
+    if (value.startsWith('linkedin.com/')) {
+      return `https://www.${value}`;
+    }
+
+    // If it contains linkedin.com somewhere, try to fix it
+    if (value.includes('linkedin.com')) {
+      if (!value.startsWith('http')) {
+        return `https://www.${value.replace(/^(https?:\/\/)?(www\.)?/, '')}`;
+      }
+      return value;
+    }
+
+    // Otherwise, assume it's just a username/profile path
+    // Remove leading slashes or "in/" prefix if present
+    value = value.replace(/^\/+/, '').replace(/^in\//, '');
+    return `https://www.linkedin.com/in/${value}`;
+  };
+
   // Validation helpers
   const validateUsername = (username: string) => {
     if (!username) return 'Username is required';
@@ -275,8 +305,10 @@ const Register: React.FC = () => {
         toast.error('LinkedIn profile is required for agent verification');
         return;
       }
-      if (!formData.agentLinkedIn.includes('linkedin.com')) {
-        toast.error('Please enter a valid LinkedIn URL');
+      // Accept username, partial URL, or full URL
+      const linkedInInput = formData.agentLinkedIn.trim();
+      if (linkedInInput.length < 3) {
+        toast.error('Please enter a valid LinkedIn username or URL');
         return;
       }
     }
@@ -316,7 +348,7 @@ const Register: React.FC = () => {
         // Agent-specific fields
         agentCompanyName: defaultRole === 'agent' ? formData.agentCompanyName || undefined : undefined,
         agentLicenseNumber: defaultRole === 'agent' ? formData.agentLicenseNumber || undefined : undefined,
-        agentLinkedIn: defaultRole === 'agent' ? formData.agentLinkedIn || undefined : undefined
+        agentLinkedIn: defaultRole === 'agent' ? normalizeLinkedInUrl(formData.agentLinkedIn) || undefined : undefined
       });
 
       // Different success message for agents vs creators
@@ -763,15 +795,15 @@ const Register: React.FC = () => {
                   <input
                     id="agentLinkedIn"
                     name="agentLinkedIn"
-                    type="url"
+                    type="text"
                     value={formData.agentLinkedIn}
                     onChange={handleChange}
-                    placeholder="https://linkedin.com/in/yourprofile"
+                    placeholder="yourprofile or linkedin.com/in/yourprofile"
                     className={inputStyles}
                     required
                   />
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Required for verification purposes
+                    Enter your LinkedIn username or full URL
                   </p>
                 </div>
               </div>
