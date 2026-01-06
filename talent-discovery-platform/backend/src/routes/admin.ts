@@ -1213,7 +1213,7 @@ router.get(
             [Op.lte]: periodEnd
           }
         },
-        group: [literal(groupByClause)],
+        group: [literal(groupByClause) as any],
         order: [[literal(groupByClause), 'ASC']],
         raw: true
       });
@@ -1231,7 +1231,7 @@ router.get(
             [Op.ne]: null
           }
         },
-        group: [literal(groupByClause.replace(/created_at/g, 'deleted_at'))],
+        group: [literal(groupByClause.replace(/created_at/g, 'deleted_at')) as any],
         order: [[literal(groupByClause.replace(/created_at/g, 'deleted_at')), 'ASC']],
         raw: true
       });
@@ -1356,7 +1356,7 @@ router.get(
         where: {
           createdAt: { [Op.gte]: periodStart, [Op.lte]: periodEnd }
         },
-        group: [literal(groupByClause)],
+        group: [literal(groupByClause) as any],
         order: [[literal(groupByClause), 'ASC']],
         raw: true
       }) as any[];
@@ -1369,7 +1369,7 @@ router.get(
         where: {
           deletedAt: { [Op.gte]: periodStart, [Op.lte]: periodEnd, [Op.ne]: null }
         },
-        group: [literal(groupByClause.replace(/created_at/g, 'deleted_at'))],
+        group: [literal(groupByClause.replace(/created_at/g, 'deleted_at')) as any],
         order: [[literal(groupByClause.replace(/created_at/g, 'deleted_at')), 'ASC']],
         raw: true
       }) as any[];
