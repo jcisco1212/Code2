@@ -3,10 +3,9 @@ import api from '../../services/api';
 import toast from 'react-hot-toast';
 import {
   UsersIcon,
-  UserPlusIcon,
-  UserMinusIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
   ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
   GlobeAltIcon,
   ArrowDownTrayIcon,
   CalendarIcon,
@@ -240,7 +239,7 @@ const UserAnalytics: React.FC = () => {
             <div className="bg-white dark:bg-white/5 rounded-2xl p-5 border border-gray-100 dark:border-white/10">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
-                  <UserPlusIcon className="w-6 h-6 text-green-600" />
+                  <ChevronUpIcon className="w-6 h-6 text-green-600" />
                 </div>
               </div>
               <div className="text-3xl font-bold text-green-600">
@@ -253,7 +252,7 @@ const UserAnalytics: React.FC = () => {
             <div className="bg-white dark:bg-white/5 rounded-2xl p-5 border border-gray-100 dark:border-white/10">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
-                  <UserMinusIcon className="w-6 h-6 text-red-600" />
+                  <ChevronDownIcon className="w-6 h-6 text-red-600" />
                 </div>
               </div>
               <div className="text-3xl font-bold text-red-600">
@@ -269,7 +268,7 @@ const UserAnalytics: React.FC = () => {
                               ${analytics.summary.netGrowth >= 0 ? 'bg-emerald-500/20' : 'bg-orange-500/20'}`}>
                   {analytics.summary.netGrowth >= 0
                     ? <ArrowTrendingUpIcon className="w-6 h-6 text-emerald-600" />
-                    : <ArrowTrendingDownIcon className="w-6 h-6 text-orange-600" />
+                    : <ChevronDownIcon className="w-6 h-6 text-orange-600" />
                   }
                 </div>
               </div>
@@ -283,7 +282,7 @@ const UserAnalytics: React.FC = () => {
             <div className="bg-white dark:bg-white/5 rounded-2xl p-5 border border-gray-100 dark:border-white/10">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-12 h-12 rounded-xl bg-gray-500/20 flex items-center justify-center">
-                  <UserMinusIcon className="w-6 h-6 text-gray-600" />
+                  <ChevronDownIcon className="w-6 h-6 text-gray-600" />
                 </div>
               </div>
               <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">
