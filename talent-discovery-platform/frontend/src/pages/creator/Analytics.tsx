@@ -9,8 +9,12 @@ import {
   HeartIcon,
   ChatBubbleLeftIcon,
   UserGroupIcon,
-  PlayIcon
+  PlayIcon,
+  SparklesIcon,
+  LightBulbIcon,
+  ArrowTrendingUpIcon
 } from '@heroicons/react/24/outline';
+import { StarIcon } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 
 interface Video {
@@ -22,6 +26,12 @@ interface Video {
   commentsCount: number;
   duration: number | null;
   createdAt: string;
+  aiOverallScore?: number | null;
+  aiVocalScore?: number | null;
+  aiMovementScore?: number | null;
+  aiExpressionScore?: number | null;
+  aiTimingScore?: number | null;
+  aiPresenceScore?: number | null;
 }
 
 interface AnalyticsData {
@@ -34,7 +44,46 @@ interface AnalyticsData {
   viewsGrowth: number;
   topVideos: Video[];
   recentVideos: Video[];
+  // AI Talent Score data
+  avgAiScore: number;
+  avgVocalScore: number;
+  avgMovementScore: number;
+  avgExpressionScore: number;
+  avgTimingScore: number;
+  avgPresenceScore: number;
+  videosWithScores: number;
 }
+
+// Talent tier calculation
+const getTalentTier = (score: number): { name: string; color: string; bgColor: string; borderColor: string; icon: string } => {
+  if (score >= 85) return { name: 'Platinum', color: 'text-cyan-400', bgColor: 'bg-gradient-to-r from-cyan-500 to-blue-500', borderColor: 'border-cyan-400', icon: '💎' };
+  if (score >= 70) return { name: 'Gold', color: 'text-yellow-400', bgColor: 'bg-gradient-to-r from-yellow-500 to-amber-500', borderColor: 'border-yellow-400', icon: '🏆' };
+  if (score >= 50) return { name: 'Silver', color: 'text-gray-300', bgColor: 'bg-gradient-to-r from-gray-400 to-gray-500', borderColor: 'border-gray-400', icon: '🥈' };
+  if (score >= 30) return { name: 'Bronze', color: 'text-amber-600', bgColor: 'bg-gradient-to-r from-amber-600 to-orange-600', borderColor: 'border-amber-600', icon: '🥉' };
+  return { name: 'Rising', color: 'text-green-400', bgColor: 'bg-gradient-to-r from-green-500 to-emerald-500', borderColor: 'border-green-400', icon: '🌱' };
+};
+
+// Get improvement tips based on lowest scores
+const getImprovementTips = (data: AnalyticsData): string[] => {
+  const tips: string[] = [];
+  const scores = [
+    { name: 'vocal', score: data.avgVocalScore, tip: 'Focus on vocal clarity and projection in your performances' },
+    { name: 'movement', score: data.avgMovementScore, tip: 'Add more dynamic movement and stage presence' },
+    { name: 'expression', score: data.avgExpressionScore, tip: 'Work on facial expressions and emotional connection' },
+    { name: 'timing', score: data.avgTimingScore, tip: 'Practice timing and rhythm to improve synchronization' },
+    { name: 'presence', score: data.avgPresenceScore, tip: 'Build confidence and command attention on camera' }
+  ].filter(s => s.score > 0);
+
+  if (scores.length === 0) {
+    return ['Upload more videos to get personalized improvement tips!'];
+  }
+
+  // Sort by lowest scores first
+  scores.sort((a, b) => a.score - b.score);
+
+  // Return top 2-3 tips
+  return scores.slice(0, 3).map(s => s.tip);
+};
 
 const Analytics: React.FC = () => {
   const navigate = useNavigate();
@@ -48,7 +97,14 @@ const Analytics: React.FC = () => {
     recentViews: 0,
     viewsGrowth: 0,
     topVideos: [],
-    recentVideos: []
+    recentVideos: [],
+    avgAiScore: 0,
+    avgVocalScore: 0,
+    avgMovementScore: 0,
+    avgExpressionScore: 0,
+    avgTimingScore: 0,
+    avgPresenceScore: 0,
+    videosWithScores: 0
   });
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<'7d' | '30d' | '90d'>('30d');
@@ -89,6 +145,27 @@ const Analytics: React.FC = () => {
         const recentViews = Math.floor(totalViews * 0.3); // Placeholder
         const viewsGrowth = Math.floor(Math.random() * 20) - 5; // Placeholder
 
+        // Calculate AI scores
+        const videosWithScores = userVideos.filter(v => v.aiOverallScore && v.aiOverallScore > 0);
+        const avgAiScore = videosWithScores.length > 0
+          ? videosWithScores.reduce((sum, v) => sum + (v.aiOverallScore || 0), 0) / videosWithScores.length
+          : 0;
+        const avgVocalScore = videosWithScores.length > 0
+          ? videosWithScores.reduce((sum, v) => sum + (v.aiVocalScore || 0), 0) / videosWithScores.length
+          : 0;
+        const avgMovementScore = videosWithScores.length > 0
+          ? videosWithScores.reduce((sum, v) => sum + (v.aiMovementScore || 0), 0) / videosWithScores.length
+          : 0;
+        const avgExpressionScore = videosWithScores.length > 0
+          ? videosWithScores.reduce((sum, v) => sum + (v.aiExpressionScore || 0), 0) / videosWithScores.length
+          : 0;
+        const avgTimingScore = videosWithScores.length > 0
+          ? videosWithScores.reduce((sum, v) => sum + (v.aiTimingScore || 0), 0) / videosWithScores.length
+          : 0;
+        const avgPresenceScore = videosWithScores.length > 0
+          ? videosWithScores.reduce((sum, v) => sum + (v.aiPresenceScore || 0), 0) / videosWithScores.length
+          : 0;
+
         setData({
           totalViews,
           totalLikes,
@@ -98,7 +175,14 @@ const Analytics: React.FC = () => {
           recentViews,
           viewsGrowth,
           topVideos,
-          recentVideos
+          recentVideos,
+          avgAiScore,
+          avgVocalScore,
+          avgMovementScore,
+          avgExpressionScore,
+          avgTimingScore,
+          avgPresenceScore,
+          videosWithScores: videosWithScores.length
         });
       } catch (err) {
         console.error('Failed to fetch analytics:', err);
@@ -165,6 +249,108 @@ const Analytics: React.FC = () => {
           </Link>
         </div>
       </div>
+
+      {/* AI Talent Score Section */}
+      {data.videosWithScores > 0 ? (
+        <div className="mb-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <SparklesIcon className="w-5 h-5 text-purple-500" />
+              AI Talent Rating
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Based on AI analysis of {data.videosWithScores} video{data.videosWithScores > 1 ? 's' : ''}
+            </p>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Talent Tier */}
+              <div className="text-center">
+                <div className={`inline-flex flex-col items-center justify-center w-32 h-32 rounded-full ${getTalentTier(data.avgAiScore).bgColor} shadow-lg`}>
+                  <span className="text-4xl">{getTalentTier(data.avgAiScore).icon}</span>
+                  <span className="text-white font-bold text-lg mt-1">{getTalentTier(data.avgAiScore).name}</span>
+                </div>
+                <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                  Your overall talent tier
+                </p>
+                <div className="flex items-center justify-center gap-1 mt-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <StarIcon
+                      key={star}
+                      className={`w-5 h-5 ${
+                        star <= Math.round(data.avgAiScore / 20)
+                          ? 'text-yellow-400'
+                          : 'text-gray-300 dark:text-gray-600'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Score Breakdown */}
+              <div className="space-y-3">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-3">Performance Breakdown</h3>
+                {[
+                  { name: 'Vocal', score: data.avgVocalScore, color: 'bg-blue-500' },
+                  { name: 'Movement', score: data.avgMovementScore, color: 'bg-green-500' },
+                  { name: 'Expression', score: data.avgExpressionScore, color: 'bg-purple-500' },
+                  { name: 'Timing', score: data.avgTimingScore, color: 'bg-orange-500' },
+                  { name: 'Presence', score: data.avgPresenceScore, color: 'bg-pink-500' }
+                ].filter(item => item.score > 0).map((item) => (
+                  <div key={item.name} className="flex items-center gap-3">
+                    <span className="text-sm text-gray-600 dark:text-gray-400 w-20">{item.name}</span>
+                    <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${item.color} rounded-full transition-all duration-500`}
+                        style={{ width: `${item.score}%` }}
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white w-10 text-right">
+                      {Math.round(item.score)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Improvement Tips */}
+              <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl p-4">
+                <h3 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                  <LightBulbIcon className="w-5 h-5 text-yellow-500" />
+                  Tips to Improve
+                </h3>
+                <ul className="space-y-2">
+                  {getImprovementTips(data).map((tip, index) => (
+                    <li key={index} className="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
+                      <ArrowTrendingUpIcon className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="mb-8 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-2xl p-6 border border-purple-200 dark:border-purple-800">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center">
+              <SparklesIcon className="w-8 h-8 text-purple-500" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Unlock Your AI Talent Rating</h3>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                Upload videos to get AI-powered analysis of your performances and personalized improvement tips.
+              </p>
+              <Link
+                to="/upload"
+                className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                Upload Your First Video
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Overview Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

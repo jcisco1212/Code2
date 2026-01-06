@@ -37,6 +37,48 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
+    <!-- Google Analytics -->
+    <!-- IMPORTANT: Replace GA_MEASUREMENT_ID with your actual Google Analytics 4 Measurement ID (e.g., G-XXXXXXXXXX) -->
+    <!-- To get your Measurement ID:
+         1. Go to analytics.google.com
+         2. Create a new property or select existing
+         3. Go to Admin > Data Streams > Web
+         4. Copy your Measurement ID (starts with G-)
+    -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+
+      // Default consent mode - respects user privacy until they accept cookies
+      gtag('consent', 'default', {
+        'analytics_storage': 'denied',
+        'ad_storage': 'denied'
+      });
+
+      gtag('js', new Date());
+      // Replace GA_MEASUREMENT_ID with your actual ID
+      gtag('config', 'GA_MEASUREMENT_ID', {
+        // Anonymize IP for GDPR compliance
+        'anonymize_ip': true,
+        // Disable automatic page_view tracking (we'll handle it in React)
+        'send_page_view': true
+      });
+    </script>
+    <!-- End Google Analytics -->
+
+    <!-- Google AdSense -->
+    <!-- IMPORTANT: Replace ca-pub-XXXXXXXXXXXXXXXX with your AdSense Publisher ID -->
+    <!-- To get your Publisher ID:
+         1. Go to adsense.google.com
+         2. Sign up or sign in
+         3. Get approved (requires site review)
+         4. Find your Publisher ID in account settings
+    -->
+    <!-- Uncomment the line below after getting approved by AdSense -->
+    <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+    <!-- End Google AdSense -->
+
     <title>Get-Noticed - AI-Powered Talent Discovery</title>
   </head>
   <body>

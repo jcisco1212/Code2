@@ -35,6 +35,7 @@ import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import NotificationDropdown from '../notifications/NotificationDropdown';
 import AIChatbot from '../support/AIChatbot';
+import CookieConsent from '../common/CookieConsent';
 
 const Layout: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -560,6 +561,9 @@ const Layout: React.FC = () => {
 
       {/* AI Support Chatbot */}
       <AIChatbot />
+
+      {/* Cookie Consent Banner */}
+      <CookieConsent />
     </div>
   );
 };
