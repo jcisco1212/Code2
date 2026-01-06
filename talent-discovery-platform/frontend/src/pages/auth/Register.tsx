@@ -310,7 +310,13 @@ const Register: React.FC = () => {
         agentLicenseNumber: defaultRole === 'agent' ? formData.agentLicenseNumber || undefined : undefined,
         agentLinkedIn: defaultRole === 'agent' ? formData.agentLinkedIn || undefined : undefined
       });
-      toast.success('Account created! Please check your email to verify your account.');
+
+      // Different success message for agents vs creators
+      if (defaultRole === 'agent') {
+        toast.success('Application submitted! Your account is pending review. We\'ll notify you once approved.', { duration: 6000 });
+      } else {
+        toast.success('Account created! Please check your email to verify your account.');
+      }
       navigate('/login');
     } catch (error: any) {
       console.error('Registration error:', error);
@@ -380,9 +386,32 @@ const Register: React.FC = () => {
               Create Account
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              {defaultRole === 'agent' ? 'Join as a Talent Agent' : 'Join as a Creator'}
+              {defaultRole === 'agent' ? 'Join as an Industry Professional' : 'Join as a Creator'}
             </p>
           </div>
+
+          {/* Agent Verification Notice */}
+          {defaultRole === 'agent' && (
+            <div className="mb-6 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-800 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-1">
+                    Account Verification Required
+                  </h4>
+                  <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+                    To protect our talent community, all industry professional accounts require verification.
+                    After submitting your application, our team will review your LinkedIn profile and credentials.
+                    You'll receive an email once your account is approved (typically within 24-48 hours).
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Basic Info */}
