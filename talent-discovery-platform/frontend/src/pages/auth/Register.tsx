@@ -81,7 +81,9 @@ const Register: React.FC = () => {
     agentType: '',
     agentCompanyName: '',
     agentLicenseNumber: '',
-    agentLinkedIn: ''
+    agentLinkedIn: '',
+    // Terms agreement
+    agreeToTerms: false
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -208,8 +210,9 @@ const Register: React.FC = () => {
   }, [formData, touched]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, type } = e.target;
+    const newValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+    setFormData({ ...formData, [name]: newValue });
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -285,6 +288,11 @@ const Register: React.FC = () => {
 
     if (!allPasswordChecksPassed) {
       toast.error('Password does not meet all requirements');
+      return;
+    }
+
+    if (!formData.agreeToTerms) {
+      toast.error('You must agree to the Terms of Service and Privacy Policy');
       return;
     }
 
@@ -828,9 +836,54 @@ const Register: React.FC = () => {
               </div>
             </div>
 
+            {/* Terms and Privacy Agreement Checkbox */}
+            <div className="pt-4 border-t border-gray-200/50 dark:border-white/10">
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <div className="relative flex-shrink-0 mt-0.5">
+                  <input
+                    type="checkbox"
+                    name="agreeToTerms"
+                    checked={formData.agreeToTerms}
+                    onChange={handleChange}
+                    className="peer sr-only"
+                    required
+                  />
+                  <div className={`w-5 h-5 rounded-md border-2 transition-all
+                    ${formData.agreeToTerms
+                      ? 'bg-primary-500 border-primary-500'
+                      : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 group-hover:border-primary-400'
+                    }
+                    flex items-center justify-center`}>
+                    {formData.agreeToTerms && (
+                      <CheckIcon className="w-3.5 h-3.5 text-white" />
+                    )}
+                  </div>
+                </div>
+                <span className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                  I agree to the{' '}
+                  <Link
+                    to="/terms"
+                    className="text-primary-600 dark:text-primary-400 hover:underline font-medium"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Terms of Service
+                  </Link>
+                  {' '}and{' '}
+                  <Link
+                    to="/privacy"
+                    className="text-primary-600 dark:text-primary-400 hover:underline font-medium"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Privacy Policy
+                  </Link>
+                  {' '}<span className="text-red-500">*</span>
+                </span>
+              </label>
+            </div>
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !formData.agreeToTerms}
               className="w-full py-4 rounded-xl font-semibold text-white
                        bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-600
                        hover:from-primary-500 hover:via-secondary-500 hover:to-accent-500
@@ -849,13 +902,6 @@ const Register: React.FC = () => {
                 </span>
               ) : 'Create Account'}
             </button>
-
-            <p className="text-xs text-gray-500 dark:text-gray-400 text-center leading-relaxed">
-              By creating an account, you agree to our{' '}
-              <Link to="/terms" className="text-primary-600 dark:text-primary-400 hover:underline">Terms of Service</Link>
-              {' '}and{' '}
-              <Link to="/privacy" className="text-primary-600 dark:text-primary-400 hover:underline">Privacy Policy</Link>
-            </p>
           </form>
 
           {/* Divider */}

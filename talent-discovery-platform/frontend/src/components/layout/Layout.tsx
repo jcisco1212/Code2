@@ -398,6 +398,9 @@ const Layout: React.FC = () => {
           <Link to="/terms" className="px-4 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
             Terms of Service
           </Link>
+          <Link to="/privacy" className="px-4 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
+            Privacy Policy
+          </Link>
           <Link to="/contact" className="px-4 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
             Contact
           </Link>
@@ -488,6 +491,9 @@ const Layout: React.FC = () => {
               <Link to="/terms" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-colors">
                 Terms of Service
               </Link>
+              <Link to="/privacy" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-colors">
+                Privacy Policy
+              </Link>
               <Link to="/contact" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-colors">
                 Contact
               </Link>
@@ -532,6 +538,7 @@ const Layout: React.FC = () => {
                 <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
                 <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
                 <li><Link to="/terms" className="hover:text-white transition-colors">Terms</Link></li>
+                <li><Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
               </ul>
             </div>
             <div>
