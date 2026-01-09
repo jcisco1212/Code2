@@ -296,28 +296,6 @@ const Privacy: React.FC = () => {
               </p>
             </section>
 
-            {/* Contact Us */}
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">12. Contact Us</h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                If you have any questions, concerns, or requests regarding this Privacy Policy or our
-                privacy practices, please contact us at:
-              </p>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                <p className="text-gray-700 dark:text-gray-300">
-                  <strong>Get-Noticed Privacy Team</strong><br />
-                  Email: privacy@get-noticed.com<br />
-                  Address: 123 Innovation Drive, Suite 500<br />
-                  San Francisco, CA 94105<br />
-                  United States
-                </p>
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 mt-4">
-                For data subject requests (access, deletion, correction), please email us at
-                privacy@get-noticed.com with the subject line "Data Subject Request."
-              </p>
-            </section>
-
             {/* Acknowledgment */}
             <section className="border-t border-gray-200 dark:border-gray-700 pt-8">
               <p className="text-gray-600 dark:text-gray-300 text-center italic">

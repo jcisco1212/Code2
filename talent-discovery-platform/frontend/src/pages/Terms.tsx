@@ -392,23 +392,6 @@ const Terms: React.FC = () => {
               </p>
             </section>
 
-            {/* Contact */}
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">13. Contact Us</h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                If you have any questions about these Terms, please contact us at:
-              </p>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                <p className="text-gray-700 dark:text-gray-300">
-                  <strong>Get-Noticed Legal Team</strong><br />
-                  Email: legal@get-noticed.com<br />
-                  Address: 123 Innovation Drive, Suite 500<br />
-                  San Francisco, CA 94105<br />
-                  United States
-                </p>
-              </div>
-            </section>
-
             {/* Acknowledgment */}
             <section className="border-t border-gray-200 dark:border-gray-700 pt-8">
               <p className="text-gray-600 dark:text-gray-300 text-center italic">
