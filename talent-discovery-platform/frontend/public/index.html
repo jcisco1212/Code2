@@ -38,14 +38,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <!-- Google Analytics -->
-    <!-- IMPORTANT: Replace GA_MEASUREMENT_ID with your actual Google Analytics 4 Measurement ID (e.g., G-XXXXXXXXXX) -->
-    <!-- To get your Measurement ID:
-         1. Go to analytics.google.com
-         2. Create a new property or select existing
-         3. Go to Admin > Data Streams > Web
-         4. Copy your Measurement ID (starts with G-)
-    -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JKBFDWGWX4"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -57,11 +50,8 @@
       });
 
       gtag('js', new Date());
-      // Replace GA_MEASUREMENT_ID with your actual ID
-      gtag('config', 'GA_MEASUREMENT_ID', {
-        // Anonymize IP for GDPR compliance
+      gtag('config', 'G-JKBFDWGWX4', {
         'anonymize_ip': true,
-        // Disable automatic page_view tracking (we'll handle it in React)
         'send_page_view': true
       });
     </script>
