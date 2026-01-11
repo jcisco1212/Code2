@@ -77,6 +77,7 @@ import AdminAnnouncements from './pages/admin/Announcements';
 import AdminAuditLogs from './pages/admin/AuditLogs';
 import AdminFeatureManagement from './pages/admin/FeatureManagement';
 import AdminUserAnalytics from './pages/admin/UserAnalytics';
+import AdminBroadcast from './pages/admin/Broadcast';
 
 function App() {
   // Initialize Capacitor for native platforms
@@ -165,6 +166,7 @@ function App() {
               <Route path="admin/audit-logs" element={<AdminRoute><AdminAuditLogs /></AdminRoute>} />
               <Route path="admin/features" element={<AdminRoute><AdminFeatureManagement /></AdminRoute>} />
               <Route path="admin/user-analytics" element={<AdminRoute><AdminUserAnalytics /></AdminRoute>} />
+              <Route path="admin/broadcast" element={<AdminRoute><AdminBroadcast /></AdminRoute>} />
 
               {/* 404 */}
               <Route path="*" element={<Navigate to="/" replace />} />

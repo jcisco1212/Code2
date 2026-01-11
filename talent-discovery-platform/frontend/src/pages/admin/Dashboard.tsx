@@ -10,7 +10,8 @@ import {
   ShieldCheckIcon,
   SparklesIcon,
   CpuChipIcon,
-  ArrowTrendingUpIcon
+  ArrowTrendingUpIcon,
+  MegaphoneIcon
 } from '@heroicons/react/24/outline';
 
 interface Stats {
@@ -90,6 +91,13 @@ const AdminDashboard: React.FC = () => {
       icon: CpuChipIcon,
       description: 'Configure AI content moderation settings',
       color: 'from-indigo-500 to-indigo-600'
+    },
+    {
+      to: '/admin/broadcast',
+      label: 'Broadcast Messages',
+      icon: MegaphoneIcon,
+      description: 'Send notifications to users by role or individually',
+      color: 'from-pink-500 to-pink-600'
     },
   ];
 

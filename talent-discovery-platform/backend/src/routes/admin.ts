@@ -1738,4 +1738,175 @@ router.post('/agents/:agentId/reject',
   }
 );
 
+// ==========================================
+// BROADCAST MESSAGING
+// ==========================================
+
+// Send broadcast message to users
+router.post(
+  '/broadcast',
+  authenticate as RequestHandler,
+  requireRole(UserRole.ADMIN, UserRole.SUPER_ADMIN) as RequestHandler,
+  validate([
+    body('title').trim().notEmpty().withMessage('Title is required').isLength({ max: 255 }).withMessage('Title max 255 chars'),
+    body('message').trim().notEmpty().withMessage('Message is required').isLength({ max: 5000 }).withMessage('Message max 5000 chars'),
+    body('targetType').isIn(['all', 'role', 'individual']).withMessage('Invalid target type'),
+    body('targetRole').optional().isIn(['user', 'creator', 'agent', 'admin', 'super_admin']).withMessage('Invalid role'),
+    body('targetUserIds').optional().isArray().withMessage('Target user IDs must be an array')
+  ]),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { title, message, targetType, targetRole, targetUserIds } = req.body;
+      const authReq = req as AuthRequest;
+
+      let targetUsers: User[] = [];
+
+      // Determine target users based on targetType
+      switch (targetType) {
+        case 'all':
+          targetUsers = await User.findAll({
+            where: { isActive: true, deletedAt: null },
+            attributes: ['id', 'email', 'username']
+          });
+          break;
+
+        case 'role':
+          if (!targetRole) {
+            res.status(400).json({ error: { message: 'Target role is required for role-based broadcast' } });
+            return;
+          }
+          targetUsers = await User.findAll({
+            where: { role: targetRole, isActive: true, deletedAt: null },
+            attributes: ['id', 'email', 'username']
+          });
+          break;
+
+        case 'individual':
+          if (!targetUserIds || targetUserIds.length === 0) {
+            res.status(400).json({ error: { message: 'At least one user ID is required for individual broadcast' } });
+            return;
+          }
+          targetUsers = await User.findAll({
+            where: { id: { [Op.in]: targetUserIds }, isActive: true, deletedAt: null },
+            attributes: ['id', 'email', 'username']
+          });
+          break;
+      }
+
+      if (targetUsers.length === 0) {
+        res.status(400).json({ error: { message: 'No users found matching the criteria' } });
+        return;
+      }
+
+      // Create notifications for all target users
+      const notifications = targetUsers.map(user => ({
+        userId: user.id,
+        type: NotificationType.SYSTEM_ANNOUNCEMENT,
+        title,
+        message,
+        data: {
+          broadcastType: targetType,
+          sentBy: authReq.user?.id,
+          sentAt: new Date().toISOString()
+        }
+      }));
+
+      await Notification.bulkCreate(notifications);
+
+      logAudit('BROADCAST_MESSAGE_SENT', authReq.userId!, {
+        title,
+        targetType,
+        targetRole: targetRole || null,
+        targetUserCount: targetUsers.length
+      });
+
+      res.json({
+        success: true,
+        message: `Broadcast message sent successfully to ${targetUsers.length} users`,
+        data: {
+          recipientCount: targetUsers.length,
+          targetType,
+          targetRole: targetRole || null
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Get users for broadcast targeting (search/filter)
+router.get(
+  '/broadcast/users',
+  authenticate as RequestHandler,
+  requireRole(UserRole.ADMIN, UserRole.SUPER_ADMIN) as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { search, role, page = 1, limit = 20 } = req.query;
+      const offset = (Number(page) - 1) * Number(limit);
+
+      const where: any = { isActive: true, deletedAt: null };
+
+      if (role) {
+        where.role = role;
+      }
+
+      if (search) {
+        where[Op.or] = [
+          { email: { [Op.iLike]: `%${search}%` } },
+          { username: { [Op.iLike]: `%${search}%` } },
+          { firstName: { [Op.iLike]: `%${search}%` } },
+          { lastName: { [Op.iLike]: `%${search}%` } }
+        ];
+      }
+
+      const { count, rows } = await User.findAndCountAll({
+        where,
+        attributes: ['id', 'username', 'email', 'firstName', 'lastName', 'role', 'avatarUrl'],
+        order: [['username', 'ASC']],
+        limit: Number(limit),
+        offset
+      });
+
+      res.json({
+        users: rows,
+        pagination: {
+          page: Number(page),
+          limit: Number(limit),
+          total: count,
+          pages: Math.ceil(count / Number(limit))
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Get user counts by role (for broadcast targeting stats)
+router.get(
+  '/broadcast/stats',
+  authenticate as RequestHandler,
+  requireRole(UserRole.ADMIN, UserRole.SUPER_ADMIN) as RequestHandler,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const stats = await User.findAll({
+        where: { isActive: true, deletedAt: null },
+        attributes: ['role', [fn('COUNT', col('id')), 'count']],
+        group: ['role'],
+        raw: true
+      });
+
+      const totalUsers = await User.count({ where: { isActive: true, deletedAt: null } });
+
+      res.json({
+        totalUsers,
+        byRole: stats
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 export default router;

@@ -702,3 +702,18 @@ export const reportsAPI = {
   getMyReports: (params?: { page?: number; limit?: number }) =>
     api.get('/reports/my-reports', { params })
 };
+
+export const broadcastAPI = {
+  sendBroadcast: (data: {
+    title: string;
+    message: string;
+    targetType: 'all' | 'role' | 'individual';
+    targetRole?: string;
+    targetUserIds?: string[];
+  }) =>
+    api.post('/admin/broadcast', data),
+  getUsers: (params?: { search?: string; role?: string; page?: number; limit?: number }) =>
+    api.get('/admin/broadcast/users', { params }),
+  getStats: () =>
+    api.get('/admin/broadcast/stats')
+};
