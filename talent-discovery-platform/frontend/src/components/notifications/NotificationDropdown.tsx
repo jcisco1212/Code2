@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { notificationsAPI } from '../../services/api';
-import { BellIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { BellIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { BellIcon as BellSolidIcon } from '@heroicons/react/24/solid';
 
 interface Notification {
@@ -10,6 +10,11 @@ interface Notification {
   title: string;
   message: string;
   link: string | null;
+  data: {
+    link?: string;
+    conversationId?: string;
+    [key: string]: any;
+  } | null;
   isRead: boolean;
   createdAt: string;
 }
@@ -20,6 +25,27 @@ const NotificationDropdown: React.FC = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  // Get link from notification (check both direct link and data.link)
+  const getNotificationLink = (notification: Notification): string | null => {
+    if (notification.link) return notification.link;
+    if (notification.data?.link) return notification.data.link;
+    return null;
+  };
+
+  // Handle notification click - mark as read and navigate
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.isRead) {
+      await handleMarkAsRead(notification.id);
+    }
+    setIsOpen(false);
+
+    const link = getNotificationLink(notification);
+    if (link) {
+      navigate(link);
+    }
+  };
 
   useEffect(() => {
     // Fetch unread count on mount
@@ -180,62 +206,49 @@ const NotificationDropdown: React.FC = () => {
               </div>
             ) : (
               <div className="divide-y divide-[#404040]">
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`p-4 hover:bg-white/5 transition-colors ${
-                      !notification.isRead ? 'bg-red-500/10' : ''
-                    }`}
-                  >
-                    <div className="flex gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-[#404040] rounded-full text-lg">
-                        {getNotificationIcon(notification.type)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        {notification.link ? (
-                          <Link
-                            to={notification.link}
-                            onClick={() => {
-                              if (!notification.isRead) {
-                                handleMarkAsRead(notification.id);
-                              }
-                              setIsOpen(false);
+                {notifications.map((notification) => {
+                  const notificationLink = getNotificationLink(notification);
+                  const isClickable = !!notificationLink;
+
+                  return (
+                    <div
+                      key={notification.id}
+                      onClick={isClickable ? () => handleNotificationClick(notification) : undefined}
+                      className={`p-4 hover:bg-white/5 transition-colors ${
+                        !notification.isRead ? 'bg-red-500/10' : ''
+                      } ${isClickable ? 'cursor-pointer' : ''}`}
+                    >
+                      <div className="flex gap-3">
+                        <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-[#404040] rounded-full text-lg">
+                          {getNotificationIcon(notification.type)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-white">
+                            {notification.title}
+                          </p>
+                          <p className="text-sm text-gray-400 line-clamp-2">
+                            {notification.message}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {formatTimeAgo(notification.createdAt)}
+                          </p>
+                        </div>
+                        {!notification.isRead && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMarkAsRead(notification.id);
                             }}
-                            className="block"
+                            className="flex-shrink-0 p-1 text-gray-500 hover:text-red-500"
+                            title="Mark as read"
                           >
-                            <p className="text-sm font-medium text-white">
-                              {notification.title}
-                            </p>
-                            <p className="text-sm text-gray-400 line-clamp-2">
-                              {notification.message}
-                            </p>
-                          </Link>
-                        ) : (
-                          <>
-                            <p className="text-sm font-medium text-white">
-                              {notification.title}
-                            </p>
-                            <p className="text-sm text-gray-400 line-clamp-2">
-                              {notification.message}
-                            </p>
-                          </>
+                            <CheckIcon className="w-4 h-4" />
+                          </button>
                         )}
-                        <p className="text-xs text-gray-500 mt-1">
-                          {formatTimeAgo(notification.createdAt)}
-                        </p>
                       </div>
-                      {!notification.isRead && (
-                        <button
-                          onClick={() => handleMarkAsRead(notification.id)}
-                          className="flex-shrink-0 p-1 text-gray-500 hover:text-red-500"
-                          title="Mark as read"
-                        >
-                          <CheckIcon className="w-4 h-4" />
-                        </button>
-                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

@@ -2,8 +2,9 @@ import { Router, Request, Response, NextFunction, RequestHandler } from 'express
 import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validate';
 import { authenticate, requireRole, requireModeratorOrAdmin, requireSuperAdmin, AuthRequest } from '../middleware/auth';
-import { User, UserRole, Video, VideoStatus, Comment, CommentStatus, Report, ReportStatus, Category, Notification, AgentApprovalStatus } from '../models';
+import { User, UserRole, Video, VideoStatus, Comment, CommentStatus, Report, ReportStatus, Category, Notification, AgentApprovalStatus, Message } from '../models';
 import { NotificationType } from '../models/Notification';
+import Conversation from '../models/Conversation';
 import { NotFoundError, ForbiddenError } from '../middleware/errorHandler';
 import { Op, fn, col, literal } from 'sequelize';
 import { cacheDelete, cacheDeletePattern } from '../config/redis';
@@ -11,6 +12,7 @@ import { logAudit } from '../utils/logger';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import ExcelJS from 'exceljs';
+import { v4 as uuidv4 } from 'uuid';
 
 const router = Router();
 
@@ -1798,22 +1800,67 @@ router.post(
         return;
       }
 
-      // Create notifications for all target users
-      const notifications = targetUsers.map(user => ({
-        userId: user.id,
+      const adminId = authReq.userId!;
+      const fullMessage = `**${title}**\n\n${message}`;
+
+      // Create conversations and messages for each user
+      const conversationPromises = targetUsers.map(async (user) => {
+        // Find or create conversation between admin and user
+        let conversation = await Conversation.findOne({
+          where: {
+            [Op.or]: [
+              { participant1Id: adminId, participant2Id: user.id },
+              { participant1Id: user.id, participant2Id: adminId }
+            ]
+          }
+        });
+
+        if (!conversation) {
+          conversation = await Conversation.create({
+            participant1Id: adminId,
+            participant2Id: user.id,
+            lastMessageAt: new Date(),
+            lastMessagePreview: title.substring(0, 100)
+          });
+        } else {
+          // Update conversation with latest message info
+          await conversation.update({
+            lastMessageAt: new Date(),
+            lastMessagePreview: title.substring(0, 100)
+          });
+        }
+
+        // Create message
+        await Message.create({
+          senderId: adminId,
+          receiverId: user.id,
+          conversationId: conversation.id,
+          content: fullMessage
+        });
+
+        return { userId: user.id, conversationId: conversation.id };
+      });
+
+      const conversationResults = await Promise.all(conversationPromises);
+
+      // Create notifications with conversation IDs for navigation
+      const notifications = conversationResults.map(({ userId, conversationId }) => ({
+        userId,
         type: NotificationType.SYSTEM_ANNOUNCEMENT,
         title,
         message,
         data: {
           broadcastType: targetType,
-          sentBy: authReq.user?.id,
-          sentAt: new Date().toISOString()
+          sentBy: adminId,
+          sentAt: new Date().toISOString(),
+          conversationId,
+          link: '/messages'
         }
       }));
 
       await Notification.bulkCreate(notifications);
 
-      logAudit('BROADCAST_MESSAGE_SENT', authReq.userId!, {
+      logAudit('BROADCAST_MESSAGE_SENT', adminId, {
         title,
         targetType,
         targetRole: targetRole || null,
