@@ -2,9 +2,8 @@ import { Router, Request, Response, NextFunction, RequestHandler } from 'express
 import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validate';
 import { authenticate, requireRole, requireModeratorOrAdmin, requireSuperAdmin, AuthRequest } from '../middleware/auth';
-import { User, UserRole, Video, VideoStatus, Comment, CommentStatus, Report, ReportStatus, Category, Notification, AgentApprovalStatus, Message } from '../models';
+import { User, UserRole, Video, VideoStatus, Comment, CommentStatus, Report, ReportStatus, Category, Notification, AgentApprovalStatus, Message, Conversation } from '../models';
 import { NotificationType } from '../models/Notification';
-import Conversation from '../models/Conversation';
 import { NotFoundError, ForbiddenError } from '../middleware/errorHandler';
 import { Op, fn, col, literal } from 'sequelize';
 import { cacheDelete, cacheDeletePattern } from '../config/redis';

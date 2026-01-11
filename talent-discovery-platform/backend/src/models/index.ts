@@ -6,6 +6,7 @@ import Follow from './Follow';
 import Like, { LikeType, LikeTarget } from './Like';
 import Notification, { NotificationType } from './Notification';
 import Message, { MessageStatus } from './Message';
+import Conversation from './Conversation';
 import AgentBookmark from './AgentBookmark';
 import Report, { ReportType, ReportStatus, ReportTarget } from './Report';
 import VideoView from './VideoView';
@@ -64,6 +65,14 @@ User.belongsToMany(User, {
 // Messages
 User.hasMany(Message, { foreignKey: 'senderId', as: 'sentMessages' });
 User.hasMany(Message, { foreignKey: 'receiverId', as: 'receivedMessages' });
+
+// Conversations
+Conversation.belongsTo(User, { foreignKey: 'participant1Id', as: 'participant1' });
+Conversation.belongsTo(User, { foreignKey: 'participant2Id', as: 'participant2' });
+Conversation.hasMany(Message, { foreignKey: 'conversationId', as: 'messages' });
+Message.belongsTo(Conversation, { foreignKey: 'conversationId', as: 'conversation' });
+User.hasMany(Conversation, { foreignKey: 'participant1Id', as: 'conversationsAsParticipant1' });
+User.hasMany(Conversation, { foreignKey: 'participant2Id', as: 'conversationsAsParticipant2' });
 
 // Video associations
 Video.belongsTo(User, { foreignKey: 'userId', as: 'user' });
@@ -197,6 +206,7 @@ export {
   NotificationType,
   Message,
   MessageStatus,
+  Conversation,
   AgentBookmark,
   Report,
   ReportType,
@@ -241,6 +251,7 @@ export default {
   Like,
   Notification,
   Message,
+  Conversation,
   AgentBookmark,
   Report,
   VideoView,
