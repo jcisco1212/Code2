@@ -1818,17 +1818,15 @@ router.post(
         if (!conversation) {
           conversation = await Conversation.create({
             participant1Id: adminId,
-            participant2Id: user.id,
-            lastMessageAt: new Date(),
-            lastMessagePreview: title.substring(0, 100)
-          });
-        } else {
-          // Update conversation with latest message info
-          await conversation.update({
-            lastMessageAt: new Date(),
-            lastMessagePreview: title.substring(0, 100)
+            participant2Id: user.id
           });
         }
+
+        // Update conversation with latest message info
+        await conversation.update({
+          lastMessageAt: new Date(),
+          lastMessagePreview: title.substring(0, 100)
+        });
 
         // Create message
         await Message.create({
