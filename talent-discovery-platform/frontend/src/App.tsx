@@ -65,6 +65,7 @@ import AgentCastingListDetail from './pages/agent/CastingListDetail';
 import AgentTalentNotes from './pages/agent/TalentNotes';
 
 // Admin Pages
+import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminUsers from './pages/admin/Users';
 import AdminVideos from './pages/admin/Videos';
@@ -95,6 +96,9 @@ function App() {
             <Routes>
             {/* Embed Route (no layout) */}
             <Route path="/embed/:videoId" element={<Embed />} />
+
+            {/* Admin Login (separate page, no layout) */}
+            <Route path="/admin/login" element={<AdminLogin />} />
 
             {/* Public Routes */}
             <Route path="/" element={<Layout />}>

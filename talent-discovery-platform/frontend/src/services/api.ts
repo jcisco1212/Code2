@@ -717,3 +717,23 @@ export const broadcastAPI = {
   getStats: () =>
     api.get('/admin/broadcast/stats')
 };
+
+// Admin Authentication API (separate from regular user auth)
+export const adminAuthAPI = {
+  login: (identifier: string, password: string) =>
+    api.post('/admin/auth/login', { identifier, password }),
+  verify2FA: (tempToken: string, token: string) =>
+    api.post('/admin/auth/verify-2fa', { tempToken, token }),
+  refreshToken: (refreshToken: string) =>
+    api.post('/admin/auth/refresh', { refreshToken }),
+  logout: () =>
+    api.post('/admin/auth/logout'),
+  getSession: () =>
+    api.get('/admin/auth/session'),
+  setup2FA: () =>
+    api.post('/admin/auth/2fa/setup'),
+  confirm2FA: (token: string) =>
+    api.post('/admin/auth/2fa/confirm', { token }),
+  disable2FA: (password: string, token: string) =>
+    api.post('/admin/auth/2fa/disable', { password, token })
+};
