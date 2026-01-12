@@ -50,10 +50,10 @@ router.post(
   '/login',
   adminAuthLimiter,
   validate([
-    body('email')
-      .isEmail()
-      .normalizeEmail()
-      .withMessage('Valid email is required'),
+    body('identifier')
+      .trim()
+      .notEmpty()
+      .withMessage('Email or username is required'),
     body('password')
       .notEmpty()
       .withMessage('Password is required')

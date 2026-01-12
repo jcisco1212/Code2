@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
+import { Op } from 'sequelize';
 import { User, UserRole } from '../models';
 import { AuthRequest, JWTPayload } from '../middleware/auth';
 import { BadRequestError, UnauthorizedError, ForbiddenError } from '../middleware/errorHandler';
@@ -39,35 +40,40 @@ const generateAdminTokens = (user: User, twoFactorVerified: boolean = false) => 
 // Admin login - separate authentication flow
 export const adminLogin = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { email, password } = req.body;
+    const { identifier, password } = req.body;
 
-    // Only allow login by email for admin (more secure, no username guessing)
+    // Find user by email or username
     const user = await User.findOne({
-      where: { email: email.toLowerCase() }
+      where: {
+        [Op.or]: [
+          { email: identifier.toLowerCase() },
+          { username: identifier }
+        ]
+      }
     });
 
     if (!user) {
       // Log failed attempt
-      logger.warn('Admin login failed - user not found', { email });
+      logger.warn('Admin login failed - user not found', { identifier });
       throw new UnauthorizedError('Invalid credentials');
     }
 
     // Check if user is an admin or super admin
     if (user.role !== UserRole.ADMIN && user.role !== UserRole.SUPER_ADMIN) {
-      logger.warn('Admin login failed - insufficient privileges', { email, role: user.role });
+      logger.warn('Admin login failed - insufficient privileges', { identifier, role: user.role });
       throw new ForbiddenError('Admin access required');
     }
 
     // Check if account is active
     if (!user.isActive) {
-      logger.warn('Admin login failed - account disabled', { email });
+      logger.warn('Admin login failed - account disabled', { identifier });
       throw new UnauthorizedError('Account is disabled');
     }
 
     // Verify password
     const isValidPassword = await user.comparePassword(password);
     if (!isValidPassword) {
-      logger.warn('Admin login failed - invalid password', { email });
+      logger.warn('Admin login failed - invalid password', { identifier });
       throw new UnauthorizedError('Invalid credentials');
     }
 
@@ -87,7 +93,7 @@ export const adminLogin = async (req: AuthRequest, res: Response, next: NextFunc
       // Store in Redis that this user is pending 2FA
       await redis.setex(`admin-2fa-pending:${user.id}`, 300, 'pending');
 
-      logAudit('ADMIN_LOGIN_2FA_REQUIRED', user.id, { email });
+      logAudit('ADMIN_LOGIN_2FA_REQUIRED', user.id, { identifier });
 
       res.json({
         requires2FA: true,
@@ -103,7 +109,7 @@ export const adminLogin = async (req: AuthRequest, res: Response, next: NextFunc
     // Store admin refresh token in Redis with admin prefix
     await redis.setex(`admin-refresh:${user.id}`, 7 * 24 * 60 * 60, tokens.refreshToken);
 
-    logAudit('ADMIN_LOGIN', user.id, { email, has2FA: false });
+    logAudit('ADMIN_LOGIN', user.id, { identifier, has2FA: false });
 
     res.json({
       message: 'Admin login successful',
