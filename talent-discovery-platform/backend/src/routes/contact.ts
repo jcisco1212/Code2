@@ -9,11 +9,11 @@ const router = Router();
 // Create transporter for contact emails
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'localhost',
-  port: parseInt(process.env.SMTP_PORT || '1025'),
+  port: parseInt(process.env.SMTP_PORT || '587'),
   secure: process.env.SMTP_SECURE === 'true',
   auth: process.env.SMTP_USER ? {
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD
+    pass: process.env.SMTP_PASS
   } : undefined
 });
 
@@ -30,9 +30,10 @@ router.post(
       const { name, email, message } = req.body;
 
       // Send email to support
+      const fromEmail = process.env.EMAIL_FROM || process.env.SMTP_USER || 'noreply@get-noticed.com';
       await transporter.sendMail({
-        from: `"Get-Noticed Contact Form" <noreply@get-noticed.com>`,
-        to: process.env.CONTACT_EMAIL || 'support@get-noticed.com',
+        from: `"Get-Noticed Contact Form" <${fromEmail}>`,
+        to: process.env.CONTACT_EMAIL || process.env.EMAIL_FROM || 'support@get-noticed.com',
         replyTo: email,
         subject: `Contact Form: Message from ${name}`,
         html: `
@@ -95,7 +96,7 @@ Reply directly to this email to respond to ${name}.
 
       // Send confirmation to user
       await transporter.sendMail({
-        from: `"Get-Noticed" <noreply@get-noticed.com>`,
+        from: `"Get-Noticed" <${fromEmail}>`,
         to: email,
         subject: `We received your message - Get-Noticed`,
         html: `

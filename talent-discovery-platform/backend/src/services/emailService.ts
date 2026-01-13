@@ -11,11 +11,11 @@ interface EmailOptions {
 // Create transporter
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'localhost',
-  port: parseInt(process.env.SMTP_PORT || '1025'),
+  port: parseInt(process.env.SMTP_PORT || '587'),
   secure: process.env.SMTP_SECURE === 'true',
   auth: process.env.SMTP_USER ? {
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD
+    pass: process.env.SMTP_PASS
   } : undefined
 });
 
@@ -264,7 +264,7 @@ export const sendEmail = async (options: EmailOptions): Promise<void> => {
     const { html, text } = template(options.data);
 
     await transporter.sendMail({
-      from: `"${process.env.SMTP_FROM_NAME || 'Get-Noticed'}" <${process.env.SMTP_FROM || 'noreply@get-noticed.com'}>`,
+      from: `"${process.env.SMTP_FROM_NAME || 'Get-Noticed'}" <${process.env.EMAIL_FROM || process.env.SMTP_USER || 'noreply@get-noticed.com'}>`,
       to: options.to,
       subject: options.subject,
       html,
