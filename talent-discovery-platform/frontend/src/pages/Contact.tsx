@@ -51,8 +51,6 @@ const Contact: React.FC = () => {
         <div>
           <h2 className="text-xl font-semibold mb-4 text-white">Get in Touch</h2>
           <p className="text-gray-400 mb-4">Have questions? We would love to hear from you.</p>
-          <p className="mb-2 text-gray-300"><strong className="text-white">Email:</strong> support@get-noticed.com</p>
-          <p className="mb-2 text-gray-300"><strong className="text-white">Business:</strong> business@get-noticed.com</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
