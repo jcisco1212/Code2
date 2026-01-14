@@ -127,13 +127,12 @@ const Layout: React.FC = () => {
             >
               <Bars3Icon className="w-6 h-6 text-white" />
             </button>
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">GN</span>
-              </div>
-              <span className="hidden sm:block text-xl font-bold text-white">
-                Get-Noticed
-              </span>
+            <Link to="/" className="flex items-center">
+              <img
+                src="/images/get-noticed-logo.png"
+                alt="Get Noticed"
+                className="h-10 md:h-12 w-auto object-contain"
+              />
             </Link>
           </div>
 
@@ -513,11 +512,12 @@ const Layout: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 lg:px-6 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">GN</span>
-                </div>
-                <h3 className="font-bold text-white">Get-Noticed</h3>
+              <div className="mb-4">
+                <img
+                  src="/images/get-noticed-logo.png"
+                  alt="Get Noticed"
+                  className="h-12 w-auto object-contain"
+                />
               </div>
               <p className="text-sm text-gray-400 leading-relaxed">
                 Discover and showcase your talent with AI-powered insights.
