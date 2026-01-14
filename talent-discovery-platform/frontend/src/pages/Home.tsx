@@ -139,6 +139,15 @@ const Home: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8">
+      {/* Get Noticed Logo */}
+      <div className="flex justify-center mb-8">
+        <img
+          src="/images/get-noticed-logo.png"
+          alt="Get Noticed"
+          className="h-20 md:h-24 lg:h-28 w-auto object-contain"
+        />
+      </div>
+
       {/* Hero Section - Aurora Glass Style */}
       <section className="mb-16 relative overflow-hidden rounded-3xl">
         {/* Background with gradient mesh */}
