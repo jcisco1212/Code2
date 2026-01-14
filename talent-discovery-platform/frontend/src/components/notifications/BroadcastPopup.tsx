@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { XMarkIcon, MegaphoneIcon, ExclamationCircleIcon, SparklesIcon, WrenchScrewdriverIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, MegaphoneIcon, ExclamationCircleIcon, SparklesIcon, WrenchScrewdriverIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
 import { useSocket } from '../../contexts/SocketContext';
 import { broadcastNotificationsAPI } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -72,7 +72,7 @@ const BroadcastPopup: React.FC = () => {
       case 'maintenance':
         return <WrenchScrewdriverIcon className="w-6 h-6" />;
       case 'survey':
-        return <ClipboardDocumentListIcon className="w-6 h-6" />;
+        return <ClipboardDocumentIcon className="w-6 h-6" />;
       default:
         return <MegaphoneIcon className="w-6 h-6" />;
     }
