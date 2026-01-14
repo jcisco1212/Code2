@@ -25,6 +25,12 @@ import WatchParty, { WatchPartyStatus } from './WatchParty';
 import WatchPartyParticipant from './WatchPartyParticipant';
 import FeatureFlag, { FeatureCategory } from './FeatureFlag';
 import AgentProfileView from './AgentProfileView';
+import IndustryNotification, { IndustryEventType, IndustryNotificationStatus } from './IndustryNotification';
+import BroadcastNotification, { BroadcastType, BroadcastTarget, BroadcastPriority, BroadcastStatus } from './BroadcastNotification';
+import UserBroadcastStatus, { BroadcastUserStatus } from './UserBroadcastStatus';
+import AdminNotificationSettings from './AdminNotificationSettings';
+import AdminIndustryNotificationStatus, { AdminNotificationStatus } from './AdminIndustryNotificationStatus';
+import PushSubscription from './PushSubscription';
 
 // User associations
 User.hasMany(Video, { foreignKey: 'userId', as: 'videos' });
@@ -189,6 +195,34 @@ AgentProfileView.belongsTo(User, { foreignKey: 'talentId', as: 'talent' });
 User.hasMany(AgentProfileView, { foreignKey: 'agentId', as: 'agentProfileViews' });
 User.hasMany(AgentProfileView, { foreignKey: 'talentId', as: 'viewedByAgents' });
 
+// IndustryNotification associations
+IndustryNotification.belongsTo(User, { foreignKey: 'userId', as: 'industryUser' });
+User.hasMany(IndustryNotification, { foreignKey: 'userId', as: 'industryNotifications' });
+
+// BroadcastNotification associations
+BroadcastNotification.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+User.hasMany(BroadcastNotification, { foreignKey: 'createdBy', as: 'createdBroadcasts' });
+
+// UserBroadcastStatus associations
+UserBroadcastStatus.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+UserBroadcastStatus.belongsTo(BroadcastNotification, { foreignKey: 'broadcastId', as: 'broadcast' });
+User.hasMany(UserBroadcastStatus, { foreignKey: 'userId', as: 'broadcastStatuses' });
+BroadcastNotification.hasMany(UserBroadcastStatus, { foreignKey: 'broadcastId', as: 'userStatuses' });
+
+// AdminNotificationSettings associations
+AdminNotificationSettings.belongsTo(User, { foreignKey: 'userId', as: 'admin' });
+User.hasOne(AdminNotificationSettings, { foreignKey: 'userId', as: 'adminNotificationSettings' });
+
+// AdminIndustryNotificationStatus associations
+AdminIndustryNotificationStatus.belongsTo(User, { foreignKey: 'adminId', as: 'admin' });
+AdminIndustryNotificationStatus.belongsTo(IndustryNotification, { foreignKey: 'industryNotificationId', as: 'industryNotification' });
+User.hasMany(AdminIndustryNotificationStatus, { foreignKey: 'adminId', as: 'industryNotificationStatuses' });
+IndustryNotification.hasMany(AdminIndustryNotificationStatus, { foreignKey: 'industryNotificationId', as: 'adminStatuses' });
+
+// PushSubscription associations
+PushSubscription.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+User.hasMany(PushSubscription, { foreignKey: 'userId', as: 'pushSubscriptions' });
+
 export {
   User,
   UserRole,
@@ -239,7 +273,21 @@ export {
   FeatureFlag,
   FeatureCategory,
   AgentProfileView,
-  AgentApprovalStatus
+  AgentApprovalStatus,
+  IndustryNotification,
+  IndustryEventType,
+  IndustryNotificationStatus,
+  BroadcastNotification,
+  BroadcastType,
+  BroadcastTarget,
+  BroadcastPriority,
+  BroadcastStatus,
+  UserBroadcastStatus,
+  BroadcastUserStatus,
+  AdminNotificationSettings,
+  AdminIndustryNotificationStatus,
+  AdminNotificationStatus,
+  PushSubscription
 };
 
 export default {
@@ -269,5 +317,11 @@ export default {
   WatchParty,
   WatchPartyParticipant,
   FeatureFlag,
-  AgentProfileView
+  AgentProfileView,
+  IndustryNotification,
+  BroadcastNotification,
+  UserBroadcastStatus,
+  AdminNotificationSettings,
+  AdminIndustryNotificationStatus,
+  PushSubscription
 };

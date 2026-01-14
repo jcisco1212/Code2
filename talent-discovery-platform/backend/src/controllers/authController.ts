@@ -4,11 +4,12 @@ import crypto from 'crypto';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { Op } from 'sequelize';
-import { User, UserRole, AgentApprovalStatus } from '../models';
+import { User, UserRole, AgentApprovalStatus, IndustryEventType } from '../models';
 import { AuthRequest, JWTPayload } from '../middleware/auth';
 import { BadRequestError, UnauthorizedError, ConflictError } from '../middleware/errorHandler';
 import { redis } from '../config/redis';
 import { sendEmail } from '../services/emailService';
+import { createIndustryNotification } from '../services/notificationService';
 import { logger, logAudit } from '../utils/logger';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
@@ -116,6 +117,23 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
         verificationUrl
       }
     }).catch(err => logger.error('Failed to send verification email', { error: err.message }));
+
+    // Send industry notification for entertainment professionals
+    if (isAgent) {
+      createIndustryNotification(
+        IndustryEventType.AGENT_SIGNUP,
+        user.id,
+        'New Agent Signup',
+        `${displayName} from ${agentCompanyName || 'Unknown Agency'} has registered as an agent and is awaiting verification.`,
+        {
+          name: displayName,
+          company: agentCompanyName,
+          agentType: agentType,
+          email: email,
+          username: username
+        }
+      ).catch(err => logger.error('Failed to send industry notification', { error: err.message }));
+    }
 
     logAudit('USER_REGISTERED', user.id, { email, username });
 

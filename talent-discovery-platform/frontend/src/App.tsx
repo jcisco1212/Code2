@@ -6,7 +6,12 @@ import { store } from './store';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { FeatureProvider } from './contexts/FeatureContext';
+import { SocketProvider } from './contexts/SocketContext';
 import { initializeCapacitor } from './utils/capacitor';
+
+// Notification Components
+import IndustryNotificationPopup from './components/notifications/IndustryNotificationPopup';
+import BroadcastPopup from './components/notifications/BroadcastPopup';
 
 // Layout
 import Layout from './components/layout/Layout';
@@ -79,6 +84,7 @@ import AdminAuditLogs from './pages/admin/AuditLogs';
 import AdminFeatureManagement from './pages/admin/FeatureManagement';
 import AdminUserAnalytics from './pages/admin/UserAnalytics';
 import AdminBroadcast from './pages/admin/Broadcast';
+import AdminNotificationSettings from './pages/admin/NotificationSettings';
 
 function App() {
   // Initialize Capacitor for native platforms
@@ -91,8 +97,12 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <FeatureProvider>
+            <SocketProvider>
             <BrowserRouter>
               <Toaster position="top-right" />
+              {/* Global Notification Popups */}
+              <IndustryNotificationPopup />
+              <BroadcastPopup />
             <Routes>
             {/* Embed Route (no layout) */}
             <Route path="/embed/:videoId" element={<Embed />} />
@@ -171,12 +181,14 @@ function App() {
               <Route path="admin/features" element={<AdminRoute><AdminFeatureManagement /></AdminRoute>} />
               <Route path="admin/user-analytics" element={<AdminRoute><AdminUserAnalytics /></AdminRoute>} />
               <Route path="admin/broadcast" element={<AdminRoute><AdminBroadcast /></AdminRoute>} />
+              <Route path="admin/notification-settings" element={<AdminRoute><AdminNotificationSettings /></AdminRoute>} />
 
               {/* 404 */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
             </Routes>
             </BrowserRouter>
+            </SocketProvider>
           </FeatureProvider>
         </AuthProvider>
       </ThemeProvider>

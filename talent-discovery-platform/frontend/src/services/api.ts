@@ -737,3 +737,142 @@ export const adminAuthAPI = {
   disable2FA: (password: string, token: string) =>
     api.post('/admin/auth/2fa/disable', { password, token })
 };
+
+// Industry Notifications API (for admins)
+export const industryNotificationsAPI = {
+  getNotifications: (params?: { page?: number; limit?: number; status?: string; eventType?: string }) =>
+    api.get('/industry-notifications', { params }),
+  getPending: () =>
+    api.get('/industry-notifications/pending'),
+  getUnreadCount: () =>
+    api.get('/industry-notifications/unread-count'),
+  getNotification: (id: string) =>
+    api.get(`/industry-notifications/${id}`),
+  markAsViewed: (id: string) =>
+    api.put(`/industry-notifications/${id}/view`),
+  dismiss: (id: string) =>
+    api.put(`/industry-notifications/${id}/dismiss`),
+  dismissAll: () =>
+    api.put('/industry-notifications/dismiss-all'),
+  getStats: (params?: { startDate?: string; endDate?: string }) =>
+    api.get('/industry-notifications/stats/overview', { params }),
+  createTest: (data: { eventType: string; title?: string; message?: string; data?: Record<string, any> }) =>
+    api.post('/industry-notifications/test', data)
+};
+
+// Broadcast Notifications API
+export const broadcastNotificationsAPI = {
+  getBroadcasts: (params?: { page?: number; limit?: number; status?: string; type?: string; priority?: string }) =>
+    api.get('/broadcasts', { params }),
+  getPending: () =>
+    api.get('/broadcasts/pending'),
+  getActive: () =>
+    api.get('/broadcasts/active'),
+  getBroadcast: (id: string) =>
+    api.get(`/broadcasts/${id}`),
+  createBroadcast: (data: {
+    type: string;
+    title: string;
+    message: string;
+    targets?: string[];
+    priority?: string;
+    showPopup?: boolean;
+    sendPush?: boolean;
+    sendEmail?: boolean;
+    sendSms?: boolean;
+    actionUrl?: string;
+    actionText?: string;
+    imageUrl?: string;
+    dismissible?: boolean;
+    requireAcknowledge?: boolean;
+    surveyData?: Record<string, any>;
+    scheduledAt?: string;
+    expiresAt?: string;
+    data?: Record<string, any>;
+  }) =>
+    api.post('/broadcasts', data),
+  updateBroadcast: (id: string, data: any) =>
+    api.put(`/broadcasts/${id}`, data),
+  sendBroadcast: (id: string) =>
+    api.post(`/broadcasts/${id}/send`),
+  markAsViewed: (id: string) =>
+    api.put(`/broadcasts/${id}/view`),
+  dismiss: (id: string) =>
+    api.put(`/broadcasts/${id}/dismiss`),
+  acknowledge: (id: string, surveyResponse?: Record<string, any>) =>
+    api.put(`/broadcasts/${id}/acknowledge`, { surveyResponse }),
+  cancelBroadcast: (id: string) =>
+    api.post(`/broadcasts/${id}/cancel`),
+  deleteBroadcast: (id: string) =>
+    api.delete(`/broadcasts/${id}`),
+  getStats: (id: string) =>
+    api.get(`/broadcasts/${id}/stats`),
+  getOptions: () =>
+    api.get('/broadcasts/config/options')
+};
+
+// Admin Notification Settings API
+export const adminNotificationSettingsAPI = {
+  getSettings: () =>
+    api.get('/admin/notification-settings'),
+  updateSettings: (data: {
+    industryPopupEnabled?: boolean;
+    industryPushEnabled?: boolean;
+    industrySmsEnabled?: boolean;
+    industryEmailEnabled?: boolean;
+    agentSignupNotify?: boolean;
+    agentVerifiedNotify?: boolean;
+    promoterSignupNotify?: boolean;
+    managerSignupNotify?: boolean;
+    castingDirectorSignupNotify?: boolean;
+    producerSignupNotify?: boolean;
+    industryContactNotify?: boolean;
+    quietHoursEnabled?: boolean;
+    quietHoursStart?: string;
+    quietHoursEnd?: string;
+    quietHoursTimezone?: string;
+    digestEnabled?: boolean;
+    digestFrequency?: 'hourly' | 'daily' | 'weekly';
+  }) =>
+    api.put('/admin/notification-settings', data),
+  requestPhoneVerification: (phoneNumber: string) =>
+    api.post('/admin/notification-settings/phone/request-verification', { phoneNumber }),
+  verifyPhone: (code: string) =>
+    api.post('/admin/notification-settings/phone/verify', { code }),
+  removePhone: () =>
+    api.delete('/admin/notification-settings/phone'),
+  // Super Admin only
+  getAllSettings: (params?: { page?: number; limit?: number }) =>
+    api.get('/admin/notification-settings/all', { params }),
+  updateAdminSettings: (adminId: string, data: any) =>
+    api.put(`/admin/notification-settings/${adminId}`, data),
+  bulkUpdateSettings: (adminIds: string[], updates: any) =>
+    api.post('/admin/notification-settings/bulk-update', { adminIds, updates }),
+  resetSettings: (adminId: string) =>
+    api.post(`/admin/notification-settings/reset/${adminId}`)
+};
+
+// Push Subscriptions API
+export const pushSubscriptionsAPI = {
+  getVapidKey: () =>
+    api.get('/push-subscriptions/vapid-key'),
+  getStatus: () =>
+    api.get('/push-subscriptions/status'),
+  getSubscriptions: () =>
+    api.get('/push-subscriptions'),
+  subscribe: (subscription: {
+    endpoint: string;
+    keys: { p256dh: string; auth: string };
+  }, deviceName?: string) =>
+    api.post('/push-subscriptions', { subscription, deviceName }),
+  unsubscribe: (endpoint: string) =>
+    api.post('/push-subscriptions/unsubscribe', { endpoint }),
+  removeSubscription: (id: string) =>
+    api.delete(`/push-subscriptions/${id}`),
+  removeAllSubscriptions: () =>
+    api.delete('/push-subscriptions/all'),
+  updateDeviceName: (id: string, deviceName: string) =>
+    api.put(`/push-subscriptions/${id}/name`, { deviceName }),
+  testPush: () =>
+    api.post('/push-subscriptions/test')
+};
