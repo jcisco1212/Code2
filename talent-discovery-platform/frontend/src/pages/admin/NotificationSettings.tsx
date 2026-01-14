@@ -210,6 +210,7 @@ const NotificationSettings: React.FC = () => {
               />
             </div>
 
+            {/* Push Notifications - Hidden for now
             <div className="flex items-center justify-between p-4 bg-[#282828] rounded-lg">
               <div className="flex items-center gap-3">
                 <BellIcon className="w-5 h-5 text-green-400" />
@@ -223,6 +224,7 @@ const NotificationSettings: React.FC = () => {
                 onChange={(v) => updateSetting('industryPushEnabled', v)}
               />
             </div>
+            */}
 
             <div className="flex items-center justify-between p-4 bg-[#282828] rounded-lg">
               <div className="flex items-center gap-3">
@@ -238,6 +240,7 @@ const NotificationSettings: React.FC = () => {
               />
             </div>
 
+            {/* SMS Notifications - Hidden for now
             <div className="flex items-center justify-between p-4 bg-[#282828] rounded-lg">
               <div className="flex items-center gap-3">
                 <DevicePhoneMobileIcon className="w-5 h-5 text-red-400" />
@@ -256,10 +259,11 @@ const NotificationSettings: React.FC = () => {
                 disabled={!settings?.smsVerified}
               />
             </div>
+            */}
           </div>
         </div>
 
-        {/* Phone Verification */}
+        {/* Phone Verification / SMS Setup - Hidden for now
         <div className="bg-[#1f1f1f] rounded-xl p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             <DevicePhoneMobileIcon className="w-5 h-5 text-purple-400" />
@@ -338,6 +342,7 @@ const NotificationSettings: React.FC = () => {
             </div>
           )}
         </div>
+        */}
 
         {/* Event Types */}
         <div className="bg-[#1f1f1f] rounded-xl p-6 mb-6">

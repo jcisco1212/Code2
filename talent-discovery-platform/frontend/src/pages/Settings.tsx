@@ -1226,6 +1226,7 @@ const Settings: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Push Notifications - Hidden for now
                 <div className="border-t dark:border-gray-700 pt-6">
                   <h3 className="font-medium text-gray-900 dark:text-white mb-3">Push Notifications</h3>
                   <div className="space-y-3">
@@ -1247,6 +1248,7 @@ const Settings: React.FC = () => {
                     ))}
                   </div>
                 </div>
+                */}
 
                 <button
                   onClick={handleNotificationsSave}
