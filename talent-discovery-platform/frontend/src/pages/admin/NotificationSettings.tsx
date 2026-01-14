@@ -9,7 +9,7 @@ import {
   CheckIcon,
   XMarkIcon,
   UserGroupIcon,
-  ExclamationTriangleIcon
+  ExclamationCircleIcon
 } from '@heroicons/react/24/outline';
 import { adminNotificationSettingsAPI } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -491,7 +491,7 @@ const NotificationSettings: React.FC = () => {
         {isSuperAdmin && (
           <div className="mt-8 p-6 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
             <div className="flex items-center gap-2 mb-4">
-              <ExclamationTriangleIcon className="w-5 h-5 text-yellow-400" />
+              <ExclamationCircleIcon className="w-5 h-5 text-yellow-400" />
               <h2 className="text-xl font-semibold text-yellow-400">Super Admin Controls</h2>
             </div>
             <p className="text-sm text-gray-400 mb-4">
