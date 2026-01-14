@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { XMarkIcon, UserPlusIcon, CheckBadgeIcon, BriefcaseIcon, FilmIcon, MegaphoneIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, UserIcon, CheckBadgeIcon, BriefcaseIcon, FilmIcon, MegaphoneIcon } from '@heroicons/react/24/outline';
 import { useSocket } from '../../contexts/SocketContext';
 import { industryNotificationsAPI } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -62,7 +62,7 @@ const IndustryNotificationPopup: React.FC = () => {
   const getEventIcon = (eventType: string) => {
     switch (eventType) {
       case 'agent_signup':
-        return <UserPlusIcon className="w-5 h-5 text-blue-400" />;
+        return <UserIcon className="w-5 h-5 text-blue-400" />;
       case 'agent_verified':
         return <CheckBadgeIcon className="w-5 h-5 text-green-400" />;
       case 'promoter_signup':
@@ -73,7 +73,7 @@ const IndustryNotificationPopup: React.FC = () => {
       case 'producer_signup':
         return <FilmIcon className="w-5 h-5 text-red-400" />;
       default:
-        return <UserPlusIcon className="w-5 h-5 text-gray-400" />;
+        return <UserIcon className="w-5 h-5 text-gray-400" />;
     }
   };
 
