@@ -4,41 +4,14 @@ import { validate } from '../middleware/validate';
 import { authenticate, optionalAuth } from '../middleware/auth';
 import { NotFoundError, ForbiddenError } from '../middleware/errorHandler';
 import { Op } from 'sequelize';
-import { sequelize } from '../config/database';
-import { DataTypes, Model } from 'sequelize';
-
-// Define Announcement model inline
-class Announcement extends Model {
-  declare id: string;
-  declare title: string;
-  declare content: string;
-  declare type: string;
-  declare target: string;
-  declare isActive: boolean;
-  declare isPinned: boolean;
-  declare startsAt: Date | null;
-  declare expiresAt: Date | null;
-  declare createdBy: string;
-}
-
-Announcement.init({
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  title: { type: DataTypes.STRING(255), allowNull: false },
-  content: { type: DataTypes.TEXT, allowNull: false },
-  type: { type: DataTypes.STRING(20), defaultValue: 'info' },
-  target: { type: DataTypes.STRING(20), defaultValue: 'all' },
-  isActive: { type: DataTypes.BOOLEAN, defaultValue: true, field: 'is_active' },
-  isPinned: { type: DataTypes.BOOLEAN, defaultValue: false, field: 'is_pinned' },
-  startsAt: { type: DataTypes.DATE, allowNull: true, field: 'starts_at' },
-  expiresAt: { type: DataTypes.DATE, allowNull: true, field: 'expires_at' },
-  createdBy: { type: DataTypes.UUID, allowNull: false, field: 'created_by' }
-}, { sequelize, tableName: 'announcements', modelName: 'Announcement' });
+import Announcement from '../models/Announcement';
 
 const router = Router();
 
 // Middleware to check if user is admin
 const isAdmin = (req: Request, res: Response, next: NextFunction) => {
-  if (req.user?.role !== 'admin') {
+  const adminRoles = ['admin', 'super_admin', 'moderator'];
+  if (!req.user?.role || !adminRoles.includes(req.user.role)) {
     res.status(403).json({ error: { message: 'Admin access required' } });
     return;
   }

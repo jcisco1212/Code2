@@ -31,6 +31,7 @@ import UserBroadcastStatus, { BroadcastUserStatus } from './UserBroadcastStatus'
 import AdminNotificationSettings from './AdminNotificationSettings';
 import AdminIndustryNotificationStatus, { AdminNotificationStatus } from './AdminIndustryNotificationStatus';
 import PushSubscription from './PushSubscription';
+import Announcement, { AnnouncementType, AnnouncementTarget } from './Announcement';
 
 // User associations
 User.hasMany(Video, { foreignKey: 'userId', as: 'videos' });
@@ -223,6 +224,10 @@ IndustryNotification.hasMany(AdminIndustryNotificationStatus, { foreignKey: 'ind
 PushSubscription.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 User.hasMany(PushSubscription, { foreignKey: 'userId', as: 'pushSubscriptions' });
 
+// Announcement associations
+Announcement.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+User.hasMany(Announcement, { foreignKey: 'createdBy', as: 'announcements' });
+
 export {
   User,
   UserRole,
@@ -287,7 +292,10 @@ export {
   AdminNotificationSettings,
   AdminIndustryNotificationStatus,
   AdminNotificationStatus,
-  PushSubscription
+  PushSubscription,
+  Announcement,
+  AnnouncementType,
+  AnnouncementTarget
 };
 
 export default {
@@ -323,5 +331,6 @@ export default {
   UserBroadcastStatus,
   AdminNotificationSettings,
   AdminIndustryNotificationStatus,
-  PushSubscription
+  PushSubscription,
+  Announcement
 };

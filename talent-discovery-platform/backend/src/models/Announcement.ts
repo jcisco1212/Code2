@@ -1,4 +1,5 @@
-import { Model, DataTypes, Sequelize } from 'sequelize';
+import { Model, DataTypes, Optional } from 'sequelize';
+import { sequelize } from '../config/database';
 
 export enum AnnouncementType {
   INFO = 'info',
@@ -25,84 +26,96 @@ interface AnnouncementAttributes {
   startsAt: Date | null;
   expiresAt: Date | null;
   createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-interface AnnouncementCreationAttributes extends Omit<AnnouncementAttributes, 'id' | 'isActive' | 'isPinned'> {}
+interface AnnouncementCreationAttributes extends Optional<AnnouncementAttributes, 'id' | 'isActive' | 'isPinned' | 'startsAt' | 'expiresAt' | 'createdAt' | 'updatedAt'> {}
 
 class Announcement extends Model<AnnouncementAttributes, AnnouncementCreationAttributes> implements AnnouncementAttributes {
-  public id!: string;
-  public title!: string;
-  public content!: string;
-  public type!: AnnouncementType;
-  public target!: AnnouncementTarget;
-  public isActive!: boolean;
-  public isPinned!: boolean;
-  public startsAt!: Date | null;
-  public expiresAt!: Date | null;
-  public createdBy!: string;
-
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  declare id: string;
+  declare title: string;
+  declare content: string;
+  declare type: AnnouncementType;
+  declare target: AnnouncementTarget;
+  declare isActive: boolean;
+  declare isPinned: boolean;
+  declare startsAt: Date | null;
+  declare expiresAt: Date | null;
+  declare createdBy: string;
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 }
 
-export const initAnnouncement = (sequelize: Sequelize) => {
-  Announcement.init(
-    {
-      id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true
-      },
-      title: {
-        type: DataTypes.STRING(255),
-        allowNull: false
-      },
-      content: {
-        type: DataTypes.TEXT,
-        allowNull: false
-      },
-      type: {
-        type: DataTypes.ENUM(...Object.values(AnnouncementType)),
-        defaultValue: AnnouncementType.INFO
-      },
-      target: {
-        type: DataTypes.ENUM(...Object.values(AnnouncementTarget)),
-        defaultValue: AnnouncementTarget.ALL
-      },
-      isActive: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true
-      },
-      isPinned: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
-      },
-      startsAt: {
-        type: DataTypes.DATE,
-        allowNull: true
-      },
-      expiresAt: {
-        type: DataTypes.DATE,
-        allowNull: true
-      },
-      createdBy: {
-        type: DataTypes.UUID,
-        allowNull: false,
-        references: { model: 'users', key: 'id' }
-      }
+Announcement.init(
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true
     },
-    {
-      sequelize,
-      tableName: 'announcements',
-      indexes: [
-        { fields: ['isActive', 'target'] },
-        { fields: ['isPinned'] },
-        { fields: ['expiresAt'] }
-      ]
+    title: {
+      type: DataTypes.STRING(255),
+      allowNull: false
+    },
+    content: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    type: {
+      type: DataTypes.ENUM(...Object.values(AnnouncementType)),
+      defaultValue: AnnouncementType.INFO
+    },
+    target: {
+      type: DataTypes.ENUM(...Object.values(AnnouncementTarget)),
+      defaultValue: AnnouncementTarget.ALL
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+      field: 'is_active'
+    },
+    isPinned: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      field: 'is_pinned'
+    },
+    startsAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'starts_at'
+    },
+    expiresAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'expires_at'
+    },
+    createdBy: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      field: 'created_by',
+      references: { model: 'users', key: 'id' }
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      field: 'created_at'
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      field: 'updated_at'
     }
-  );
-
-  return Announcement;
-};
+  },
+  {
+    sequelize,
+    tableName: 'announcements',
+    modelName: 'Announcement',
+    timestamps: true,
+    indexes: [
+      { fields: ['is_active', 'target'], name: 'ann_active_target_idx' },
+      { fields: ['is_pinned'], name: 'ann_pinned_idx' },
+      { fields: ['expires_at'], name: 'ann_expires_idx' }
+    ]
+  }
+);
 
 export default Announcement;
