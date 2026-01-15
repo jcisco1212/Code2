@@ -108,6 +108,15 @@ const AdminLogin: React.FC = () => {
           {/* Red accent bar */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-600 via-red-500 to-orange-500" />
 
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <img
+              src="/images/get-noticed-logo.png"
+              alt="Get Noticed"
+              className="h-24 w-auto object-contain"
+            />
+          </div>
+
           {/* Header */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl
