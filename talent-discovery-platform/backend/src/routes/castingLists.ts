@@ -54,9 +54,12 @@ CastingListTalent.belongsTo(User, { foreignKey: 'talentId', as: 'talent' });
 
 const router = Router();
 
+// Helper to check if user has admin privileges
+const isAdminRole = (role?: string) => ['admin', 'super_admin', 'moderator'].includes(role || '');
+
 // Middleware to check if user is an agent
 const isAgent = (req: Request, res: Response, next: NextFunction) => {
-  if (req.user?.role !== 'agent' && req.user?.role !== 'admin') {
+  if (req.user?.role !== 'agent' && !isAdminRole(req.user?.role)) {
     res.status(403).json({ error: { message: 'Agent access required' } });
     return;
   }
@@ -136,7 +139,7 @@ router.get(
         throw new NotFoundError('Casting list not found');
       }
 
-      if (list.agentId !== req.userId && req.user?.role !== 'admin') {
+      if (list.agentId !== req.userId && !isAdminRole(req.user?.role)) {
         throw new ForbiddenError('Not authorized');
       }
 
