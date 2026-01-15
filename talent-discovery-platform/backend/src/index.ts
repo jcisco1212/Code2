@@ -226,6 +226,34 @@ async function startServer() {
 
     // Sync models (in development only)
     if (process.env.NODE_ENV === 'development') {
+      // Fix enum column migration issue for announcements table
+      // PostgreSQL can't auto-cast string defaults to enum types during ALTER
+      try {
+        // Check if type/target columns exist but are NOT already the correct enum type
+        const [typeCheck] = await sequelize.query(`
+          SELECT c.column_name, c.data_type, c.udt_name
+          FROM information_schema.columns c
+          WHERE c.table_name = 'announcements'
+            AND c.column_name IN ('type', 'target')
+        `);
+
+        if (typeCheck && (typeCheck as any[]).length > 0) {
+          const needsMigration = (typeCheck as any[]).some(col =>
+            (col.column_name === 'type' && col.udt_name !== 'enum_announcements_type') ||
+            (col.column_name === 'target' && col.udt_name !== 'enum_announcements_target')
+          );
+
+          if (needsMigration) {
+            logger.info('Resetting announcements table due to enum type mismatch...');
+            await sequelize.query('DROP TABLE IF EXISTS announcements CASCADE');
+            await sequelize.query('DROP TYPE IF EXISTS enum_announcements_type CASCADE');
+            await sequelize.query('DROP TYPE IF EXISTS enum_announcements_target CASCADE');
+          }
+        }
+      } catch (err) {
+        // Ignore migration prep errors - table may not exist yet
+      }
+
       await sequelize.sync({ alter: true });
       logger.info('Database models synchronized');
     }
