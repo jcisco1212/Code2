@@ -225,7 +225,8 @@ async function startServer() {
     logger.info('Database connection established successfully');
 
     // Sync models (in development only)
-    if (process.env.NODE_ENV === 'development') {
+    const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
+    if (isDev) {
       // Fix enum column migration issue for announcements table
       // Force drop and recreate to avoid PostgreSQL enum casting issues
       try {
