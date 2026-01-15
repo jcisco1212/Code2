@@ -11,7 +11,8 @@ import {
   SparklesIcon,
   CpuChipIcon,
   ArrowTrendingUpIcon,
-  MegaphoneIcon
+  MegaphoneIcon,
+  BellAlertIcon
 } from '@heroicons/react/24/outline';
 
 interface Stats {
@@ -98,6 +99,13 @@ const AdminDashboard: React.FC = () => {
       icon: MegaphoneIcon,
       description: 'Send notifications to users by role or individually',
       color: 'from-pink-500 to-pink-600'
+    },
+    {
+      to: '/admin/announcements',
+      label: 'Announcements',
+      icon: BellAlertIcon,
+      description: 'Create and manage site-wide announcements',
+      color: 'from-orange-500 to-orange-600'
     },
   ];
 
