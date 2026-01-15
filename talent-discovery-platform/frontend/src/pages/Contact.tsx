@@ -51,7 +51,7 @@ const Contact: React.FC = () => {
         <img
           src="/images/get-noticed-logo.png"
           alt="Get Noticed"
-          className="h-32 w-auto object-contain"
+          className="h-40 md:h-48 w-auto object-contain"
         />
       </div>
 

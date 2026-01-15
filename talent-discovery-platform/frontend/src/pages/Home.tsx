@@ -144,7 +144,7 @@ const Home: React.FC = () => {
         <img
           src="/images/get-noticed-logo.png"
           alt="Get Noticed"
-          className="h-20 md:h-24 lg:h-28 w-auto object-contain"
+          className="h-40 md:h-48 w-auto object-contain"
         />
       </div>
 
