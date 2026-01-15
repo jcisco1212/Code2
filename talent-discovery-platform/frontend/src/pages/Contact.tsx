@@ -46,11 +46,42 @@ const Contact: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* Logo */}
+      <div className="flex justify-center mb-8">
+        <img
+          src="/images/get-noticed-logo.png"
+          alt="Get Noticed"
+          className="h-32 w-auto object-contain"
+        />
+      </div>
+
       <h1 className="text-3xl font-bold mb-6 text-white">Contact Us</h1>
       <div className="grid md:grid-cols-2 gap-8">
         <div>
           <h2 className="text-xl font-semibold mb-4 text-white">Get in Touch</h2>
           <p className="text-gray-400 mb-4">Have questions? We would love to hear from you.</p>
+
+          {/* Email Addresses */}
+          <div className="mt-6 space-y-3">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-300 mb-1">Support</h3>
+              <a
+                href="mailto:support@get-noticed.net"
+                className="text-red-500 hover:text-red-400 transition-colors"
+              >
+                support@get-noticed.net
+              </a>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-300 mb-1">Business Inquiries</h3>
+              <a
+                href="mailto:business@get-noticed.net"
+                className="text-red-500 hover:text-red-400 transition-colors"
+              >
+                business@get-noticed.net
+              </a>
+            </div>
+          </div>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input

@@ -118,7 +118,7 @@ const Layout: React.FC = () => {
     <div className="min-h-screen">
       {/* Header - Glass Effect */}
       <header className="fixed top-0 left-0 right-0 z-50 nav-glass">
-        <div className="flex items-center justify-between h-16 px-4 lg:px-6">
+        <div className="flex items-center justify-between h-32 px-4 lg:px-6">
           {/* Left: Logo & Menu Button */}
           <div className="flex items-center gap-4">
             <button
@@ -131,7 +131,7 @@ const Layout: React.FC = () => {
               <img
                 src="/images/get-noticed-logo.png"
                 alt="Get Noticed"
-                className="h-10 md:h-12 w-auto object-contain"
+                className="h-40 md:h-48 w-auto object-contain"
               />
             </Link>
           </div>
@@ -503,20 +503,20 @@ const Layout: React.FC = () => {
       )}
 
       {/* Main Content */}
-      <main className="pt-24 lg:pt-28 min-h-screen">
+      <main className="pt-48 lg:pt-56 min-h-screen">
         <Outlet />
       </main>
 
       {/* Footer - Glass Effect */}
       <footer className="mt-16 border-t border-[#303030] bg-[#181818]">
-        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-12">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-24">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
               <div className="mb-4">
                 <img
                   src="/images/get-noticed-logo.png"
                   alt="Get Noticed"
-                  className="h-12 w-auto object-contain"
+                  className="h-48 w-auto object-contain"
                 />
               </div>
               <p className="text-sm text-gray-400 leading-relaxed">
