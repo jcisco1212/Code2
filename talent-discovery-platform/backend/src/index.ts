@@ -229,12 +229,14 @@ async function startServer() {
       // Fix enum column migration issue for announcements table
       // Force drop and recreate to avoid PostgreSQL enum casting issues
       try {
-        await sequelize.query('DROP TABLE IF EXISTS announcements CASCADE');
-        await sequelize.query('DROP TYPE IF EXISTS enum_announcements_type CASCADE');
-        await sequelize.query('DROP TYPE IF EXISTS enum_announcements_target CASCADE');
-        logger.info('Reset announcements table for clean sync');
-      } catch (err) {
-        // Ignore if table doesn't exist
+        logger.info('Dropping announcements table and enum types...');
+        await sequelize.query('DROP TABLE IF EXISTS "announcements" CASCADE;');
+        logger.info('Dropped announcements table');
+        await sequelize.query('DROP TYPE IF EXISTS "public"."enum_announcements_type" CASCADE;');
+        await sequelize.query('DROP TYPE IF EXISTS "public"."enum_announcements_target" CASCADE;');
+        logger.info('Dropped enum types');
+      } catch (err: any) {
+        logger.error('Error dropping announcements:', err.message);
       }
 
       await sequelize.sync({ alter: true });
