@@ -12,7 +12,7 @@ import {
   CpuChipIcon,
   ArrowTrendingUpIcon,
   MegaphoneIcon,
-  BellAlertIcon
+  BellIcon
 } from '@heroicons/react/24/outline';
 
 interface Stats {
@@ -103,7 +103,7 @@ const AdminDashboard: React.FC = () => {
     {
       to: '/admin/announcements',
       label: 'Announcements',
-      icon: BellAlertIcon,
+      icon: BellIcon,
       description: 'Create and manage site-wide announcements',
       color: 'from-orange-500 to-orange-600'
     },
