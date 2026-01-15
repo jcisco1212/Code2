@@ -101,10 +101,10 @@ AdminIndustryNotificationStatus.init(
     modelName: 'AdminIndustryNotificationStatus',
     timestamps: true,
     indexes: [
-      { fields: ['admin_id'] },
-      { fields: ['industry_notification_id'] },
-      { fields: ['status'] },
-      { fields: ['admin_id', 'industry_notification_id'], unique: true }
+      { fields: ['admin_id'], name: 'ains_admin_id_idx' },
+      { fields: ['industry_notification_id'], name: 'ains_notification_id_idx' },
+      { fields: ['status'], name: 'ains_status_idx' },
+      { fields: ['admin_id', 'industry_notification_id'], unique: true, name: 'ains_admin_notification_unique' }
     ]
   }
 );
