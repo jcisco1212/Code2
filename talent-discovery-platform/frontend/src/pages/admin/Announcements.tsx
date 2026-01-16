@@ -29,7 +29,7 @@ const targetOptions = [
   { value: 'admins', label: 'Admins Only' }
 ];
 
-interface FormData {
+interface AnnouncementFormData {
   title: string;
   content: string;
   type: 'info' | 'warning' | 'success' | 'error';
@@ -40,8 +40,8 @@ interface FormData {
 }
 
 interface AnnouncementFormProps {
-  initialData: FormData;
-  onSubmit: (data: FormData) => void;
+  initialData: AnnouncementFormData;
+  onSubmit: (data: AnnouncementFormData) => void;
   onCancel: () => void;
   isEdit: boolean;
 }
@@ -54,11 +54,11 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({ initialData, onSubm
     if (!formRef.current) return;
 
     const form = formRef.current;
-    const data: FormData = {
+    const data: AnnouncementFormData = {
       title: (form.elements.namedItem('title') as HTMLInputElement).value,
       content: (form.elements.namedItem('content') as HTMLTextAreaElement).value,
-      type: (form.elements.namedItem('type') as HTMLSelectElement).value as FormData['type'],
-      target: (form.elements.namedItem('target') as HTMLSelectElement).value as FormData['target'],
+      type: (form.elements.namedItem('type') as HTMLSelectElement).value as AnnouncementFormData['type'],
+      target: (form.elements.namedItem('target') as HTMLSelectElement).value as AnnouncementFormData['target'],
       isPinned: (form.elements.namedItem('isPinned') as HTMLInputElement).checked,
       startsAt: (form.elements.namedItem('startsAt') as HTMLInputElement).value,
       expiresAt: (form.elements.namedItem('expiresAt') as HTMLInputElement).value
@@ -167,7 +167,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({ initialData, onSubm
   );
 };
 
-const emptyFormData: FormData = {
+const emptyAnnouncementFormData: AnnouncementFormData = {
   title: '',
   content: '',
   type: 'info',
@@ -198,7 +198,7 @@ const AdminAnnouncements: React.FC = () => {
     }
   };
 
-  const handleCreate = useCallback(async (formData: FormData) => {
+  const handleCreate = useCallback(async (formData: AnnouncementFormData) => {
     try {
       const response = await announcementsAPI.create({
         title: formData.title,
@@ -217,7 +217,7 @@ const AdminAnnouncements: React.FC = () => {
     }
   }, []);
 
-  const handleUpdate = useCallback(async (formData: FormData) => {
+  const handleUpdate = useCallback(async (formData: AnnouncementFormData) => {
     if (!editingAnnouncement) return;
     try {
       const response = await announcementsAPI.update(editingAnnouncement.id, {
@@ -313,7 +313,7 @@ const AdminAnnouncements: React.FC = () => {
       {showCreate && (
         <AnnouncementForm
           key="create"
-          initialData={emptyFormData}
+          initialData={emptyAnnouncementFormData}
           onSubmit={handleCreate}
           onCancel={handleCancelCreate}
           isEdit={false}
