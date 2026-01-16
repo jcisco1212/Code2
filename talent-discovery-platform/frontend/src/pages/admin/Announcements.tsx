@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, memo } from 'react';
+import React, { useState, useEffect, useCallback, memo, useRef } from 'react';
 import { announcementsAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -46,114 +46,126 @@ interface AnnouncementFormProps {
   isEdit: boolean;
 }
 
-const AnnouncementForm = memo(({ initialData, onSubmit, onCancel, isEdit }: AnnouncementFormProps) => {
-  const [formData, setFormData] = useState<FormData>(initialData);
+const AnnouncementForm: React.FC<AnnouncementFormProps> = ({ initialData, onSubmit, onCancel, isEdit }) => {
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    if (!formRef.current) return;
+
+    const form = formRef.current;
+    const data: FormData = {
+      title: (form.elements.namedItem('title') as HTMLInputElement).value,
+      content: (form.elements.namedItem('content') as HTMLTextAreaElement).value,
+      type: (form.elements.namedItem('type') as HTMLSelectElement).value as FormData['type'],
+      target: (form.elements.namedItem('target') as HTMLSelectElement).value as FormData['target'],
+      isPinned: (form.elements.namedItem('isPinned') as HTMLInputElement).checked,
+      startsAt: (form.elements.namedItem('startsAt') as HTMLInputElement).value,
+      expiresAt: (form.elements.namedItem('expiresAt') as HTMLInputElement).value
+    };
+    onSubmit(data);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
-    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-      {isEdit ? 'Edit Announcement' : 'Create Announcement'}
-    </h2>
-    <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
-        <input
-          type="text"
-          value={formData.title}
-          onChange={e => setFormData(p => ({ ...p, title: e.target.value }))}
-          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content *</label>
-        <textarea
-          value={formData.content}
-          onChange={e => setFormData(p => ({ ...p, content: e.target.value }))}
-          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-          rows={4}
-          required
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
+    <form ref={formRef} onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
+      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+        {isEdit ? 'Edit Announcement' : 'Create Announcement'}
+      </h2>
+      <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
-          <select
-            value={formData.type}
-            onChange={e => setFormData(p => ({ ...p, type: e.target.value as any }))}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-          >
-            {typeOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Audience</label>
-          <select
-            value={formData.target}
-            onChange={e => setFormData(p => ({ ...p, target: e.target.value as any }))}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-          >
-            {targetOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Starts At</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
           <input
-            type="date"
-            value={formData.startsAt}
-            onChange={e => setFormData(p => ({ ...p, startsAt: e.target.value }))}
+            type="text"
+            name="title"
+            defaultValue={initialData.title}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expires At</label>
-          <input
-            type="date"
-            value={formData.expiresAt}
-            onChange={e => setFormData(p => ({ ...p, expiresAt: e.target.value }))}
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content *</label>
+          <textarea
+            name="content"
+            defaultValue={initialData.content}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            rows={4}
+            required
           />
         </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+            <select
+              name="type"
+              defaultValue={initialData.type}
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            >
+              {typeOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Audience</label>
+            <select
+              name="target"
+              defaultValue={initialData.target}
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            >
+              {targetOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Starts At</label>
+            <input
+              type="date"
+              name="startsAt"
+              defaultValue={initialData.startsAt}
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expires At</label>
+            <input
+              type="date"
+              name="expiresAt"
+              defaultValue={initialData.expiresAt}
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+        </div>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="isPinned"
+            defaultChecked={initialData.isPinned}
+            className="rounded"
+          />
+          <span className="text-gray-700 dark:text-gray-300">Pin to top</span>
+        </label>
+        <div className="flex gap-3 justify-end pt-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            {isEdit ? 'Update' : 'Create'}
+          </button>
+        </div>
       </div>
-      <label className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          checked={formData.isPinned}
-          onChange={e => setFormData(p => ({ ...p, isPinned: e.target.checked }))}
-          className="rounded"
-        />
-        <span className="text-gray-700 dark:text-gray-300">Pin to top</span>
-      </label>
-      <div className="flex gap-3 justify-end pt-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-        >
-          {isEdit ? 'Update' : 'Create'}
-        </button>
-      </div>
-    </div>
     </form>
   );
-});
+};
 
 const emptyFormData: FormData = {
   title: '',
