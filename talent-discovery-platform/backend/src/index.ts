@@ -13,7 +13,6 @@ import { redis } from './config/redis';
 import { logger } from './utils/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
-import Announcement from './models/Announcement';
 
 // Route imports
 import authRoutes from './routes/auth';
@@ -228,25 +227,15 @@ async function startServer() {
     // Sync models (in development only)
     const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
     if (isDev) {
-      // Fix enum column migration issue for announcements table
-      // PostgreSQL can't auto-cast string defaults to enum types during ALTER
-      // Must drop the table and enum types, then force sync the model
+      // Clean up old PostgreSQL enum types from announcements table (now using STRING)
       try {
-        logger.info('Fixing announcements table enum migration...');
-
-        // Drop enum types first (CASCADE will handle dependencies)
+        await sequelize.query('DROP TABLE IF EXISTS "announcements" CASCADE;');
         await sequelize.query('DROP TYPE IF EXISTS "public"."enum_announcements_type" CASCADE;');
         await sequelize.query('DROP TYPE IF EXISTS "public"."enum_announcements_target" CASCADE;');
-        logger.info('Dropped announcements enum types');
-
-        // Force sync the Announcement model to recreate table with proper enum
-        await Announcement.sync({ force: true });
-        logger.info('Announcements table recreated with force sync');
       } catch (err: any) {
-        logger.error('Error during announcements table cleanup:', err.message);
+        // Ignore errors - types may not exist
       }
 
-      // Now sync other models with alter (Announcement is already synced)
       await sequelize.sync({ alter: true });
       logger.info('Database models synchronized');
     }
