@@ -265,14 +265,6 @@ const AdminAnnouncements: React.FC = () => {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-600"></div>
-      </div>
-    );
-  }
-
   const handleCancelCreate = useCallback(() => {
     setShowCreate(false);
   }, []);
@@ -280,6 +272,14 @@ const AdminAnnouncements: React.FC = () => {
   const handleCancelEdit = useCallback(() => {
     setEditingAnnouncement(null);
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
