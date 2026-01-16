@@ -67,7 +67,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({ initialData, onSubm
   };
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
+    <form ref={formRef} onSubmit={handleSubmit} autoComplete="off" className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
       <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
         {isEdit ? 'Edit Announcement' : 'Create Announcement'}
       </h2>
@@ -77,6 +77,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({ initialData, onSubm
           <input
             type="text"
             name="title"
+            autoComplete="off"
             defaultValue={initialData.title}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
             required
@@ -86,6 +87,7 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({ initialData, onSubm
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content *</label>
           <textarea
             name="content"
+            autoComplete="off"
             defaultValue={initialData.content}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
             rows={4}
