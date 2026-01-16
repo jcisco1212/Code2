@@ -227,15 +227,6 @@ async function startServer() {
     // Sync models (in development only)
     const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
     if (isDev) {
-      // Clean up old PostgreSQL enum types from announcements table (now using STRING)
-      try {
-        await sequelize.query('DROP TABLE IF EXISTS "announcements" CASCADE;');
-        await sequelize.query('DROP TYPE IF EXISTS "public"."enum_announcements_type" CASCADE;');
-        await sequelize.query('DROP TYPE IF EXISTS "public"."enum_announcements_target" CASCADE;');
-      } catch (err: any) {
-        // Ignore errors - types may not exist
-      }
-
       await sequelize.sync({ alter: true });
       logger.info('Database models synchronized');
     }

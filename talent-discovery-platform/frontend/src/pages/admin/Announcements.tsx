@@ -203,20 +203,23 @@ const AdminAnnouncements: React.FC = () => {
 
   const handleCreate = useCallback(async (formData: AnnouncementFormData) => {
     try {
-      const response = await announcementsAPI.create({
+      const payload = {
         title: formData.title,
         content: formData.content,
         type: formData.type,
         target: formData.target,
         isPinned: formData.isPinned,
-        startsAt: formData.startsAt || undefined,
-        expiresAt: formData.expiresAt || undefined
-      });
+        startsAt: formData.startsAt ? new Date(formData.startsAt).toISOString() : undefined,
+        expiresAt: formData.expiresAt ? new Date(formData.expiresAt).toISOString() : undefined
+      };
+      console.log('Creating announcement with payload:', payload);
+      const response = await announcementsAPI.create(payload);
       setAnnouncements(prev => [response.data.announcement, ...prev]);
       setShowCreate(false);
       toast.success('Announcement created');
-    } catch (err) {
-      toast.error('Failed to create announcement');
+    } catch (err: any) {
+      console.error('Failed to create announcement:', err.response?.data || err);
+      toast.error(err.response?.data?.error?.message || 'Failed to create announcement');
     }
   }, []);
 
