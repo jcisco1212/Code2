@@ -39,6 +39,114 @@ interface FormData {
   expiresAt: string;
 }
 
+interface AnnouncementFormProps {
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  onSubmit: (e: React.FormEvent) => void;
+  onCancel: () => void;
+  isEdit: boolean;
+}
+
+const AnnouncementForm: React.FC<AnnouncementFormProps> = ({ formData, setFormData, onSubmit, onCancel, isEdit }) => (
+  <form onSubmit={onSubmit} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
+    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+      {isEdit ? 'Edit Announcement' : 'Create Announcement'}
+    </h2>
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
+        <input
+          type="text"
+          value={formData.title}
+          onChange={e => setFormData(p => ({ ...p, title: e.target.value }))}
+          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+          required
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content *</label>
+        <textarea
+          value={formData.content}
+          onChange={e => setFormData(p => ({ ...p, content: e.target.value }))}
+          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+          rows={4}
+          required
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+          <select
+            value={formData.type}
+            onChange={e => setFormData(p => ({ ...p, type: e.target.value as any }))}
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+          >
+            {typeOptions.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Audience</label>
+          <select
+            value={formData.target}
+            onChange={e => setFormData(p => ({ ...p, target: e.target.value as any }))}
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+          >
+            {targetOptions.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Starts At</label>
+          <input
+            type="date"
+            value={formData.startsAt}
+            onChange={e => setFormData(p => ({ ...p, startsAt: e.target.value }))}
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expires At</label>
+          <input
+            type="date"
+            value={formData.expiresAt}
+            onChange={e => setFormData(p => ({ ...p, expiresAt: e.target.value }))}
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+          />
+        </div>
+      </div>
+      <label className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={formData.isPinned}
+          onChange={e => setFormData(p => ({ ...p, isPinned: e.target.checked }))}
+          className="rounded"
+        />
+        <span className="text-gray-700 dark:text-gray-300">Pin to top</span>
+      </label>
+      <div className="flex gap-3 justify-end pt-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+        >
+          {isEdit ? 'Update' : 'Create'}
+        </button>
+      </div>
+    </div>
+  </form>
+);
+
 const AdminAnnouncements: React.FC = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -181,105 +289,15 @@ const AdminAnnouncements: React.FC = () => {
     );
   }
 
-  const AnnouncementForm = ({ onSubmit, isEdit }: { onSubmit: (e: React.FormEvent) => void; isEdit: boolean }) => (
-    <form onSubmit={onSubmit} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
-      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-        {isEdit ? 'Edit Announcement' : 'Create Announcement'}
-      </h2>
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
-          <input
-            type="text"
-            value={formData.title}
-            onChange={e => setFormData(p => ({ ...p, title: e.target.value }))}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content *</label>
-          <textarea
-            value={formData.content}
-            onChange={e => setFormData(p => ({ ...p, content: e.target.value }))}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-            rows={4}
-            required
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
-            <select
-              value={formData.type}
-              onChange={e => setFormData(p => ({ ...p, type: e.target.value as any }))}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-            >
-              {typeOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Audience</label>
-            <select
-              value={formData.target}
-              onChange={e => setFormData(p => ({ ...p, target: e.target.value as any }))}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-            >
-              {targetOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Starts At</label>
-            <input
-              type="date"
-              value={formData.startsAt}
-              onChange={e => setFormData(p => ({ ...p, startsAt: e.target.value }))}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expires At</label>
-            <input
-              type="date"
-              value={formData.expiresAt}
-              onChange={e => setFormData(p => ({ ...p, expiresAt: e.target.value }))}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-        </div>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={formData.isPinned}
-            onChange={e => setFormData(p => ({ ...p, isPinned: e.target.checked }))}
-            className="rounded"
-          />
-          <span className="text-gray-700 dark:text-gray-300">Pin to top</span>
-        </label>
-        <div className="flex gap-3 justify-end pt-2">
-          <button
-            type="button"
-            onClick={() => { isEdit ? setEditing(null) : setShowCreate(false); resetForm(); }}
-            className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-          >
-            {isEdit ? 'Update' : 'Create'}
-          </button>
-        </div>
-      </div>
-    </form>
-  );
+  const handleCancelCreate = () => {
+    setShowCreate(false);
+    resetForm();
+  };
+
+  const handleCancelEdit = () => {
+    setEditing(null);
+    resetForm();
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -298,8 +316,24 @@ const AdminAnnouncements: React.FC = () => {
         )}
       </div>
 
-      {showCreate && <AnnouncementForm onSubmit={handleCreate} isEdit={false} />}
-      {editing && <AnnouncementForm onSubmit={handleUpdate} isEdit={true} />}
+      {showCreate && (
+        <AnnouncementForm
+          formData={formData}
+          setFormData={setFormData}
+          onSubmit={handleCreate}
+          onCancel={handleCancelCreate}
+          isEdit={false}
+        />
+      )}
+      {editing && (
+        <AnnouncementForm
+          formData={formData}
+          setFormData={setFormData}
+          onSubmit={handleUpdate}
+          onCancel={handleCancelEdit}
+          isEdit={true}
+        />
+      )}
 
       {announcements.length === 0 ? (
         <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl">
