@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { announcementsAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -40,15 +40,22 @@ interface FormData {
 }
 
 interface AnnouncementFormProps {
-  formData: FormData;
-  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
-  onSubmit: (e: React.FormEvent) => void;
+  initialData: FormData;
+  onSubmit: (data: FormData) => void;
   onCancel: () => void;
   isEdit: boolean;
 }
 
-const AnnouncementForm: React.FC<AnnouncementFormProps> = ({ formData, setFormData, onSubmit, onCancel, isEdit }) => (
-  <form onSubmit={onSubmit} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
+const AnnouncementForm = memo(({ initialData, onSubmit, onCancel, isEdit }: AnnouncementFormProps) => {
+  const [formData, setFormData] = useState<FormData>(initialData);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
     <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
       {isEdit ? 'Edit Announcement' : 'Create Announcement'}
     </h2>
@@ -144,23 +151,25 @@ const AnnouncementForm: React.FC<AnnouncementFormProps> = ({ formData, setFormDa
         </button>
       </div>
     </div>
-  </form>
-);
+    </form>
+  );
+});
+
+const emptyFormData: FormData = {
+  title: '',
+  content: '',
+  type: 'info',
+  target: 'all',
+  isPinned: false,
+  startsAt: '',
+  expiresAt: ''
+};
 
 const AdminAnnouncements: React.FC = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
-  const [editing, setEditing] = useState<string | null>(null);
-  const [formData, setFormData] = useState<FormData>({
-    title: '',
-    content: '',
-    type: 'info',
-    target: 'all',
-    isPinned: false,
-    startsAt: '',
-    expiresAt: ''
-  });
+  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
 
   useEffect(() => {
     fetchAnnouncements();
@@ -177,20 +186,7 @@ const AdminAnnouncements: React.FC = () => {
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      content: '',
-      type: 'info',
-      target: 'all',
-      isPinned: false,
-      startsAt: '',
-      expiresAt: ''
-    });
-  };
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreate = useCallback(async (formData: FormData) => {
     try {
       const response = await announcementsAPI.create({
         title: formData.title,
@@ -203,18 +199,16 @@ const AdminAnnouncements: React.FC = () => {
       });
       setAnnouncements(prev => [response.data.announcement, ...prev]);
       setShowCreate(false);
-      resetForm();
       toast.success('Announcement created');
     } catch (err) {
       toast.error('Failed to create announcement');
     }
-  };
+  }, []);
 
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editing) return;
+  const handleUpdate = useCallback(async (formData: FormData) => {
+    if (!editingAnnouncement) return;
     try {
-      const response = await announcementsAPI.update(editing, {
+      const response = await announcementsAPI.update(editingAnnouncement.id, {
         title: formData.title,
         content: formData.content,
         type: formData.type,
@@ -223,14 +217,13 @@ const AdminAnnouncements: React.FC = () => {
         startsAt: formData.startsAt || undefined,
         expiresAt: formData.expiresAt || undefined
       });
-      setAnnouncements(prev => prev.map(a => a.id === editing ? response.data.announcement : a));
-      setEditing(null);
-      resetForm();
+      setAnnouncements(prev => prev.map(a => a.id === editingAnnouncement.id ? response.data.announcement : a));
+      setEditingAnnouncement(null);
       toast.success('Announcement updated');
     } catch (err) {
       toast.error('Failed to update announcement');
     }
-  };
+  }, [editingAnnouncement]);
 
   const handleToggleActive = async (id: string, isActive: boolean) => {
     try {
@@ -253,19 +246,10 @@ const AdminAnnouncements: React.FC = () => {
     }
   };
 
-  const startEdit = (announcement: Announcement) => {
-    setEditing(announcement.id);
-    setFormData({
-      title: announcement.title,
-      content: announcement.content,
-      type: announcement.type,
-      target: announcement.target,
-      isPinned: announcement.isPinned,
-      startsAt: announcement.startsAt ? announcement.startsAt.split('T')[0] : '',
-      expiresAt: announcement.expiresAt ? announcement.expiresAt.split('T')[0] : ''
-    });
+  const startEdit = useCallback((announcement: Announcement) => {
+    setEditingAnnouncement(announcement);
     setShowCreate(false);
-  };
+  }, []);
 
   const getTypeStyle = (type: string) => {
     const opt = typeOptions.find(o => o.value === type);
@@ -289,15 +273,13 @@ const AdminAnnouncements: React.FC = () => {
     );
   }
 
-  const handleCancelCreate = () => {
+  const handleCancelCreate = useCallback(() => {
     setShowCreate(false);
-    resetForm();
-  };
+  }, []);
 
-  const handleCancelEdit = () => {
-    setEditing(null);
-    resetForm();
-  };
+  const handleCancelEdit = useCallback(() => {
+    setEditingAnnouncement(null);
+  }, []);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -306,9 +288,9 @@ const AdminAnnouncements: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Announcements</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Manage platform-wide announcements</p>
         </div>
-        {!showCreate && !editing && (
+        {!showCreate && !editingAnnouncement && (
           <button
-            onClick={() => { setShowCreate(true); resetForm(); }}
+            onClick={() => setShowCreate(true)}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
           >
             + New Announcement
@@ -318,17 +300,25 @@ const AdminAnnouncements: React.FC = () => {
 
       {showCreate && (
         <AnnouncementForm
-          formData={formData}
-          setFormData={setFormData}
+          key="create"
+          initialData={emptyFormData}
           onSubmit={handleCreate}
           onCancel={handleCancelCreate}
           isEdit={false}
         />
       )}
-      {editing && (
+      {editingAnnouncement && (
         <AnnouncementForm
-          formData={formData}
-          setFormData={setFormData}
+          key={editingAnnouncement.id}
+          initialData={{
+            title: editingAnnouncement.title,
+            content: editingAnnouncement.content,
+            type: editingAnnouncement.type,
+            target: editingAnnouncement.target,
+            isPinned: editingAnnouncement.isPinned,
+            startsAt: editingAnnouncement.startsAt ? editingAnnouncement.startsAt.split('T')[0] : '',
+            expiresAt: editingAnnouncement.expiresAt ? editingAnnouncement.expiresAt.split('T')[0] : ''
+          }}
           onSubmit={handleUpdate}
           onCancel={handleCancelEdit}
           isEdit={true}
