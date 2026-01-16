@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { XMarkIcon, MegaphoneIcon, ExclamationTriangleIcon, CheckCircleIcon, XCircleIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, MegaphoneIcon, ExclamationCircleIcon, CheckCircleIcon, XCircleIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { announcementsAPI } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -97,7 +97,7 @@ const AnnouncementBanner: React.FC = () => {
       case 'warning':
         return {
           bg: 'bg-yellow-500',
-          icon: <ExclamationTriangleIcon className="w-5 h-5" />,
+          icon: <ExclamationCircleIcon className="w-5 h-5" />,
           text: 'text-black'
         };
       case 'success':
