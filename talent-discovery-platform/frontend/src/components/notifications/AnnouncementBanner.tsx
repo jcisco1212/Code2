@@ -30,7 +30,9 @@ const AnnouncementBanner: React.FC = () => {
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
+        console.log('Fetching active announcements...');
         const response = await announcementsAPI.getActive();
+        console.log('Announcements API response:', response.data);
         const activeAnnouncements = response.data.announcements || [];
 
         // Filter by target audience
@@ -43,6 +45,8 @@ const AnnouncementBanner: React.FC = () => {
           return false;
         });
 
+        console.log('Filtered announcements:', filteredAnnouncements);
+        console.log('Dismissed IDs:', dismissedIds);
         setAnnouncements(filteredAnnouncements);
       } catch (error) {
         console.error('Failed to load announcements:', error);
@@ -53,7 +57,7 @@ const AnnouncementBanner: React.FC = () => {
     // Refresh every 5 minutes
     const interval = setInterval(fetchAnnouncements, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, dismissedIds]);
 
   // Filter out dismissed announcements
   const visibleAnnouncements = announcements.filter(a => !dismissedIds.includes(a.id));
