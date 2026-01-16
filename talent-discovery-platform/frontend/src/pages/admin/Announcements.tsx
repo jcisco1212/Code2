@@ -297,6 +297,16 @@ const AdminAnnouncements: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* Debug test input - does this work? */}
+      <div className="mb-4 p-4 bg-yellow-100 rounded">
+        <label className="block text-black mb-2">TEST INPUT (type here):</label>
+        <input
+          type="text"
+          className="w-full p-2 border border-black rounded text-black bg-white"
+          placeholder="Can you type here?"
+        />
+      </div>
+
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Announcements</h1>
