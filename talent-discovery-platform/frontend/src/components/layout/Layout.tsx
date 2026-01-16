@@ -36,6 +36,7 @@ import { Fragment } from 'react';
 import NotificationDropdown from '../notifications/NotificationDropdown';
 import AIChatbot from '../support/AIChatbot';
 import CookieConsent from '../common/CookieConsent';
+import AnnouncementBanner from '../notifications/AnnouncementBanner';
 
 const Layout: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -504,6 +505,8 @@ const Layout: React.FC = () => {
 
       {/* Main Content */}
       <main className="pt-48 lg:pt-56 min-h-screen">
+        {/* Announcement Banner */}
+        <AnnouncementBanner />
         <Outlet />
       </main>
 

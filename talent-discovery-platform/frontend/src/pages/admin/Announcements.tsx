@@ -184,6 +184,7 @@ const AdminAnnouncements: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
+  const [formKey, setFormKey] = useState(0);
 
   useEffect(() => {
     fetchAnnouncements();
@@ -297,16 +298,6 @@ const AdminAnnouncements: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      {/* Debug test input - does this work? */}
-      <div className="mb-4 p-4 bg-yellow-100 rounded">
-        <label className="block text-black mb-2">TEST INPUT (type here):</label>
-        <input
-          type="text"
-          className="w-full p-2 border border-black rounded text-black bg-white"
-          placeholder="Can you type here?"
-        />
-      </div>
-
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Announcements</h1>
@@ -314,7 +305,10 @@ const AdminAnnouncements: React.FC = () => {
         </div>
         {!showCreate && !editingAnnouncement && (
           <button
-            onClick={() => setShowCreate(true)}
+            onClick={() => {
+              setFormKey(k => k + 1);
+              setShowCreate(true);
+            }}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
           >
             + New Announcement
@@ -324,7 +318,7 @@ const AdminAnnouncements: React.FC = () => {
 
       {showCreate && (
         <AnnouncementForm
-          key="create"
+          key={`create-${formKey}`}
           initialData={emptyAnnouncementFormData}
           onSubmit={handleCreate}
           onCancel={handleCancelCreate}
