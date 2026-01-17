@@ -63,12 +63,18 @@ Announcement.init(
       allowNull: false
     },
     type: {
-      type: DataTypes.ENUM(...Object.values(AnnouncementType)),
-      defaultValue: AnnouncementType.INFO
+      type: DataTypes.STRING(20),
+      defaultValue: AnnouncementType.INFO,
+      validate: {
+        isIn: [Object.values(AnnouncementType)]
+      }
     },
     target: {
-      type: DataTypes.ENUM(...Object.values(AnnouncementTarget)),
-      defaultValue: AnnouncementTarget.ALL
+      type: DataTypes.STRING(20),
+      defaultValue: AnnouncementTarget.ALL,
+      validate: {
+        isIn: [Object.values(AnnouncementTarget)]
+      }
     },
     isActive: {
       type: DataTypes.BOOLEAN,

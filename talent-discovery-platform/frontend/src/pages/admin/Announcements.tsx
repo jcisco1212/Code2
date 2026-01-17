@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo, useRef } from 'react';
 import { announcementsAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -29,7 +29,7 @@ const targetOptions = [
   { value: 'admins', label: 'Admins Only' }
 ];
 
-interface FormData {
+interface AnnouncementFormData {
   title: string;
   content: string;
   type: 'info' | 'warning' | 'success' | 'error';
@@ -39,20 +39,152 @@ interface FormData {
   expiresAt: string;
 }
 
+interface AnnouncementFormProps {
+  initialData: AnnouncementFormData;
+  onSubmit: (data: AnnouncementFormData) => void;
+  onCancel: () => void;
+  isEdit: boolean;
+}
+
+const AnnouncementForm: React.FC<AnnouncementFormProps> = ({ initialData, onSubmit, onCancel, isEdit }) => {
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formRef.current) return;
+
+    const form = formRef.current;
+    const data: AnnouncementFormData = {
+      title: (form.elements.namedItem('title') as HTMLInputElement).value,
+      content: (form.elements.namedItem('content') as HTMLTextAreaElement).value,
+      type: (form.elements.namedItem('type') as HTMLSelectElement).value as AnnouncementFormData['type'],
+      target: (form.elements.namedItem('target') as HTMLSelectElement).value as AnnouncementFormData['target'],
+      isPinned: (form.elements.namedItem('isPinned') as HTMLInputElement).checked,
+      startsAt: (form.elements.namedItem('startsAt') as HTMLInputElement).value,
+      expiresAt: (form.elements.namedItem('expiresAt') as HTMLInputElement).value
+    };
+    onSubmit(data);
+  };
+
+  return (
+    <form ref={formRef} onSubmit={handleSubmit} autoComplete="off" className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
+      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+        {isEdit ? 'Edit Announcement' : 'Create Announcement'}
+      </h2>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
+          <input
+            type="text"
+            name="title"
+            autoComplete="off"
+            defaultValue={initialData.title}
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content *</label>
+          <textarea
+            name="content"
+            autoComplete="off"
+            defaultValue={initialData.content}
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            rows={4}
+            required
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+            <select
+              name="type"
+              defaultValue={initialData.type}
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            >
+              {typeOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Audience</label>
+            <select
+              name="target"
+              defaultValue={initialData.target}
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            >
+              {targetOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Starts At</label>
+            <input
+              type="date"
+              name="startsAt"
+              defaultValue={initialData.startsAt}
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expires At</label>
+            <input
+              type="date"
+              name="expiresAt"
+              defaultValue={initialData.expiresAt}
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+        </div>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="isPinned"
+            defaultChecked={initialData.isPinned}
+            className="rounded"
+          />
+          <span className="text-gray-700 dark:text-gray-300">Pin to top</span>
+        </label>
+        <div className="flex gap-3 justify-end pt-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            {isEdit ? 'Update' : 'Create'}
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+};
+
+const emptyAnnouncementFormData: AnnouncementFormData = {
+  title: '',
+  content: '',
+  type: 'info',
+  target: 'all',
+  isPinned: false,
+  startsAt: '',
+  expiresAt: ''
+};
+
 const AdminAnnouncements: React.FC = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
-  const [editing, setEditing] = useState<string | null>(null);
-  const [formData, setFormData] = useState<FormData>({
-    title: '',
-    content: '',
-    type: 'info',
-    target: 'all',
-    isPinned: false,
-    startsAt: '',
-    expiresAt: ''
-  });
+  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
+  const [formKey, setFormKey] = useState(0);
 
   useEffect(() => {
     fetchAnnouncements();
@@ -69,44 +201,30 @@ const AdminAnnouncements: React.FC = () => {
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      content: '',
-      type: 'info',
-      target: 'all',
-      isPinned: false,
-      startsAt: '',
-      expiresAt: ''
-    });
-  };
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreate = useCallback(async (formData: AnnouncementFormData) => {
     try {
-      const response = await announcementsAPI.create({
+      const payload = {
         title: formData.title,
         content: formData.content,
         type: formData.type,
         target: formData.target,
         isPinned: formData.isPinned,
-        startsAt: formData.startsAt || undefined,
-        expiresAt: formData.expiresAt || undefined
-      });
+        startsAt: formData.startsAt ? new Date(formData.startsAt).toISOString() : undefined,
+        expiresAt: formData.expiresAt ? new Date(formData.expiresAt).toISOString() : undefined
+      };
+      const response = await announcementsAPI.create(payload);
       setAnnouncements(prev => [response.data.announcement, ...prev]);
       setShowCreate(false);
-      resetForm();
       toast.success('Announcement created');
-    } catch (err) {
-      toast.error('Failed to create announcement');
+    } catch (err: any) {
+      toast.error(err.response?.data?.error?.message || 'Failed to create announcement');
     }
-  };
+  }, []);
 
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editing) return;
+  const handleUpdate = useCallback(async (formData: AnnouncementFormData) => {
+    if (!editingAnnouncement) return;
     try {
-      const response = await announcementsAPI.update(editing, {
+      const response = await announcementsAPI.update(editingAnnouncement.id, {
         title: formData.title,
         content: formData.content,
         type: formData.type,
@@ -115,14 +233,13 @@ const AdminAnnouncements: React.FC = () => {
         startsAt: formData.startsAt || undefined,
         expiresAt: formData.expiresAt || undefined
       });
-      setAnnouncements(prev => prev.map(a => a.id === editing ? response.data.announcement : a));
-      setEditing(null);
-      resetForm();
+      setAnnouncements(prev => prev.map(a => a.id === editingAnnouncement.id ? response.data.announcement : a));
+      setEditingAnnouncement(null);
       toast.success('Announcement updated');
     } catch (err) {
       toast.error('Failed to update announcement');
     }
-  };
+  }, [editingAnnouncement]);
 
   const handleToggleActive = async (id: string, isActive: boolean) => {
     try {
@@ -145,19 +262,10 @@ const AdminAnnouncements: React.FC = () => {
     }
   };
 
-  const startEdit = (announcement: Announcement) => {
-    setEditing(announcement.id);
-    setFormData({
-      title: announcement.title,
-      content: announcement.content,
-      type: announcement.type,
-      target: announcement.target,
-      isPinned: announcement.isPinned,
-      startsAt: announcement.startsAt ? announcement.startsAt.split('T')[0] : '',
-      expiresAt: announcement.expiresAt ? announcement.expiresAt.split('T')[0] : ''
-    });
+  const startEdit = useCallback((announcement: Announcement) => {
+    setEditingAnnouncement(announcement);
     setShowCreate(false);
-  };
+  }, []);
 
   const getTypeStyle = (type: string) => {
     const opt = typeOptions.find(o => o.value === type);
@@ -173,6 +281,14 @@ const AdminAnnouncements: React.FC = () => {
     });
   };
 
+  const handleCancelCreate = useCallback(() => {
+    setShowCreate(false);
+  }, []);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingAnnouncement(null);
+  }, []);
+
   if (loading) {
     return (
       <div className="flex justify-center py-12">
@@ -181,106 +297,6 @@ const AdminAnnouncements: React.FC = () => {
     );
   }
 
-  const AnnouncementForm = ({ onSubmit, isEdit }: { onSubmit: (e: React.FormEvent) => void; isEdit: boolean }) => (
-    <form onSubmit={onSubmit} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
-      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-        {isEdit ? 'Edit Announcement' : 'Create Announcement'}
-      </h2>
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
-          <input
-            type="text"
-            value={formData.title}
-            onChange={e => setFormData(p => ({ ...p, title: e.target.value }))}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content *</label>
-          <textarea
-            value={formData.content}
-            onChange={e => setFormData(p => ({ ...p, content: e.target.value }))}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-            rows={4}
-            required
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
-            <select
-              value={formData.type}
-              onChange={e => setFormData(p => ({ ...p, type: e.target.value as any }))}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-            >
-              {typeOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Audience</label>
-            <select
-              value={formData.target}
-              onChange={e => setFormData(p => ({ ...p, target: e.target.value as any }))}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-            >
-              {targetOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Starts At</label>
-            <input
-              type="date"
-              value={formData.startsAt}
-              onChange={e => setFormData(p => ({ ...p, startsAt: e.target.value }))}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expires At</label>
-            <input
-              type="date"
-              value={formData.expiresAt}
-              onChange={e => setFormData(p => ({ ...p, expiresAt: e.target.value }))}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-        </div>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={formData.isPinned}
-            onChange={e => setFormData(p => ({ ...p, isPinned: e.target.checked }))}
-            className="rounded"
-          />
-          <span className="text-gray-700 dark:text-gray-300">Pin to top</span>
-        </label>
-        <div className="flex gap-3 justify-end pt-2">
-          <button
-            type="button"
-            onClick={() => { isEdit ? setEditing(null) : setShowCreate(false); resetForm(); }}
-            className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-          >
-            {isEdit ? 'Update' : 'Create'}
-          </button>
-        </div>
-      </div>
-    </form>
-  );
-
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -288,9 +304,12 @@ const AdminAnnouncements: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Announcements</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Manage platform-wide announcements</p>
         </div>
-        {!showCreate && !editing && (
+        {!showCreate && !editingAnnouncement && (
           <button
-            onClick={() => { setShowCreate(true); resetForm(); }}
+            onClick={() => {
+              setFormKey(k => k + 1);
+              setShowCreate(true);
+            }}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
           >
             + New Announcement
@@ -298,8 +317,32 @@ const AdminAnnouncements: React.FC = () => {
         )}
       </div>
 
-      {showCreate && <AnnouncementForm onSubmit={handleCreate} isEdit={false} />}
-      {editing && <AnnouncementForm onSubmit={handleUpdate} isEdit={true} />}
+      {showCreate && (
+        <AnnouncementForm
+          key={`create-${formKey}`}
+          initialData={emptyAnnouncementFormData}
+          onSubmit={handleCreate}
+          onCancel={handleCancelCreate}
+          isEdit={false}
+        />
+      )}
+      {editingAnnouncement && (
+        <AnnouncementForm
+          key={editingAnnouncement.id}
+          initialData={{
+            title: editingAnnouncement.title,
+            content: editingAnnouncement.content,
+            type: editingAnnouncement.type,
+            target: editingAnnouncement.target,
+            isPinned: editingAnnouncement.isPinned,
+            startsAt: editingAnnouncement.startsAt ? editingAnnouncement.startsAt.split('T')[0] : '',
+            expiresAt: editingAnnouncement.expiresAt ? editingAnnouncement.expiresAt.split('T')[0] : ''
+          }}
+          onSubmit={handleUpdate}
+          onCancel={handleCancelEdit}
+          isEdit={true}
+        />
+      )}
 
       {announcements.length === 0 ? (
         <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl">

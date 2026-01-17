@@ -148,39 +148,39 @@ const Home: React.FC = () => {
         />
       </div>
 
-      {/* Hero Section - Aurora Glass Style */}
-      <section className="mb-16 relative overflow-hidden rounded-3xl">
+      {/* Hero Section - Aurora Glass Style (Compact) */}
+      <section className="mb-10 relative overflow-hidden rounded-2xl">
         {/* Background with gradient mesh */}
         <div className="absolute inset-0 bg-gradient-primary opacity-90" />
         <div className="absolute inset-0 bg-aurora-mesh-dark opacity-50" />
 
         {/* Content */}
-        <div className="relative z-10 p-8 lg:p-16">
+        <div className="relative z-10 p-6 lg:p-10">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white/90 text-sm font-medium mb-6">
-              <SparklesIcon className="w-4 h-4" />
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white/90 text-xs font-medium mb-4">
+              <SparklesIcon className="w-3 h-3" />
               AI-Powered Talent Discovery
             </div>
-            <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+            <h1 className="text-2xl lg:text-4xl font-bold text-white mb-4 leading-tight">
               Showcase Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-cyan-300">Talent</span> to the World
             </h1>
-            <p className="text-lg text-white/80 mb-8 leading-relaxed">
+            <p className="text-sm text-white/80 mb-6 leading-relaxed">
               Join thousands of singers, actors, dancers, and comedians who are getting
               discovered by entertainment agents through AI-powered talent ranking.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-3">
               <Link
                 to="/register"
-                className="group px-8 py-4 bg-white text-primary-600 rounded-full font-semibold
+                className="group px-6 py-2.5 bg-white text-primary-600 rounded-full font-semibold text-sm
                          shadow-lg hover:shadow-xl transition-all duration-300
                          hover:-translate-y-1 flex items-center gap-2"
               >
-                <PlayIcon className="w-5 h-5" />
+                <PlayIcon className="w-4 h-4" />
                 Start Creating
               </Link>
               <Link
                 to="/trending"
-                className="px-8 py-4 border-2 border-white/50 text-white rounded-full font-semibold
+                className="px-6 py-2.5 border-2 border-white/50 text-white rounded-full font-semibold text-sm
                          hover:bg-white/10 hover:border-white transition-all duration-300
                          backdrop-blur-sm"
               >
@@ -190,8 +190,8 @@ const Home: React.FC = () => {
           </div>
 
           {/* Decorative elements */}
-          <div className="absolute top-10 right-10 w-32 h-32 bg-accent-500/30 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-1/4 w-48 h-48 bg-cyan-500/20 rounded-full blur-3xl" />
+          <div className="absolute top-5 right-5 w-24 h-24 bg-accent-500/30 rounded-full blur-3xl" />
+          <div className="absolute bottom-5 right-1/4 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl" />
         </div>
       </section>
 
@@ -213,6 +213,67 @@ const Home: React.FC = () => {
           </div>
         </section>
       )}
+
+      {/* Categories - Glass Cards */}
+      <section className="mb-16">
+        <div className="flex items-center gap-3 mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Browse by Category</h2>
+        </div>
+        {categoriesLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {[...Array(10)].map((_, i) => (
+              <div key={i} className="animate-pulse rounded-2xl p-6 bg-gray-200/50 dark:bg-white/10 h-28 backdrop-blur-sm" />
+            ))}
+          </div>
+        ) : categories.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {categories.map((category, index) => (
+              <Link
+                key={category.id}
+                to={`/category/${category.slug}`}
+                className={`group relative overflow-hidden rounded-2xl aspect-[5/3] ${!category.iconUrl ? `bg-gradient-to-br ${getCategoryColor(category, index)}` : ''}
+                           text-white shadow-lg hover:shadow-xl
+                           hover:scale-105 hover:-translate-y-1
+                           transition-all duration-300`}
+              >
+                {/* Background image if exists */}
+                {category.iconUrl && (
+                  <img
+                    src={getUploadUrl(category.iconUrl) || ''}
+                    alt={category.name}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
+
+                {/* Gradient overlay for text readability */}
+                <div className={`absolute inset-0 ${category.iconUrl ? 'bg-gradient-to-t from-black/70 via-black/20 to-transparent' : ''}`} />
+
+                {/* Glow effect on hover */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/10" />
+
+                {/* Content */}
+                <div className="absolute inset-0 p-4 flex flex-col justify-end">
+                  {!category.iconUrl && (
+                    <div className="text-3xl mb-2">{getCategoryIcon(category)}</div>
+                  )}
+                  <div className="font-semibold relative z-10 text-shadow">{category.name}</div>
+                </div>
+
+                {/* Decorative gradient overlay */}
+                {!category.iconUrl && (
+                  <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+                )}
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 card">
+            <p className="text-gray-500 dark:text-gray-400">No categories available yet.</p>
+          </div>
+        )}
+      </section>
 
       {/* Clips Section - Short Form Videos - Always Show */}
       <section className="mb-16">
@@ -367,67 +428,6 @@ const Home: React.FC = () => {
             {trendingVideos.slice(0, 12).map((video: any) => (
               <VideoCard key={video.id} video={video} />
             ))}
-          </div>
-        )}
-      </section>
-
-      {/* Categories - Glass Cards */}
-      <section className="mb-16">
-        <div className="flex items-center gap-3 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Browse by Category</h2>
-        </div>
-        {categoriesLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {[...Array(10)].map((_, i) => (
-              <div key={i} className="animate-pulse rounded-2xl p-6 bg-gray-200/50 dark:bg-white/10 h-28 backdrop-blur-sm" />
-            ))}
-          </div>
-        ) : categories.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {categories.map((category, index) => (
-              <Link
-                key={category.id}
-                to={`/category/${category.slug}`}
-                className={`group relative overflow-hidden rounded-2xl aspect-[5/3] ${!category.iconUrl ? `bg-gradient-to-br ${getCategoryColor(category, index)}` : ''}
-                           text-white shadow-lg hover:shadow-xl
-                           hover:scale-105 hover:-translate-y-1
-                           transition-all duration-300`}
-              >
-                {/* Background image if exists */}
-                {category.iconUrl && (
-                  <img
-                    src={getUploadUrl(category.iconUrl) || ''}
-                    alt={category.name}
-                    className="absolute inset-0 w-full h-full object-cover"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                )}
-
-                {/* Gradient overlay for text readability */}
-                <div className={`absolute inset-0 ${category.iconUrl ? 'bg-gradient-to-t from-black/70 via-black/20 to-transparent' : ''}`} />
-
-                {/* Glow effect on hover */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/10" />
-
-                {/* Content */}
-                <div className="absolute inset-0 p-4 flex flex-col justify-end">
-                  {!category.iconUrl && (
-                    <div className="text-3xl mb-2">{getCategoryIcon(category)}</div>
-                  )}
-                  <div className="font-semibold relative z-10 text-shadow">{category.name}</div>
-                </div>
-
-                {/* Decorative gradient overlay */}
-                {!category.iconUrl && (
-                  <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
-                )}
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 card">
-            <p className="text-gray-500 dark:text-gray-400">No categories available yet.</p>
           </div>
         )}
       </section>
