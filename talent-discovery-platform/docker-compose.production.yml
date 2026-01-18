@@ -1,0 +1,158 @@
+# ==============================================
+# Get-Noticed - Production Docker Compose
+# ==============================================
+# Domain: get-noticed.net
+#
+# Usage:
+#   docker-compose -f docker-compose.production.yml up -d
+#
+# Prerequisites:
+#   - Docker & Docker Compose installed
+#   - .env file with production values
+#   - SSL certificates in ./docker/nginx/ssl/
+# ==============================================
+
+version: '3.8'
+
+services:
+  # ===========================================
+  # Backend API Server
+  # ===========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: get-noticed-backend
+    restart: always
+    env_file:
+      - ./backend/.env
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      HOST: 0.0.0.0
+    expose:
+      - "4000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - get-noticed-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  # ===========================================
+  # Video Processing Worker
+  # ===========================================
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.worker
+    container_name: get-noticed-worker
+    restart: always
+    env_file:
+      - ./backend/.env
+    environment:
+      NODE_ENV: production
+    volumes:
+      - worker_temp:/tmp/videos
+    networks:
+      - get-noticed-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  # ===========================================
+  # AI Services (Python/FastAPI)
+  # ===========================================
+  ai-services:
+    build:
+      context: ./ai-services
+      dockerfile: Dockerfile
+    container_name: get-noticed-ai
+    restart: always
+    env_file:
+      - ./ai-services/.env
+    environment:
+      ENVIRONMENT: production
+    expose:
+      - "5000"
+    volumes:
+      - ai_models:/app/models
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    networks:
+      - get-noticed-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  # ===========================================
+  # Frontend (Static Build served by Nginx)
+  # ===========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.production
+      args:
+        REACT_APP_API_URL: https://api.get-noticed.net/api/v1
+        REACT_APP_BACKEND_URL: https://api.get-noticed.net
+        REACT_APP_SOCKET_URL: wss://api.get-noticed.net
+    container_name: get-noticed-frontend
+    restart: always
+    expose:
+      - "80"
+    networks:
+      - get-noticed-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ===========================================
+  # Nginx Reverse Proxy & SSL Termination
+  # ===========================================
+  nginx:
+    image: nginx:alpine
+    container_name: get-noticed-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.production.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - backend
+      - frontend
+      - ai-services
+    networks:
+      - get-noticed-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+volumes:
+  worker_temp:
+  ai_models:
+
+networks:
+  get-noticed-network:
+    driver: bridge

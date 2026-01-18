@@ -1,0 +1,257 @@
+# ==============================================
+# Get-Noticed - CI/CD Pipeline
+# Domain: get-noticed.net
+# ==============================================
+
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY_API: get-noticed-api
+  ECR_REPOSITORY_WORKER: get-noticed-worker
+  ECR_REPOSITORY_AI: get-noticed-ai
+  ECR_REPOSITORY_FRONTEND: get-noticed-frontend
+  ECS_CLUSTER: get-noticed-production
+
+jobs:
+  # ===========================================
+  # Test Job
+  # ===========================================
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: ./talent-discovery-platform/backend
+        run: npm ci
+
+      - name: Run backend linting
+        working-directory: ./talent-discovery-platform/backend
+        run: npm run lint --if-present
+
+      - name: Run backend tests
+        working-directory: ./talent-discovery-platform/backend
+        run: npm test --if-present
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-jwt-secret
+          JWT_REFRESH_SECRET: test-refresh-secret
+          NODE_ENV: test
+
+      - name: Setup Node.js for frontend
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: talent-discovery-platform/frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./talent-discovery-platform/frontend
+        run: npm ci
+
+      - name: Run frontend linting
+        working-directory: ./talent-discovery-platform/frontend
+        run: npm run lint --if-present
+
+      - name: Run frontend tests
+        working-directory: ./talent-discovery-platform/frontend
+        run: npm test --if-present -- --passWithNoTests
+        env:
+          CI: true
+
+  # ===========================================
+  # Build and Push Docker Images
+  # ===========================================
+  build:
+    name: Build and Push Images
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push API image
+        working-directory: ./talent-discovery-platform/backend
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_API:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_API:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_API:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_API:latest
+
+      - name: Build and push Worker image
+        working-directory: ./talent-discovery-platform/backend
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -f Dockerfile.worker -t $ECR_REGISTRY/$ECR_REPOSITORY_WORKER:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_WORKER:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_WORKER:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_WORKER:latest
+
+      - name: Build and push AI image
+        working-directory: ./talent-discovery-platform/ai-services
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_AI:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_AI:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_AI:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_AI:latest
+
+      - name: Build and push Frontend image
+        working-directory: ./talent-discovery-platform/frontend
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build \
+            --build-arg REACT_APP_API_URL=https://api.get-noticed.net/api/v1 \
+            --build-arg REACT_APP_BACKEND_URL=https://api.get-noticed.net \
+            --build-arg REACT_APP_SOCKET_URL=wss://api.get-noticed.net \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:latest
+
+  # ===========================================
+  # Deploy to ECS
+  # ===========================================
+  deploy:
+    name: Deploy to ECS
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update ECS API service
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service api \
+            --force-new-deployment
+
+      - name: Update ECS Worker service
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service worker \
+            --force-new-deployment
+
+      - name: Update ECS AI service
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ai \
+            --force-new-deployment
+
+      - name: Wait for API service stability
+        run: |
+          aws ecs wait services-stable \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services api
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "Deployment to production successful!"
+          echo "API: https://api.get-noticed.net"
+          echo "Frontend: https://get-noticed.net"
+
+  # ===========================================
+  # Database Migrations (Manual Trigger)
+  # ===========================================
+  migrate:
+    name: Run Database Migrations
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Run migrations via ECS task
+        run: |
+          aws ecs run-task \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --task-definition get-noticed-production-migration \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.PRIVATE_SUBNET_IDS }}],securityGroups=[${{ secrets.ECS_SECURITY_GROUP }}]}"
