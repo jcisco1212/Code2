@@ -66,6 +66,7 @@ class ChatRoom extends Model<ChatRoomAttributes, ChatRoomCreationAttributes> imp
       memberCount: this.memberCount,
       maxMembers: this.maxMembers,
       isPublic: this.isPublic,
+      inviteCode: this.inviteCode,
       creator: this.creator,
       members: this.members,
       createdAt: this.createdAt,
