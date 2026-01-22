@@ -285,7 +285,7 @@ const AdminUsers: React.FC = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
+                <tr key={user.id} className="hover:bg-gray-300">
                   <td className="px-6 py-4">
                     <div className="font-medium text-gray-900">{user.displayName || user.username}</div>
                     <div className="text-sm text-gray-500">{user.email}</div>
