@@ -392,17 +392,17 @@ const Layout: React.FC = () => {
         </div>
 
         {/* Secondary nav for pages */}
-        <div className="hidden lg:flex items-center gap-1 px-6 py-2 border-t border-white/50 dark:border-white/5 bg-white/30 dark:bg-white/5">
-          <Link to="/about" className="px-4 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
+        <div className="hidden lg:flex items-center gap-1 px-6 py-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+          <Link to="/about" className="px-4 py-1.5 text-sm text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
             About
           </Link>
-          <Link to="/terms" className="px-4 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
+          <Link to="/terms" className="px-4 py-1.5 text-sm text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
             Terms of Service
           </Link>
-          <Link to="/privacy" className="px-4 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
+          <Link to="/privacy" className="px-4 py-1.5 text-sm text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
             Privacy Policy
           </Link>
-          <Link to="/contact" className="px-4 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
+          <Link to="/contact" className="px-4 py-1.5 text-sm text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-white/50 dark:hover:bg-white/10 transition-colors">
             Contact
           </Link>
         </div>
