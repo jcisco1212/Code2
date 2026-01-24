@@ -255,10 +255,7 @@ const Home: React.FC = () => {
 
                 {/* Content */}
                 <div className="absolute inset-0 p-4 flex flex-col justify-end">
-                  {!category.iconUrl && (
-                    <div className="text-3xl mb-2">{getCategoryIcon(category)}</div>
-                  )}
-                  <div className="font-semibold relative z-10 text-shadow">{category.name}</div>
+                  <div className="font-semibold relative z-10 text-shadow text-lg">{category.name}</div>
                 </div>
 
                 {/* Decorative gradient overlay */}
