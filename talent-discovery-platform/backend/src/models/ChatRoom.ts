@@ -66,6 +66,7 @@ class ChatRoom extends Model<ChatRoomAttributes, ChatRoomCreationAttributes> imp
       memberCount: this.memberCount,
       maxMembers: this.maxMembers,
       isPublic: this.isPublic,
+      inviteCode: this.inviteCode,
       creator: this.creator,
       members: this.members,
       createdAt: this.createdAt,
@@ -149,6 +150,7 @@ ChatRoom.init(
     },
     inviteCode: {
       type: DataTypes.STRING(20),
+      allowNull: false,
       unique: true,
       defaultValue: generateInviteCode,
       field: 'invite_code'
@@ -175,5 +177,12 @@ ChatRoom.init(
     ]
   }
 );
+
+// Ensure invite code is always generated before creation
+ChatRoom.beforeCreate(async (room) => {
+  if (!room.inviteCode) {
+    room.inviteCode = generateInviteCode();
+  }
+});
 
 export default ChatRoom;

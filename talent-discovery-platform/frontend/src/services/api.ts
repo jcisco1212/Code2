@@ -259,7 +259,7 @@ export const profileAPI = {
   upgradeToCreator: () =>
     api.post('/profiles/me/upgrade-creator'),
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
-    api.put('/auth/change-password', data),
+    api.post('/auth/change-password', data),
   updateNotificationSettings: (settings: any) =>
     api.put('/profiles/me/notifications', { settings }),
   updatePrivacySettings: (settings: any) =>
