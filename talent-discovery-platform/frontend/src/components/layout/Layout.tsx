@@ -428,7 +428,7 @@ const Layout: React.FC = () => {
                   key={item.name}
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-primary-500/10 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-900 dark:text-gray-200 hover:bg-primary-500/10 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                 >
                   <item.icon className="w-5 h-5" />
                   {item.name}
@@ -486,16 +486,16 @@ const Layout: React.FC = () => {
                 </>
               )}
               <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-white/20 to-transparent my-4" />
-              <Link to="/about" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-colors">
+              <Link to="/about" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 text-gray-800 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-colors">
                 About
               </Link>
-              <Link to="/terms" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-colors">
+              <Link to="/terms" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 text-gray-800 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-colors">
                 Terms of Service
               </Link>
-              <Link to="/privacy" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-colors">
+              <Link to="/privacy" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 text-gray-800 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-colors">
                 Privacy Policy
               </Link>
-              <Link to="/contact" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-colors">
+              <Link to="/contact" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 text-gray-800 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-colors">
                 Contact
               </Link>
             </nav>
