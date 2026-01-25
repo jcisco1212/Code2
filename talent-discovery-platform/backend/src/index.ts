@@ -53,6 +53,9 @@ import industryNotificationsRoutes from './routes/industryNotifications';
 import broadcastNotificationsRoutes from './routes/broadcastNotifications';
 import adminNotificationSettingsRoutes from './routes/adminNotificationSettings';
 import pushSubscriptionsRoutes from './routes/pushSubscriptions';
+import socialContentRoutes from './routes/socialContent';
+import marketingCampaignsRoutes from './routes/marketingCampaigns';
+import marketingAnalyticsRoutes from './routes/marketingAnalytics';
 import { setSocketIO } from './services/notificationService';
 
 dotenv.config();
@@ -177,6 +180,9 @@ app.use('/api/v1/industry-notifications', industryNotificationsRoutes);
 app.use('/api/v1/broadcasts', broadcastNotificationsRoutes);
 app.use('/api/v1/admin/notification-settings', adminNotificationSettingsRoutes);
 app.use('/api/v1/push-subscriptions', pushSubscriptionsRoutes);
+app.use('/api/v1/admin/social-content', socialContentRoutes);
+app.use('/api/v1/admin/marketing-campaigns', marketingCampaignsRoutes);
+app.use('/api/v1/admin/marketing-analytics', marketingAnalyticsRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

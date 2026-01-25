@@ -876,3 +876,88 @@ export const pushSubscriptionsAPI = {
   testPush: () =>
     api.post('/push-subscriptions/test')
 };
+
+// Social Content Management API
+export const socialContentAPI = {
+  getAll: (params?: { status?: string; platform?: string; campaignId?: string; page?: number; limit?: number }) =>
+    api.get('/admin/social-content', { params }),
+  getCalendar: (params?: { startDate?: string; endDate?: string }) =>
+    api.get('/admin/social-content/calendar', { params }),
+  get: (id: string) =>
+    api.get(`/admin/social-content/${id}`),
+  create: (data: {
+    title: string;
+    content: string;
+    platform: string;
+    contentType?: string;
+    mediaUrls?: string[];
+    linkUrl?: string;
+    hashtags?: string[];
+    scheduledAt?: string;
+    campaignId?: string;
+    notes?: string;
+  }) =>
+    api.post('/admin/social-content', data),
+  update: (id: string, data: any) =>
+    api.put(`/admin/social-content/${id}`, data),
+  publish: (id: string) =>
+    api.post(`/admin/social-content/${id}/publish`),
+  duplicate: (id: string) =>
+    api.post(`/admin/social-content/${id}/duplicate`),
+  delete: (id: string) =>
+    api.delete(`/admin/social-content/${id}`)
+};
+
+// Marketing Campaigns API
+export const marketingCampaignsAPI = {
+  getAll: (params?: { status?: string; page?: number; limit?: number }) =>
+    api.get('/admin/marketing-campaigns', { params }),
+  get: (id: string) =>
+    api.get(`/admin/marketing-campaigns/${id}`),
+  create: (data: {
+    name: string;
+    description?: string;
+    startDate?: string;
+    endDate?: string;
+    targetAudience?: string;
+    goals?: string;
+    budget?: number;
+  }) =>
+    api.post('/admin/marketing-campaigns', data),
+  update: (id: string, data: any) =>
+    api.put(`/admin/marketing-campaigns/${id}`, data),
+  delete: (id: string) =>
+    api.delete(`/admin/marketing-campaigns/${id}`)
+};
+
+// Marketing Analytics API
+export const marketingAnalyticsAPI = {
+  getDashboard: () =>
+    api.get('/admin/marketing-analytics/dashboard'),
+  getByPlatform: (params?: { startDate?: string; endDate?: string; platform?: string }) =>
+    api.get('/admin/marketing-analytics/by-platform', { params }),
+  getCampaignAnalytics: (campaignId: string) =>
+    api.get(`/admin/marketing-analytics/campaign/${campaignId}`),
+  getTimeSeries: (params?: { startDate?: string; endDate?: string; metricType?: string; platform?: string; interval?: string }) =>
+    api.get('/admin/marketing-analytics/time-series', { params }),
+  recordMetric: (data: {
+    contentId?: string;
+    campaignId?: string;
+    platform: string;
+    metricType: string;
+    metricValue: number;
+    recordedAt?: string;
+    metadata?: Record<string, any>;
+  }) =>
+    api.post('/admin/marketing-analytics', data),
+  recordBulk: (data: Array<{
+    contentId?: string;
+    campaignId?: string;
+    platform: string;
+    metricType: string;
+    metricValue: number;
+    recordedAt?: string;
+    metadata?: Record<string, any>;
+  }>) =>
+    api.post('/admin/marketing-analytics/bulk', { data })
+};

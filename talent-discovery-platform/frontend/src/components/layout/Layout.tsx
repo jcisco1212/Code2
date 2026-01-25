@@ -109,6 +109,8 @@ const Layout: React.FC = () => {
     ? [
         { name: 'Admin Panel', href: '/admin', icon: Cog6ToothIcon },
         { name: 'User Analytics', href: '/admin/user-analytics', icon: ChartBarIcon },
+        { name: 'Content Management', href: '/admin/content-management', icon: ClipboardDocumentIcon },
+        { name: 'Marketing Analytics', href: '/admin/marketing-analytics', icon: ChartBarIcon },
         { name: 'Features', href: '/admin/features', icon: Cog6ToothIcon },
         { name: 'Announcements', href: '/admin/announcements', icon: MegaphoneIcon },
         { name: 'Audit Logs', href: '/admin/audit-logs', icon: DocumentIcon }

@@ -32,6 +32,9 @@ import AdminNotificationSettings from './AdminNotificationSettings';
 import AdminIndustryNotificationStatus, { AdminNotificationStatus } from './AdminIndustryNotificationStatus';
 import PushSubscription from './PushSubscription';
 import Announcement, { AnnouncementType, AnnouncementTarget } from './Announcement';
+import SocialContent, { SocialPlatform, ContentStatus, ContentType } from './SocialContent';
+import MarketingCampaign, { CampaignStatus } from './MarketingCampaign';
+import MarketingAnalytics, { MetricType } from './MarketingAnalytics';
 
 // User associations
 User.hasMany(Video, { foreignKey: 'userId', as: 'videos' });
@@ -228,6 +231,22 @@ User.hasMany(PushSubscription, { foreignKey: 'userId', as: 'pushSubscriptions' }
 Announcement.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
 User.hasMany(Announcement, { foreignKey: 'createdBy', as: 'announcements' });
 
+// MarketingCampaign associations
+MarketingCampaign.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+User.hasMany(MarketingCampaign, { foreignKey: 'createdBy', as: 'marketingCampaigns' });
+MarketingCampaign.hasMany(SocialContent, { foreignKey: 'campaignId', as: 'content' });
+MarketingCampaign.hasMany(MarketingAnalytics, { foreignKey: 'campaignId', as: 'analytics' });
+
+// SocialContent associations
+SocialContent.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+SocialContent.belongsTo(MarketingCampaign, { foreignKey: 'campaignId', as: 'campaign' });
+User.hasMany(SocialContent, { foreignKey: 'createdBy', as: 'socialContent' });
+SocialContent.hasMany(MarketingAnalytics, { foreignKey: 'contentId', as: 'analytics' });
+
+// MarketingAnalytics associations
+MarketingAnalytics.belongsTo(SocialContent, { foreignKey: 'contentId', as: 'content' });
+MarketingAnalytics.belongsTo(MarketingCampaign, { foreignKey: 'campaignId', as: 'campaign' });
+
 export {
   User,
   UserRole,
@@ -295,7 +314,15 @@ export {
   PushSubscription,
   Announcement,
   AnnouncementType,
-  AnnouncementTarget
+  AnnouncementTarget,
+  SocialContent,
+  SocialPlatform,
+  ContentStatus,
+  ContentType,
+  MarketingCampaign,
+  CampaignStatus,
+  MarketingAnalytics,
+  MetricType
 };
 
 export default {
@@ -332,5 +359,8 @@ export default {
   AdminNotificationSettings,
   AdminIndustryNotificationStatus,
   PushSubscription,
-  Announcement
+  Announcement,
+  SocialContent,
+  MarketingCampaign,
+  MarketingAnalytics
 };
