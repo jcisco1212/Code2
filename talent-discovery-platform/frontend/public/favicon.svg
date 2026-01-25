@@ -1,4 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#FF0000"/>
-  <path d="M12 8 L12 24 L24 16 Z" fill="#ffffff"/>
+  <defs>
+    <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8e8e8"/>
+      <stop offset="25%" style="stop-color:#c0c0c0"/>
+      <stop offset="50%" style="stop-color:#a8a8a8"/>
+      <stop offset="75%" style="stop-color:#c0c0c0"/>
+      <stop offset="100%" style="stop-color:#808080"/>
+    </linearGradient>
+    <linearGradient id="starHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#b0b0b0"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="4" fill="#1a1a2e"/>
+  <polygon points="16,2 19.5,11 29,11 21.5,17 24,27 16,21 8,27 10.5,17 3,11 12.5,11" fill="url(#starGradient)" stroke="url(#starHighlight)" stroke-width="0.5"/>
+  <circle cx="26" cy="6" r="3" fill="#ef4444"/>
 </svg>
