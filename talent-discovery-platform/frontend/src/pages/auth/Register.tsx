@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { categoriesAPI } from '../../services/api';
 import { SparklesIcon, UserIcon, EnvelopeIcon, LockClosedIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+
+// Google OAuth Client ID from environment
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || '';
 
 // Ethnicity options
 const ethnicityOptions = [
@@ -86,11 +89,64 @@ const Register: React.FC = () => {
     agreeToTerms: false
   });
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [categories, setCategories] = useState<Category[]>([]);
-  const { register } = useAuth();
+  const { register, googleLogin } = useAuth();
   const navigate = useNavigate();
+
+  // Handle Google Sign-In response
+  const handleGoogleResponse = useCallback(async (response: any) => {
+    if (response.credential) {
+      setGoogleLoading(true);
+      try {
+        const result = await googleLogin(response.credential);
+        toast.success('Welcome to Get-Noticed!');
+        if (result?.user?.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
+      } catch (error: any) {
+        toast.error(error.message || 'Google sign-up failed');
+      } finally {
+        setGoogleLoading(false);
+      }
+    }
+  }, [googleLogin, navigate]);
+
+  // Initialize Google Sign-In
+  useEffect(() => {
+    const initGoogleSignIn = () => {
+      if (GOOGLE_CLIENT_ID && (window as any).google) {
+        (window as any).google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleResponse
+        });
+        const buttonElement = document.getElementById('google-signup-button');
+        if (buttonElement) {
+          (window as any).google.accounts.id.renderButton(
+            buttonElement,
+            {
+              theme: 'outline',
+              size: 'large',
+              width: '100%',
+              text: 'signup_with',
+              shape: 'rectangular'
+            }
+          );
+        }
+      }
+    };
+
+    // Try immediately
+    initGoogleSignIn();
+
+    // Also try after a delay in case Google script loads slowly
+    const timer = setTimeout(initGoogleSignIn, 1000);
+    return () => clearTimeout(timer);
+  }, [handleGoogleResponse]);
 
   // Fetch talent categories
   useEffect(() => {
@@ -429,6 +485,28 @@ const Register: React.FC = () => {
               {defaultRole === 'agent' ? 'Join as an Industry Professional' : 'Join as a Creator'}
             </p>
           </div>
+
+          {/* Google Sign-Up (only for non-agent accounts) */}
+          {GOOGLE_CLIENT_ID && defaultRole !== 'agent' && (
+            <>
+              <div className="flex justify-center mb-4">
+                <div id="google-signup-button" className="w-full"></div>
+              </div>
+              {googleLoading && (
+                <p className="text-center text-sm text-gray-500 mb-4">Creating account with Google...</p>
+              )}
+              <div className="relative mb-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200/50 dark:border-white/10" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white/70 dark:bg-transparent text-gray-500 dark:text-gray-400">
+                    or fill out the form below
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Agent Verification Notice */}
           {defaultRole === 'agent' && (
