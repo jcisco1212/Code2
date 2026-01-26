@@ -4,11 +4,12 @@ import crypto from 'crypto';
 import { User, UserRole } from '../models';
 import { logger, logAudit } from '../utils/logger';
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:4000';
-
 export const configurePassport = () => {
+  // Read env vars inside the function to ensure dotenv has loaded them
+  const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+  const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+  const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:4000';
+
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
     logger.warn('Google OAuth credentials not configured. Google Sign-In will be disabled.');
     return;
