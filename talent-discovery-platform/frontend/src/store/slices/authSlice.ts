@@ -40,7 +40,7 @@ const initialState: AuthState = {
 // Async thunks
 export const login = createAsyncThunk(
   'auth/login',
-  async (credentials: { identifier: string; password: string }, { rejectWithValue }) => {
+  async (credentials: { identifier: string; password: string; rememberMe?: boolean }, { rejectWithValue }) => {
     try {
       const response = await api.post('/auth/login', credentials);
       return response.data;

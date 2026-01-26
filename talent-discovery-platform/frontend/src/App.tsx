@@ -44,6 +44,7 @@ import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import VerifyEmail from './pages/auth/VerifyEmail';
+import OAuthCallback from './pages/auth/OAuthCallback';
 
 // Creator Pages
 import Upload from './pages/creator/Upload';
@@ -106,6 +107,9 @@ function App() {
             <Routes>
             {/* Embed Route (no layout) */}
             <Route path="/embed/:videoId" element={<Embed />} />
+
+            {/* OAuth Callback (no layout) */}
+            <Route path="/oauth/callback" element={<OAuthCallback />} />
 
             {/* Admin Login (separate page, no layout) */}
             <Route path="/admin/login" element={<AdminLogin />} />

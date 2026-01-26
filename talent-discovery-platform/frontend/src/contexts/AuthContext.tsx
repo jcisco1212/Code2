@@ -37,7 +37,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (identifier: string, password: string) => Promise<any>;
+  login: (identifier: string, password: string, rememberMe?: boolean) => Promise<any>;
   googleLogin: (credential: string) => Promise<any>;
   register: (data: RegisterData) => Promise<any>;
   logout: () => Promise<void>;
@@ -59,8 +59,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [accessToken, user, dispatch]);
 
-  const login = async (identifier: string, password: string) => {
-    const result = await dispatch(loginAction({ identifier, password }));
+  const login = async (identifier: string, password: string, rememberMe: boolean = false) => {
+    const result = await dispatch(loginAction({ identifier, password, rememberMe }));
     if (loginAction.rejected.match(result)) {
       throw new Error(result.payload as string);
     }

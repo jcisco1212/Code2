@@ -13,6 +13,8 @@ import { redis } from './config/redis';
 import { logger } from './utils/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
+import passport from 'passport';
+import { configurePassport } from './config/passport';
 
 // Route imports
 import authRoutes from './routes/auth';
@@ -104,6 +106,10 @@ app.use(compression());
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Initialize Passport
+configurePassport();
+app.use(passport.initialize());
 
 // Request logging
 app.use(requestLogger);

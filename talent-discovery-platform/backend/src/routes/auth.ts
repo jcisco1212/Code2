@@ -1,5 +1,6 @@
-import { Router, RequestHandler } from 'express';
+import { Router, RequestHandler, Request, Response, NextFunction } from 'express';
 import { body, query } from 'express-validator';
+import passport from 'passport';
 import { validate } from '../middleware/validate';
 import { authenticate } from '../middleware/auth';
 import * as authController from '../controllers/authController';
@@ -48,13 +49,23 @@ router.post(
   authController.login as RequestHandler
 );
 
-// Google OAuth login/register
-router.post(
+// Google OAuth - Initiate login flow
+router.get(
   '/google',
-  validate([
-    body('credential').notEmpty().withMessage('Google credential required')
-  ]),
-  authController.googleAuth as RequestHandler
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    session: false
+  }) as RequestHandler
+);
+
+// Google OAuth - Callback handler
+router.get(
+  '/google/callback',
+  passport.authenticate('google', {
+    session: false,
+    failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:3001'}/login?error=google_auth_failed`
+  }) as RequestHandler,
+  authController.googleCallback as RequestHandler
 );
 
 // Verify 2FA token

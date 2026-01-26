@@ -4,7 +4,6 @@ import crypto from 'crypto';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { Op } from 'sequelize';
-import { OAuth2Client } from 'google-auth-library';
 import { User, UserRole, AgentApprovalStatus, IndustryEventType } from '../models';
 import { AuthRequest, JWTPayload } from '../middleware/auth';
 import { BadRequestError, UnauthorizedError, ConflictError } from '../middleware/errorHandler';
@@ -13,26 +12,29 @@ import { sendEmail } from '../services/emailService';
 import { createIndustryNotification } from '../services/notificationService';
 import { logger, logAudit } from '../utils/logger';
 
-// Google OAuth client
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'default-refresh-secret';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
-const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
+const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+// Extended expiration for "Remember Me"
+const JWT_REMEMBER_ME_EXPIRES_IN = '7d';
+const JWT_REMEMBER_ME_REFRESH_EXPIRES_IN = '30d';
 
 // Generate tokens
-const generateTokens = (user: User) => {
+const generateTokens = (user: User, rememberMe: boolean = false) => {
   const payload: JWTPayload = {
     userId: user.id,
     email: user.email,
     role: user.role
   };
 
-  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions);
-  const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: JWT_REFRESH_EXPIRES_IN } as jwt.SignOptions);
+  const accessExpiry = rememberMe ? JWT_REMEMBER_ME_EXPIRES_IN : JWT_EXPIRES_IN;
+  const refreshExpiry = rememberMe ? JWT_REMEMBER_ME_REFRESH_EXPIRES_IN : JWT_REFRESH_EXPIRES_IN;
 
-  return { accessToken, refreshToken };
+  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: accessExpiry } as jwt.SignOptions);
+  const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: refreshExpiry } as jwt.SignOptions);
+
+  return { accessToken, refreshToken, rememberMe };
 };
 
 // Register new user
@@ -153,7 +155,7 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
 // Login
 export const login = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { identifier, password } = req.body;
+    const { identifier, password, rememberMe = false } = req.body;
 
     // Find user by email or username
     const user = await User.findOne({
@@ -188,16 +190,18 @@ export const login = async (req: AuthRequest, res: Response, next: NextFunction)
       res.json({
         requires2FA: true,
         userId: user.id,
+        rememberMe, // Pass through for 2FA verification
         message: 'Please enter your 2FA code'
       });
       return;
     }
 
-    // Generate tokens
-    const tokens = generateTokens(user);
+    // Generate tokens (with extended expiry if rememberMe is true)
+    const tokens = generateTokens(user, rememberMe);
 
-    // Store refresh token in Redis
-    await redis.setex(`refresh:${user.id}`, 30 * 24 * 60 * 60, tokens.refreshToken);
+    // Store refresh token in Redis (30 days if rememberMe, 7 days otherwise)
+    const refreshTTL = rememberMe ? 30 * 24 * 60 * 60 : 7 * 24 * 60 * 60;
+    await redis.setex(`refresh:${user.id}`, refreshTTL, tokens.refreshToken);
 
     logAudit('USER_LOGIN', user.id, { identifier });
 
@@ -211,83 +215,21 @@ export const login = async (req: AuthRequest, res: Response, next: NextFunction)
   }
 };
 
-// Google OAuth login/register
-export const googleAuth = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+// Google OAuth callback - handles redirect after successful Google auth
+export const googleCallback = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { credential } = req.body;
+    const user = req.user as User;
+    const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3001';
 
-    if (!credential) {
-      throw new BadRequestError('Google credential is required');
-    }
-
-    // Verify the Google ID token
-    const ticket = await googleClient.verifyIdToken({
-      idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID
-    });
-
-    const payload = ticket.getPayload();
-    if (!payload) {
-      throw new UnauthorizedError('Invalid Google token');
-    }
-
-    const { email, given_name, family_name, picture, sub: googleId } = payload;
-
-    if (!email) {
-      throw new BadRequestError('Email not provided by Google');
-    }
-
-    // Check if user exists with this email
-    let user = await User.findOne({ where: { email } });
-
-    if (user) {
-      // User exists - update Google ID if not set
-      if (!user.googleId) {
-        user.googleId = googleId;
-        if (picture && !user.avatarUrl) {
-          user.avatarUrl = picture;
-        }
-        await user.save();
-      }
-
-      // Check if account is active
-      if (!user.isActive) {
-        throw new UnauthorizedError('Account is disabled');
-      }
-
-      // Update last login
-      user.lastLogin = new Date();
-      await user.save();
-
-      logAudit('USER_GOOGLE_LOGIN', user.id, { email });
-    } else {
-      // Create new user
-      const username = email.split('@')[0] + '_' + crypto.randomBytes(4).toString('hex');
-      const displayName = given_name && family_name ? `${given_name} ${family_name}` : email.split('@')[0];
-
-      user = await User.create({
-        email,
-        username,
-        googleId,
-        displayName,
-        firstName: given_name || '',
-        lastName: family_name || '',
-        avatarUrl: picture || null,
-        role: UserRole.CREATOR,
-        emailVerified: true, // Google already verified the email
-        passwordHash: crypto.randomBytes(32).toString('hex') // Random password since they use Google
-      });
-
-      logAudit('USER_GOOGLE_REGISTER', user.id, { email });
+    if (!user) {
+      res.redirect(`${FRONTEND_URL}/login?error=google_auth_failed`);
+      return;
     }
 
     // Check if 2FA is enabled
     if (user.twoFactorEnabled) {
-      res.json({
-        requires2FA: true,
-        userId: user.id,
-        message: 'Please enter your 2FA code'
-      });
+      // Redirect to frontend with 2FA required flag
+      res.redirect(`${FRONTEND_URL}/login?requires2fa=true&userId=${user.id}`);
       return;
     }
 
@@ -297,17 +239,19 @@ export const googleAuth = async (req: AuthRequest, res: Response, next: NextFunc
     // Store refresh token in Redis
     await redis.setex(`refresh:${user.id}`, 30 * 24 * 60 * 60, tokens.refreshToken);
 
-    res.json({
-      message: 'Login successful',
-      user: user.toAuthJSON(),
-      ...tokens
+    logAudit('USER_GOOGLE_AUTH_COMPLETE', user.id, { email: user.email });
+
+    // Redirect to frontend with tokens
+    const params = new URLSearchParams({
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken
     });
-  } catch (error: any) {
-    if (error.message?.includes('Token used too late') || error.message?.includes('Invalid token')) {
-      next(new UnauthorizedError('Google authentication failed. Please try again.'));
-    } else {
-      next(error);
-    }
+
+    res.redirect(`${FRONTEND_URL}/oauth/callback?${params.toString()}`);
+  } catch (error) {
+    const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3001';
+    logger.error('Google OAuth callback error:', error);
+    res.redirect(`${FRONTEND_URL}/login?error=google_auth_failed`);
   }
 };
 
@@ -670,7 +614,7 @@ export const resendVerification = async (req: AuthRequest, res: Response, next: 
 export default {
   register,
   login,
-  googleAuth,
+  googleCallback,
   verify2FA,
   refreshToken,
   logout,
