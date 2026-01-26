@@ -12,7 +12,9 @@ import {
   PencilIcon,
   TrashIcon,
   ChartBarIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  GlobeAltIcon,
+  LockClosedIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -107,6 +109,19 @@ const Studio: React.FC = () => {
       toast.error(err.response?.data?.error?.message || 'Failed to delete video');
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleToggleVisibility = async (videoId: string, currentVisibility: string) => {
+    const newVisibility = currentVisibility === 'public' ? 'private' : 'public';
+    try {
+      await videosAPI.updateVideo(videoId, { visibility: newVisibility });
+      setVideos(prev => prev.map(v =>
+        v.id === videoId ? { ...v, visibility: newVisibility } : v
+      ));
+      toast.success(`Video is now ${newVisibility}`);
+    } catch (err: any) {
+      toast.error(err.response?.data?.error?.message || 'Failed to update visibility');
     }
   };
 
@@ -344,6 +359,21 @@ const Studio: React.FC = () => {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => handleToggleVisibility(video.id, video.visibility)}
+                    className={`p-2 rounded-lg transition-colors ${
+                      video.visibility === 'public'
+                        ? 'text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30'
+                        : 'text-gray-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30'
+                    }`}
+                    title={video.visibility === 'public' ? 'Make private' : 'Make public'}
+                  >
+                    {video.visibility === 'public' ? (
+                      <GlobeAltIcon className="w-5 h-5" />
+                    ) : (
+                      <LockClosedIcon className="w-5 h-5" />
+                    )}
+                  </button>
                   <Link
                     to={`/watch/${video.id}`}
                     className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
