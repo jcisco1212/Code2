@@ -2,17 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Mobile menu text - force black on light background */
+/* Mobile menu text - force white on dark background */
 .mobile-menu-link {
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
+  color: #f1f1f1 !important;
+  -webkit-text-fill-color: #f1f1f1 !important;
+}
+.mobile-menu-link:hover {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 .mobile-menu-link svg {
-  color: #000000 !important;
+  color: #f1f1f1 !important;
 }
 .mobile-menu-section {
-  color: rgba(0, 0, 0, 0.7) !important;
-  -webkit-text-fill-color: rgba(0, 0, 0, 0.7) !important;
+  color: rgba(241, 241, 241, 0.7) !important;
+  -webkit-text-fill-color: rgba(241, 241, 241, 0.7) !important;
 }
 
 /* ============================================

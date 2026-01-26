@@ -412,14 +412,14 @@ const Layout: React.FC = () => {
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-          <div className="fixed left-0 top-0 bottom-0 w-72 bg-white/95 dark:bg-aurora/95 backdrop-blur-xl shadow-2xl">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200/50 dark:border-white/10">
-              <span className="text-xl font-bold text-gradient">Menu</span>
+          <div className="fixed left-0 top-0 bottom-0 w-72 bg-[#212121] backdrop-blur-xl shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b border-[#404040]">
+              <span className="text-xl font-bold text-white">Menu</span>
               <button
                 onClick={() => setSidebarOpen(false)}
-                className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                className="p-2 rounded-xl hover:bg-white/10 transition-colors"
               >
-                <XMarkIcon className="w-6 h-6 text-gray-800 dark:text-gray-300" />
+                <XMarkIcon className="w-6 h-6 text-gray-300" />
               </button>
             </div>
             <nav className="p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-80px)]">
@@ -428,7 +428,7 @@ const Layout: React.FC = () => {
                   key={item.name}
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className="mobile-menu-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-500/10 transition-colors font-medium"
+                  className="mobile-menu-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-colors font-medium"
                 >
                   <item.icon className="w-5 h-5" />
                   {item.name}
@@ -436,14 +436,14 @@ const Layout: React.FC = () => {
               ))}
               {userNavigation.length > 0 && (
                 <>
-                  <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-white/20 to-transparent my-4" />
+                  <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent my-4" />
                   <p className="mobile-menu-section px-4 text-xs font-semibold uppercase tracking-wider">Your Content</p>
                   {userNavigation.map((item) => (
                     <Link
                       key={item.name}
                       to={item.href}
                       onClick={() => setSidebarOpen(false)}
-                      className="mobile-menu-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-500/10 transition-colors font-medium"
+                      className="mobile-menu-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-colors font-medium"
                     >
                       <item.icon className="w-5 h-5" />
                       {item.name}
@@ -453,14 +453,14 @@ const Layout: React.FC = () => {
               )}
               {agentNavigation.length > 0 && (
                 <>
-                  <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-white/20 to-transparent my-4" />
+                  <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent my-4" />
                   <p className="mobile-menu-section px-4 text-xs font-semibold uppercase tracking-wider">Agent Tools</p>
                   {agentNavigation.map((item) => (
                     <Link
                       key={item.name}
                       to={item.href}
                       onClick={() => setSidebarOpen(false)}
-                      className="mobile-menu-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-500/10 transition-colors font-medium"
+                      className="mobile-menu-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-colors font-medium"
                     >
                       <item.icon className="w-5 h-5" />
                       {item.name}
@@ -470,14 +470,14 @@ const Layout: React.FC = () => {
               )}
               {adminNavigation.length > 0 && (
                 <>
-                  <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-white/20 to-transparent my-4" />
+                  <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent my-4" />
                   <p className="mobile-menu-section px-4 text-xs font-semibold uppercase tracking-wider">Admin</p>
                   {adminNavigation.map((item) => (
                     <Link
                       key={item.name}
                       to={item.href}
                       onClick={() => setSidebarOpen(false)}
-                      className="mobile-menu-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-500/10 transition-colors font-medium"
+                      className="mobile-menu-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/10 transition-colors font-medium"
                     >
                       <item.icon className="w-5 h-5" />
                       {item.name}
@@ -485,7 +485,7 @@ const Layout: React.FC = () => {
                   ))}
                 </>
               )}
-              <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-white/20 to-transparent my-4" />
+              <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent my-4" />
               <Link to="/about" onClick={() => setSidebarOpen(false)} className="mobile-menu-link block px-4 py-2.5 rounded-lg transition-colors font-medium">
                 About
               </Link>
