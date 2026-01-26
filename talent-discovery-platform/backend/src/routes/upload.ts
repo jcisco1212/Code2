@@ -47,17 +47,36 @@ if (ffmpegAvailable) {
   ffmpeg.setFfprobePath(ffmpegPath.replace('ffmpeg', 'ffprobe'));
 }
 
-// Transcode video to web-compatible MP4
+// Check if video is already web-compatible (H.264 + AAC)
+function isWebCompatible(filePath: string): Promise<boolean> {
+  if (!ffmpeg) return Promise.resolve(false);
+  return new Promise((resolve) => {
+    ffmpeg.ffprobe(filePath, (err: Error | null, metadata: any) => {
+      if (err) {
+        resolve(false);
+        return;
+      }
+      const videoStream = metadata.streams.find((s: any) => s.codec_type === 'video');
+      const audioStream = metadata.streams.find((s: any) => s.codec_type === 'audio');
+      const isH264 = videoStream?.codec_name === 'h264';
+      const isAAC = !audioStream || audioStream?.codec_name === 'aac';
+      const isMp4 = filePath.toLowerCase().endsWith('.mp4');
+      resolve(isH264 && isAAC && isMp4);
+    });
+  });
+}
+
+// Transcode video to web-compatible MP4 (optimized for speed)
 function transcodeToWebMP4(inputPath: string, outputPath: string): Promise<void> {
   if (!ffmpeg) return Promise.reject(new Error('FFmpeg not available'));
   return new Promise((resolve, reject) => {
     ffmpeg(inputPath)
       .outputOptions([
         '-c:v libx264',        // H.264 video codec
-        '-preset fast',         // Encoding speed
-        '-crf 23',              // Quality level
+        '-preset ultrafast',    // Fastest encoding (was 'fast')
+        '-crf 28',              // Lower quality for faster encoding (was 23)
         '-c:a aac',             // AAC audio codec
-        '-b:a 128k',            // Audio bitrate
+        '-b:a 96k',             // Lower audio bitrate for speed
         '-movflags +faststart', // Enable fast start for web
         '-vf scale=trunc(iw/2)*2:trunc(ih/2)*2' // Ensure even dimensions
       ])
@@ -475,14 +494,24 @@ router.post(
           return;
         }
 
-        logger.info(`Transcoding video ${videoId} to web-compatible format...`);
+        logger.info(`Processing video ${videoId}...`);
 
         try {
           // Get video duration
           const duration = await getVideoDuration(originalPath);
 
-          // Transcode to web-compatible MP4
-          await transcodeToWebMP4(originalPath, transcodedPath);
+          // Check if video is already web-compatible (skip transcoding)
+          const alreadyCompatible = await isWebCompatible(originalPath);
+
+          if (alreadyCompatible) {
+            logger.info(`Video ${videoId} is already web-compatible, skipping transcoding`);
+            // Just copy/rename the file
+            fs.copyFileSync(originalPath, transcodedPath);
+          } else {
+            logger.info(`Transcoding video ${videoId} to web-compatible format...`);
+            // Transcode to web-compatible MP4
+            await transcodeToWebMP4(originalPath, transcodedPath);
+          }
 
           // Generate thumbnail from transcoded video
           let thumbnailUrl: string | null = null;
