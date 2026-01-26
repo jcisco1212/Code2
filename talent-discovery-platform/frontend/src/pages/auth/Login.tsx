@@ -39,22 +39,34 @@ const Login: React.FC = () => {
 
   // Initialize Google Sign-In
   useEffect(() => {
-    if (GOOGLE_CLIENT_ID && (window as any).google) {
-      (window as any).google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleResponse
-      });
-      (window as any).google.accounts.id.renderButton(
-        document.getElementById('google-signin-button'),
-        {
-          theme: 'outline',
-          size: 'large',
-          width: '100%',
-          text: 'signin_with',
-          shape: 'rectangular'
+    const initGoogleSignIn = () => {
+      if (GOOGLE_CLIENT_ID && (window as any).google) {
+        (window as any).google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleResponse
+        });
+        const buttonElement = document.getElementById('google-signin-button');
+        if (buttonElement) {
+          (window as any).google.accounts.id.renderButton(
+            buttonElement,
+            {
+              theme: 'outline',
+              size: 'large',
+              width: '100%',
+              text: 'signin_with',
+              shape: 'rectangular'
+            }
+          );
         }
-      );
-    }
+      }
+    };
+
+    // Try immediately
+    initGoogleSignIn();
+
+    // Also try after a delay in case Google script loads slowly
+    const timer = setTimeout(initGoogleSignIn, 1000);
+    return () => clearTimeout(timer);
   }, [handleGoogleResponse]);
 
   useEffect(() => {
