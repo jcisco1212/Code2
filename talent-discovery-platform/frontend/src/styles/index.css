@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile menu text - force black on light background */
+.mobile-menu-link {
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+}
+.mobile-menu-link svg {
+  color: #000000 !important;
+}
+.mobile-menu-section {
+  color: rgba(0, 0, 0, 0.7) !important;
+  -webkit-text-fill-color: rgba(0, 0, 0, 0.7) !important;
+}
+
 /* ============================================
    YOUTUBE-STYLE THEME - Get-Noticed
    Dark background with red accents
