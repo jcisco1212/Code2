@@ -112,6 +112,7 @@ interface UserAttributes {
   emailVerificationToken: string | null;
   passwordResetToken: string | null;
   passwordResetExpires: Date | null;
+  googleId: string | null;
   lastLogin: Date | null;
   country: string | null;
   deletedAt: Date | null;
@@ -144,7 +145,7 @@ interface UserCreationAttributes extends Optional<UserAttributes,
   'id' | 'displayName' | 'firstName' | 'lastName' | 'bio' | 'avatarUrl' | 'bannerUrl' |
   'location' | 'socialLinks' | 'embedLinks' | 'agencyName' | 'role' | 'isVerified' | 'isActive' | 'twoFactorEnabled' |
   'twoFactorSecret' | 'emailVerified' | 'emailVerificationToken' | 'passwordResetToken' |
-  'passwordResetExpires' | 'lastLogin' | 'country' | 'deletedAt' |
+  'passwordResetExpires' | 'googleId' | 'lastLogin' | 'country' | 'deletedAt' |
   'agentApprovalStatus' | 'agentApprovalNotes' | 'agentApprovedAt' | 'agentApprovedBy' | 'agentCompanyName' | 'agentLicenseNumber' | 'agentLinkedIn' | 'agentType' |
   'gender' | 'dateOfBirth' | 'ethnicity' | 'hairColor' | 'photoGallery' |
   'artistType' | 'genre' | 'talentCategories' | 'privacySettings' | 'notificationSettings' | 'bannerSettings' | 'createdAt' | 'updatedAt'
@@ -174,6 +175,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   declare emailVerificationToken: string | null;
   declare passwordResetToken: string | null;
   declare passwordResetExpires: Date | null;
+  declare googleId: string | null;
   declare lastLogin: Date | null;
   declare country: string | null;
   declare deletedAt: Date | null;
@@ -418,6 +420,12 @@ User.init(
       type: DataTypes.DATE,
       allowNull: true,
       field: 'password_reset_expires'
+    },
+    googleId: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      unique: true,
+      field: 'google_id'
     },
     lastLogin: {
       type: DataTypes.DATE,

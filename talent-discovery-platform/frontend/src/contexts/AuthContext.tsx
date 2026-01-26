@@ -6,6 +6,7 @@ import {
   logout as logoutAction,
   login as loginAction,
   register as registerAction,
+  googleLogin as googleLoginAction,
   clearError
 } from '../store/slices/authSlice';
 
@@ -37,6 +38,7 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   login: (identifier: string, password: string) => Promise<any>;
+  googleLogin: (credential: string) => Promise<any>;
   register: (data: RegisterData) => Promise<any>;
   logout: () => Promise<void>;
   clearAuthError: () => void;
@@ -60,6 +62,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (identifier: string, password: string) => {
     const result = await dispatch(loginAction({ identifier, password }));
     if (loginAction.rejected.match(result)) {
+      throw new Error(result.payload as string);
+    }
+    return result.payload;
+  };
+
+  const googleLogin = async (credential: string) => {
+    const result = await dispatch(googleLoginAction({ credential }));
+    if (googleLoginAction.rejected.match(result)) {
       throw new Error(result.payload as string);
     }
     return result.payload;
@@ -93,6 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         error,
         login,
+        googleLogin,
         register,
         logout,
         clearAuthError,

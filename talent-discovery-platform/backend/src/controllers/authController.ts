@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { Op } from 'sequelize';
+import { OAuth2Client } from 'google-auth-library';
 import { User, UserRole, AgentApprovalStatus, IndustryEventType } from '../models';
 import { AuthRequest, JWTPayload } from '../middleware/auth';
 import { BadRequestError, UnauthorizedError, ConflictError } from '../middleware/errorHandler';
@@ -11,6 +12,9 @@ import { redis } from '../config/redis';
 import { sendEmail } from '../services/emailService';
 import { createIndustryNotification } from '../services/notificationService';
 import { logger, logAudit } from '../utils/logger';
+
+// Google OAuth client
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'default-refresh-secret';
@@ -204,6 +208,106 @@ export const login = async (req: AuthRequest, res: Response, next: NextFunction)
     });
   } catch (error) {
     next(error);
+  }
+};
+
+// Google OAuth login/register
+export const googleAuth = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      throw new BadRequestError('Google credential is required');
+    }
+
+    // Verify the Google ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload) {
+      throw new UnauthorizedError('Invalid Google token');
+    }
+
+    const { email, given_name, family_name, picture, sub: googleId } = payload;
+
+    if (!email) {
+      throw new BadRequestError('Email not provided by Google');
+    }
+
+    // Check if user exists with this email
+    let user = await User.findOne({ where: { email } });
+
+    if (user) {
+      // User exists - update Google ID if not set
+      if (!user.googleId) {
+        user.googleId = googleId;
+        if (picture && !user.avatarUrl) {
+          user.avatarUrl = picture;
+        }
+        await user.save();
+      }
+
+      // Check if account is active
+      if (!user.isActive) {
+        throw new UnauthorizedError('Account is disabled');
+      }
+
+      // Update last login
+      user.lastLogin = new Date();
+      await user.save();
+
+      logAudit('USER_GOOGLE_LOGIN', user.id, { email });
+    } else {
+      // Create new user
+      const username = email.split('@')[0] + '_' + crypto.randomBytes(4).toString('hex');
+      const displayName = given_name && family_name ? `${given_name} ${family_name}` : email.split('@')[0];
+
+      user = await User.create({
+        email,
+        username,
+        googleId,
+        displayName,
+        firstName: given_name || '',
+        lastName: family_name || '',
+        avatarUrl: picture || null,
+        role: UserRole.CREATOR,
+        emailVerified: true, // Google already verified the email
+        passwordHash: crypto.randomBytes(32).toString('hex') // Random password since they use Google
+      });
+
+      logAudit('USER_GOOGLE_REGISTER', user.id, { email });
+    }
+
+    // Check if 2FA is enabled
+    if (user.twoFactorEnabled) {
+      res.json({
+        requires2FA: true,
+        userId: user.id,
+        message: 'Please enter your 2FA code'
+      });
+      return;
+    }
+
+    // Generate tokens
+    const tokens = generateTokens(user);
+
+    // Store refresh token in Redis
+    await redis.setex(`refresh:${user.id}`, 30 * 24 * 60 * 60, tokens.refreshToken);
+
+    res.json({
+      message: 'Login successful',
+      user: user.toAuthJSON(),
+      ...tokens
+    });
+  } catch (error: any) {
+    if (error.message?.includes('Token used too late') || error.message?.includes('Invalid token')) {
+      next(new UnauthorizedError('Google authentication failed. Please try again.'));
+    } else {
+      next(error);
+    }
   }
 };
 
@@ -566,6 +670,7 @@ export const resendVerification = async (req: AuthRequest, res: Response, next: 
 export default {
   register,
   login,
+  googleAuth,
   verify2FA,
   refreshToken,
   logout,

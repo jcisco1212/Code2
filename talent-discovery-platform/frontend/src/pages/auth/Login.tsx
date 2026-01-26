@@ -1,17 +1,61 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { SparklesIcon, EnvelopeIcon, LockClosedIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 
+// Google OAuth Client ID from environment
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || '';
+
 const Login: React.FC = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [isSuspended, setIsSuspended] = useState(false);
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  // Handle Google Sign-In response
+  const handleGoogleResponse = useCallback(async (response: any) => {
+    if (response.credential) {
+      setGoogleLoading(true);
+      try {
+        const result = await googleLogin(response.credential);
+        toast.success('Welcome!');
+        if (result?.user?.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
+      } catch (error: any) {
+        toast.error(error.message || 'Google sign-in failed');
+      } finally {
+        setGoogleLoading(false);
+      }
+    }
+  }, [googleLogin, navigate]);
+
+  // Initialize Google Sign-In
+  useEffect(() => {
+    if (GOOGLE_CLIENT_ID && (window as any).google) {
+      (window as any).google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleResponse
+      });
+      (window as any).google.accounts.id.renderButton(
+        document.getElementById('google-signin-button'),
+        {
+          theme: 'outline',
+          size: 'large',
+          width: '100%',
+          text: 'signin_with',
+          shape: 'rectangular'
+        }
+      );
+    }
+  }, [handleGoogleResponse]);
 
   useEffect(() => {
     if (searchParams.get('suspended') === 'true') {
@@ -182,6 +226,30 @@ const Login: React.FC = () => {
               ) : 'Sign In'}
             </button>
           </form>
+
+          {/* Google Sign-In Divider */}
+          {GOOGLE_CLIENT_ID && (
+            <>
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200/50 dark:border-white/10" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white/70 dark:bg-transparent text-gray-500 dark:text-gray-400">
+                    or continue with
+                  </span>
+                </div>
+              </div>
+
+              {/* Google Sign-In Button */}
+              <div className="flex justify-center">
+                <div id="google-signin-button" className="w-full"></div>
+              </div>
+              {googleLoading && (
+                <p className="text-center text-sm text-gray-500 mt-2">Signing in with Google...</p>
+              )}
+            </>
+          )}
 
           {/* Divider */}
           <div className="relative my-8">

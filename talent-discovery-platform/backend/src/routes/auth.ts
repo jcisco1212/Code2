@@ -48,6 +48,15 @@ router.post(
   authController.login as RequestHandler
 );
 
+// Google OAuth login/register
+router.post(
+  '/google',
+  validate([
+    body('credential').notEmpty().withMessage('Google credential required')
+  ]),
+  authController.googleAuth as RequestHandler
+);
+
 // Verify 2FA token
 router.post(
   '/verify-2fa',

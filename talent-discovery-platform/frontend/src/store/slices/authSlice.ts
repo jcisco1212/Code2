@@ -76,6 +76,18 @@ export const register = createAsyncThunk(
   }
 );
 
+export const googleLogin = createAsyncThunk(
+  'auth/googleLogin',
+  async ({ credential }: { credential: string }, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/auth/google', { credential });
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error?.message || 'Google login failed');
+    }
+  }
+);
+
 export const verify2FA = createAsyncThunk(
   'auth/verify2FA',
   async ({ userId, token }: { userId: string; token: string }, { rejectWithValue }) => {
@@ -173,6 +185,29 @@ const authSlice = createSlice({
         state.user = action.payload.user;
       })
       .addCase(register.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      // Google Login
+      .addCase(googleLogin.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(googleLogin.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (action.payload.requires2FA) {
+          state.requires2FA = true;
+          state.pending2FAUserId = action.payload.userId;
+        } else {
+          state.user = action.payload.user;
+          state.accessToken = action.payload.accessToken;
+          state.refreshToken = action.payload.refreshToken;
+          state.isAuthenticated = true;
+          localStorage.setItem('accessToken', action.payload.accessToken);
+          localStorage.setItem('refreshToken', action.payload.refreshToken);
+        }
+      })
+      .addCase(googleLogin.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       })
