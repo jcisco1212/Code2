@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { categoriesAPI } from '../../services/api';
-import { SparklesIcon, UserIcon, EnvelopeIcon, LockClosedIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { UserIcon, EnvelopeIcon, LockClosedIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 // Backend URL for OAuth redirect
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000/api/v1';
@@ -425,11 +425,11 @@ const Register: React.FC = () => {
 
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl
-                            bg-gradient-to-br from-primary-500 to-accent-500
-                            shadow-aurora mb-4">
-              <SparklesIcon className="w-8 h-8 text-white" />
-            </div>
+            <img
+              src="/images/get-noticed-logo.png"
+              alt="Get-Noticed"
+              className="h-20 w-auto mx-auto mb-4"
+            />
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               Create Account
             </h1>
