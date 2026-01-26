@@ -14,21 +14,27 @@ import { logger, logAudit } from '../utils/logger';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'default-refresh-secret';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
-const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
+const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+// Extended expiration for "Remember Me"
+const JWT_REMEMBER_ME_EXPIRES_IN = '7d';
+const JWT_REMEMBER_ME_REFRESH_EXPIRES_IN = '30d';
 
 // Generate tokens
-const generateTokens = (user: User) => {
+const generateTokens = (user: User, rememberMe: boolean = false) => {
   const payload: JWTPayload = {
     userId: user.id,
     email: user.email,
     role: user.role
   };
 
-  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions);
-  const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: JWT_REFRESH_EXPIRES_IN } as jwt.SignOptions);
+  const accessExpiry = rememberMe ? JWT_REMEMBER_ME_EXPIRES_IN : JWT_EXPIRES_IN;
+  const refreshExpiry = rememberMe ? JWT_REMEMBER_ME_REFRESH_EXPIRES_IN : JWT_REFRESH_EXPIRES_IN;
 
-  return { accessToken, refreshToken };
+  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: accessExpiry } as jwt.SignOptions);
+  const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: refreshExpiry } as jwt.SignOptions);
+
+  return { accessToken, refreshToken, rememberMe };
 };
 
 // Register new user
@@ -149,7 +155,7 @@ export const register = async (req: AuthRequest, res: Response, next: NextFuncti
 // Login
 export const login = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { identifier, password } = req.body;
+    const { identifier, password, rememberMe = false } = req.body;
 
     // Find user by email or username
     const user = await User.findOne({
@@ -184,16 +190,18 @@ export const login = async (req: AuthRequest, res: Response, next: NextFunction)
       res.json({
         requires2FA: true,
         userId: user.id,
+        rememberMe, // Pass through for 2FA verification
         message: 'Please enter your 2FA code'
       });
       return;
     }
 
-    // Generate tokens
-    const tokens = generateTokens(user);
+    // Generate tokens (with extended expiry if rememberMe is true)
+    const tokens = generateTokens(user, rememberMe);
 
-    // Store refresh token in Redis
-    await redis.setex(`refresh:${user.id}`, 30 * 24 * 60 * 60, tokens.refreshToken);
+    // Store refresh token in Redis (30 days if rememberMe, 7 days otherwise)
+    const refreshTTL = rememberMe ? 30 * 24 * 60 * 60 : 7 * 24 * 60 * 60;
+    await redis.setex(`refresh:${user.id}`, refreshTTL, tokens.refreshToken);
 
     logAudit('USER_LOGIN', user.id, { identifier });
 
