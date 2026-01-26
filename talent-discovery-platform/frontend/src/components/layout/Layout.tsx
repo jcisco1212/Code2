@@ -428,24 +428,26 @@ const Layout: React.FC = () => {
                   key={item.name}
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl !text-black dark:!text-gray-200 hover:bg-primary-500/10 hover:!text-primary-600 dark:hover:!text-primary-400 transition-colors font-medium"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-500/10 transition-colors font-medium"
+                  style={{ color: '#000000' }}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <item.icon className="w-5 h-5" style={{ color: '#000000' }} />
                   {item.name}
                 </Link>
               ))}
               {userNavigation.length > 0 && (
                 <>
                   <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-white/20 to-transparent my-4" />
-                  <p className="px-4 text-xs font-semibold !text-black/70 dark:!text-gray-500 uppercase tracking-wider">Your Content</p>
+                  <p className="px-4 text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(0,0,0,0.7)' }}>Your Content</p>
                   {userNavigation.map((item) => (
                     <Link
                       key={item.name}
                       to={item.href}
                       onClick={() => setSidebarOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl !text-black dark:!text-gray-200 hover:bg-primary-500/10 hover:!text-primary-600 dark:hover:!text-primary-400 transition-colors font-medium"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-500/10 transition-colors font-medium"
+                      style={{ color: '#000000' }}
                     >
-                      <item.icon className="w-5 h-5" />
+                      <item.icon className="w-5 h-5" style={{ color: '#000000' }} />
                       {item.name}
                     </Link>
                   ))}
@@ -454,15 +456,16 @@ const Layout: React.FC = () => {
               {agentNavigation.length > 0 && (
                 <>
                   <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-white/20 to-transparent my-4" />
-                  <p className="px-4 text-xs font-semibold !text-black/70 dark:!text-gray-500 uppercase tracking-wider">Agent Tools</p>
+                  <p className="px-4 text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(0,0,0,0.7)' }}>Agent Tools</p>
                   {agentNavigation.map((item) => (
                     <Link
                       key={item.name}
                       to={item.href}
                       onClick={() => setSidebarOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl !text-black dark:!text-gray-200 hover:bg-primary-500/10 hover:!text-primary-600 dark:hover:!text-primary-400 transition-colors font-medium"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-500/10 transition-colors font-medium"
+                      style={{ color: '#000000' }}
                     >
-                      <item.icon className="w-5 h-5" />
+                      <item.icon className="w-5 h-5" style={{ color: '#000000' }} />
                       {item.name}
                     </Link>
                   ))}
@@ -471,31 +474,32 @@ const Layout: React.FC = () => {
               {adminNavigation.length > 0 && (
                 <>
                   <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-white/20 to-transparent my-4" />
-                  <p className="px-4 text-xs font-semibold !text-black/70 dark:!text-gray-500 uppercase tracking-wider">Admin</p>
+                  <p className="px-4 text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(0,0,0,0.7)' }}>Admin</p>
                   {adminNavigation.map((item) => (
                     <Link
                       key={item.name}
                       to={item.href}
                       onClick={() => setSidebarOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl !text-black dark:!text-gray-200 hover:bg-primary-500/10 hover:!text-primary-600 dark:hover:!text-primary-400 transition-colors font-medium"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-500/10 transition-colors font-medium"
+                      style={{ color: '#000000' }}
                     >
-                      <item.icon className="w-5 h-5" />
+                      <item.icon className="w-5 h-5" style={{ color: '#000000' }} />
                       {item.name}
                     </Link>
                   ))}
                 </>
               )}
               <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-white/20 to-transparent my-4" />
-              <Link to="/about" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 !text-black dark:!text-gray-300 hover:!text-primary-600 dark:hover:!text-primary-400 rounded-lg transition-colors font-medium">
+              <Link to="/about" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 rounded-lg transition-colors font-medium" style={{ color: '#000000' }}>
                 About
               </Link>
-              <Link to="/terms" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 !text-black dark:!text-gray-300 hover:!text-primary-600 dark:hover:!text-primary-400 rounded-lg transition-colors font-medium">
+              <Link to="/terms" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 rounded-lg transition-colors font-medium" style={{ color: '#000000' }}>
                 Terms of Service
               </Link>
-              <Link to="/privacy" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 !text-black dark:!text-gray-300 hover:!text-primary-600 dark:hover:!text-primary-400 rounded-lg transition-colors font-medium">
+              <Link to="/privacy" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 rounded-lg transition-colors font-medium" style={{ color: '#000000' }}>
                 Privacy Policy
               </Link>
-              <Link to="/contact" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 !text-black dark:!text-gray-300 hover:!text-primary-600 dark:hover:!text-primary-400 rounded-lg transition-colors font-medium">
+              <Link to="/contact" onClick={() => setSidebarOpen(false)} className="block px-4 py-2.5 rounded-lg transition-colors font-medium" style={{ color: '#000000' }}>
                 Contact
               </Link>
             </nav>
