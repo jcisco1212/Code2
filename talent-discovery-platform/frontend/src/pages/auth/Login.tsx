@@ -10,6 +10,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000/api/v1';
 const Login: React.FC = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSuspended, setIsSuspended] = useState(false);
   const { login } = useAuth();
@@ -42,7 +43,7 @@ const Login: React.FC = () => {
 
     setLoading(true);
     try {
-      const result = await login(identifier, password);
+      const result = await login(identifier, password, rememberMe);
       toast.success('Welcome back!');
 
       // Redirect admins to admin panel, others to home
@@ -164,7 +165,18 @@ const Login: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600
+                           text-primary-600 focus:ring-primary-500 focus:ring-offset-0
+                           bg-white dark:bg-gray-800 cursor-pointer"
+                />
+                <span className="text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+              </label>
               <Link
                 to="/forgot-password"
                 className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors"
